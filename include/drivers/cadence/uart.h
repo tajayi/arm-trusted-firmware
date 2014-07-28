@@ -37,21 +37,46 @@
 /* This is very minimalistic and will only work in QEMU.  */
 
 /* CADENCE Registers */
-#define R_UART_CR  (0x00)
-#define R_UART_IMR (0x10)
+#define R_UART_CR    (0x00)
+#define R_UART_IER   (0x08)
+#define R_UART_IDR   (0x0C)
+#define R_UART_IMR   (0x10)
+#define R_UART_CISR  (0x14)
+#define R_UART_RTRIG (0x20)
+#define R_UART_SR    (0x2C)
+#define UART_SR_INTR_RTRIG     0x00000001
+#define UART_SR_INTR_REMPTY    0x00000002
+#define UART_SR_INTR_TEMPTY    0x00000008
+#define UART_SR_INTR_TFUL      0x00000010
+
 #define R_UART_TX  (0x30)
 #define R_UART_RX  (0x30)
+
 
 /* FIXME:  */
 #define CADENCE_UART_BAUDRATE (0)
 
 static inline void cadence_uart_tx(unsigned long base, unsigned int val)
 {
+	uint32_t status;
+
+	/* Wait for an empty slot.  */
+	do {
+		status = mmio_read_32(base + R_UART_SR);
+	} while (status & UART_SR_INTR_TFUL);
+
         mmio_write_32(base + R_UART_TX, val);
 }
 
 static inline unsigned int cadence_uart_rx(unsigned long base)
 {
+	uint32_t status;
+
+	/* Wait for a data.  */
+	do {
+		status = mmio_read_32(base + R_UART_SR);
+	} while (status & UART_SR_INTR_REMPTY);
+
         return mmio_read_32(base + R_UART_RX);
 }
 
