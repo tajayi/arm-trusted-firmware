@@ -116,6 +116,10 @@ entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
 #else
 	entry_point_info_t *next_image_info;
 
+	if (!bl2_to_bl31_params) {
+		return NULL;
+	}
+
 	next_image_info = (type == NON_SECURE) ?
 		bl2_to_bl31_params->bl33_ep_info :
 		bl2_to_bl31_params->bl32_ep_info;
