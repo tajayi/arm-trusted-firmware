@@ -70,7 +70,7 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/ronaldo/bl31_fvp_setup.c			\
-				plat/fvp/fvp_pm.c				\
+				plat/ronaldo/fvp_pm.c				\
 				plat/fvp/fvp_security.c				\
 				plat/fvp/fvp_topology.c				\
 				plat/fvp/aarch64/fvp_helpers.S			\
