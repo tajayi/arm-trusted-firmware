@@ -116,10 +116,6 @@ entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
 #else
 	entry_point_info_t *next_image_info;
 
-	if (!bl2_to_bl31_params) {
-		return NULL;
-	}
-
 	next_image_info = (type == NON_SECURE) ?
 		bl2_to_bl31_params->bl33_ep_info :
 		bl2_to_bl31_params->bl32_ep_info;
@@ -170,14 +166,13 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * We are not checking plat_params_from_bl2 as NULL as we are not
 	 * using it on FVP
 	 */
-#if 0
 	assert(from_bl2 != NULL);
 	assert(from_bl2->h.type == PARAM_BL31);
 	assert(from_bl2->h.version >= VERSION_1);
 
-	assert(((unsigned long)plat_params_from_bl2) == FVP_BL31_PLAT_PARAM_VAL);
-#endif
 	bl2_to_bl31_params = from_bl2;
+	assert(((unsigned long)plat_params_from_bl2) == FVP_BL31_PLAT_PARAM_VAL);
+
 #endif
 }
 
