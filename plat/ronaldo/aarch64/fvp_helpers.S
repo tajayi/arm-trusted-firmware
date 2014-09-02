@@ -40,14 +40,6 @@
 	.globl	platform_mem_init
 	.globl	plat_report_exception
 
-	.macro	fvp_choose_gicmmap  param1, param2, x_tmp, w_tmp, res
-	ldr	\x_tmp, =VE_SYSREGS_BASE + V2M_SYS_ID
-	ldr	\w_tmp, [\x_tmp]
-	ubfx	\w_tmp, \w_tmp, #SYS_ID_BLD_SHIFT, #SYS_ID_BLD_LENGTH
-	cmp	\w_tmp, #BLD_GIC_VE_MMAP
-	csel	\res, \param1, \param2, eq
-	.endm
-
 	/* -----------------------------------------------------
 	 * void plat_secondary_cold_boot_setup (void);
 	 *
@@ -76,9 +68,7 @@ func plat_secondary_cold_boot_setup
 	 * Deactivate the gic cpu interface as well
 	 * ---------------------------------------------
 	 */
-	ldr	x0, =VE_GICC_BASE
-	ldr	x1, =BASE_GICC_BASE
-	fvp_choose_gicmmap	x0, x1, x2, w2, x1
+	ldr	x1, =RDO_GICC_BASE
 	mov	w0, #(IRQ_BYP_DIS_GRP1 | FIQ_BYP_DIS_GRP1)
 	orr	w0, w0, #(IRQ_BYP_DIS_GRP0 | FIQ_BYP_DIS_GRP0)
 	str	w0, [x1, #GICC_CTLR]
@@ -180,7 +170,7 @@ func plat_report_exception
 	mov	x2, #(SECURE << SYS_LED_SS_SHIFT)
 	orr	x0, x0, x2
 	orr	x0, x0, x1
-	mov	x1, #VE_SYSREGS_BASE
+/*	mov	x1, #VE_SYSREGS_BASE
 	add	x1, x1, #V2M_SYS_LED
-	str	w0, [x1]
+	str	w0, [x1] */
 	ret

@@ -54,7 +54,7 @@ BL1_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/common/aarch64/platform_up_stack.S		\
 				plat/ronaldo/bl1_fvp_setup.c			\
 				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/fvp/aarch64/fvp_helpers.S
+				plat/ronaldo/aarch64/fvp_helpers.S
 
 BL2_SOURCES		+=	drivers/arm/tzc400/tzc400.c			\
 				plat/common/aarch64/platform_up_stack.S		\
@@ -73,7 +73,7 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/ronaldo/fvp_pm.c				\
 				plat/ronaldo/fvp_security.c			\
 				plat/ronaldo/fvp_topology.c			\
-				plat/fvp/aarch64/fvp_helpers.S			\
+				plat/ronaldo/aarch64/fvp_helpers.S		\
 				plat/ronaldo/aarch64/fvp_common.c		\
 				plat/ronaldo/drivers/pwrc/fvp_pwrc.c
 
