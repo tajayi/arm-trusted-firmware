@@ -204,6 +204,7 @@ func el1_sysregs_context_restore
 	msr	spsr_el1, x9
 	msr	elr_el1, x10
 
+#if 0
 	ldp	x11, x12, [x0, #CTX_SPSR_ABT]
 	msr	spsr_abt, x11
 	msr	spsr_und, x12
@@ -211,6 +212,7 @@ func el1_sysregs_context_restore
 	ldp	x13, x14, [x0, #CTX_SPSR_IRQ]
 	msr	spsr_irq, x13
 	msr	spsr_fiq, x14
+#endif
 
 	ldp	x15, x16, [x0, #CTX_SCTLR_EL1]
 	msr	sctlr_el1, x15
