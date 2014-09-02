@@ -142,8 +142,6 @@
 #define BLD_GIC_VE_MMAP	0x0
 #define BLD_GIC_A53A57_MMAP	0x1
 
-#define ARCH_MODEL		0x1
-
 /* FVP Power controller base address*/
 #define PWRC_BASE		0x1c100000
 
