@@ -12,7 +12,7 @@ BL3-2 is an optional Secure Payload.
 BL3-3 is the Non-secure world (Uboot, Linux etc).
 
 To build:
-make DEBUG=1 CROSS_COMPILE=aarch64-none-elf- PLAT=ronaldo bl31
+make DEBUG=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=ronaldo bl31
 
 To run on QEMU:
 qemu-system-aarch64 -M arm-generic-fdt \
