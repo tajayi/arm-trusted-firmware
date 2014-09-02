@@ -91,7 +91,7 @@
 #define TZRAM_SIZE		0x00040000
 
 /* Location of trusted dram on the base fvp */
-#define TZDRAM_BASE		0x00000000
+#define TZDRAM_BASE		0x04000000 /* Can't overlap TZROM area */
 #define TZDRAM_SIZE		0x02000000
 
 /*******************************************************************************
@@ -157,7 +157,7 @@
  * Platform specific page table and MMU setup constants
  ******************************************************************************/
 #define ADDR_SPACE_SIZE			(1ull << 32)
-#define MAX_XLAT_TABLES			3
+#define MAX_XLAT_TABLES			4
 #define MAX_MMAP_REGIONS		16
 
 /*******************************************************************************

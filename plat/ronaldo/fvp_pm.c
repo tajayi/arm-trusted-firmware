@@ -108,6 +108,10 @@ int fvp_affinst_on(unsigned long mpidr,
 	flush_dcache_range((unsigned long) &fvp_mboxes[linear_id],
 			   sizeof(unsigned long));
 
+	mmio_write_32(R_RVBAR_L_0 + mpidr * 8, sec_entrypoint);
+	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, 0);
+	dsb();
+
 	fvp_pwrc_write_pponr(mpidr);
 
 exit:

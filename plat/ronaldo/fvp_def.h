@@ -59,6 +59,14 @@
 #define DEVICE1_BASE		0xF9000000
 #define DEVICE1_SIZE		0x01000000
 
+/* For cpu reset APU space here too 0xFE5F1000 */
+#define APB_BASE		0xfe500000
+#define APB_SIZE		0x00100000
+
+#define APU_BASE		(0xFE5F1000)
+#define R_RVBAR_L_0		(APU_BASE + 0x40)
+#define R_RVBAR_H_0		(APU_BASE + 0x44)
+#define CRF_APB_RST_FPD_APU	(APB_BASE + 0X00000104)
 
 #define NSRAM_BASE		0x2e000000
 #define NSRAM_SIZE		0x10000

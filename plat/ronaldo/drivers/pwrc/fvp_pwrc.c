@@ -56,12 +56,22 @@ void fvp_pwrc_write_pponr(unsigned long mpidr)
 {
 	bakery_lock_get(&pwrc_lock);
 	bakery_lock_release(&pwrc_lock);
+
+	unsigned int r;
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r &= ~(1 << mpidr);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 }
 
 void fvp_pwrc_write_ppoffr(unsigned long mpidr)
 {
 	bakery_lock_get(&pwrc_lock);
 	bakery_lock_release(&pwrc_lock);
+
+	unsigned int r;
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r |= 1 << (mpidr & 0xf);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 }
 
 void fvp_pwrc_set_wen(unsigned long mpidr)
