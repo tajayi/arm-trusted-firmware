@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,14 +28,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
-#include <pl011.h>
+#ifndef __AEM_GENERIC_H__
+#define __AEM_GENERIC_H__
 
-void pl011_setbaudrate(unsigned long base_addr, unsigned int baudrate)
-{
-	unsigned int divisor;
-	assert(baudrate);
-	divisor = (PL011_CLK_IN_HZ * 4) / baudrate;
-	pl011_write_ibrd(base_addr, divisor >> 6);
-	pl011_write_fbrd(base_addr, divisor & 0x3F);
-}
+/* BASE AEM midr for revision 0 */
+#define BASE_AEM_MIDR 0x410FD0F0
+
+/* Foundation AEM midr for revision 0 */
+#define FOUNDATION_AEM_MIDR  0x410FD000
+
+
+#endif /* __AEM_GENERIC_H__ */

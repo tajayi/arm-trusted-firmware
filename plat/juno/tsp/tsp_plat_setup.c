@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,9 +30,9 @@
 
 #include <bl_common.h>
 #include <console.h>
-#include <platform.h>
-#include "fvp_def.h"
-#include "fvp_private.h"
+#include <platform_tsp.h>
+#include "../juno_def.h"
+#include "../juno_private.h"
 
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
@@ -66,36 +66,32 @@ extern unsigned long __COHERENT_RAM_END__;
 /*******************************************************************************
  * Initialize the UART
  ******************************************************************************/
-void bl32_early_platform_setup(void)
+void tsp_early_platform_setup(void)
 {
 	/*
 	 * Initialize a different console than already in use to display
 	 * messages from TSP
 	 */
-	console_init(PL011_UART1_BASE);
-
-	/* Initialize the platform config for future decision making */
-	fvp_config_setup();
+	console_init(PL011_UART0_BASE, PL011_UART0_CLK_IN_HZ, PL011_BAUDRATE);
 }
 
 /*******************************************************************************
  * Perform platform specific setup placeholder
  ******************************************************************************/
-void bl32_platform_setup(void)
+void tsp_platform_setup(void)
 {
-	fvp_gic_init();
 }
 
 /*******************************************************************************
  * Perform the very early platform specific architectural setup here. At the
- * moment this is only intializes the MMU
+ * moment this only intializes the MMU
  ******************************************************************************/
-void bl32_plat_arch_setup(void)
+void tsp_plat_arch_setup(void)
 {
-	fvp_configure_mmu_el1(BL32_RO_BASE,
-			      (BL32_COHERENT_RAM_LIMIT - BL32_RO_BASE),
-			      BL32_RO_BASE,
-			      BL32_RO_LIMIT,
-			      BL32_COHERENT_RAM_BASE,
-			      BL32_COHERENT_RAM_LIMIT);
+	configure_mmu_el1(BL32_RO_BASE,
+			  BL32_COHERENT_RAM_LIMIT - BL32_RO_BASE,
+			  BL32_RO_BASE,
+			  BL32_RO_LIMIT,
+			  BL32_COHERENT_RAM_BASE,
+			  BL32_COHERENT_RAM_LIMIT);
 }

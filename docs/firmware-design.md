@@ -9,10 +9,11 @@ Contents :
 4.  Power State Coordination Interface
 5.  Secure-EL1 Payloads and Dispatchers
 6.  Crash Reporting in BL3-1
-7.  Memory layout on FVP platforms
-8.  Firmware Image Package (FIP)
-9.  Code Structure
-10.  References
+7.  CPU specific operations framework
+8.  Memory layout of BL images
+9.  Firmware Image Package (FIP)
+10.  Code Structure
+11.  References
 
 
 1.  Introduction
@@ -57,9 +58,18 @@ into five steps (in order of execution):
 *   Boot Loader stage 3-2 (BL3-2) _Secure-EL1 Payload_ (optional)
 *   Boot Loader stage 3-3 (BL3-3) _Non-trusted Firmware_
 
-The ARM Fixed Virtual Platforms (FVPs) provide trusted ROM, trusted SRAM and
-trusted DRAM regions. Each boot loader stage uses one or more of these
-memories for its code and data.
+ARM development platforms (Fixed Virtual Platforms (FVPs) and Juno) implement a
+combination of the following types of memory regions. Each bootloader stage uses
+one or more of these memory regions.
+
+*   Regions accessible from both non-secure and secure states. For example,
+    non-trusted SRAM, ROM and DRAM.
+*   Regions accessible from only the secure state. For example, trusted SRAM and
+    ROM. The FVPs also implement the trusted DRAM which is statically
+    configured. Additionally, the Base FVPs and Juno development platform
+    configure the TrustZone Controller (TZC) to create a region in the DRAM
+    which is accessible only from the secure state.
+
 
 The sections below provide the following details:
 
@@ -72,23 +82,30 @@ The sections below provide the following details:
 
 ### BL1
 
-This stage begins execution from the platform's reset vector in trusted ROM at
-EL3. BL1 code starts at `0x00000000` (trusted ROM) in the FVP memory map. The
-BL1 data section is placed at the start of trusted SRAM, `0x04000000`. The
-functionality implemented by this stage is as follows.
+This stage begins execution from the platform's reset vector at EL3. The reset
+address is platform dependent but it is usually located in a Trusted ROM area.
+The BL1 data section is copied to trusted SRAM at runtime.
+
+On the ARM FVP port, BL1 code starts execution from the reset vector at address
+`0x00000000` (trusted ROM). The BL1 data section is copied to the start of
+trusted SRAM at address `0x04000000`.
+
+On the Juno ARM development platform port, BL1 code starts execution at
+`0x0BEC0000` (FLASH). The BL1 data section is copied to trusted SRAM at address
+`0x04001000.
+
+The functionality implemented by this stage is as follows.
 
 #### Determination of boot path
 
 Whenever a CPU is released from reset, BL1 needs to distinguish between a warm
-boot and a cold boot. This is done using a platform-specific mechanism. The
-ARM FVPs implement a simple power controller at `0x1c100000`. The `PSYS`
-register (`0x10`) is used to distinguish between a cold and warm boot. This
-information is contained in the `PSYS.WK[25:24]` field. Additionally, a
-per-CPU mailbox is maintained in trusted DRAM (`0x00600000`), to which BL1
-writes an entrypoint. Each CPU jumps to this entrypoint upon warm boot. During
-cold boot, BL1 places the secondary CPUs in a safe platform-specific state while
-the primary CPU executes the remaining cold boot path as described in the
-following sections.
+boot and a cold boot. This is done using platform-specific mechanisms (see the
+`platform_get_entrypoint()` function in the [Porting Guide]). In the case of a
+warm boot, a CPU is expected to continue execution from a seperate
+entrypoint. In the case of a cold boot, the secondary CPUs are placed in a safe
+platform-specific state (see the `plat_secondary_cold_boot_setup()` function in
+the [Porting Guide]) while the primary CPU executes the remaining cold boot path
+as described in the following sections.
 
 #### Architectural initialization
 
@@ -97,14 +114,10 @@ BL1 performs minimal architectural initialization as follows.
 *   Exception vectors
 
     BL1 sets up simple exception vectors for both synchronous and asynchronous
-    exceptions. The default behavior upon receiving an exception is to set a
-    status code. In the case of the FVP this code is written to the Versatile
-    Express System LED register in the following format:
-
-        SYS_LED[0]   - Security state (Secure=0/Non-Secure=1)
-        SYS_LED[2:1] - Exception Level (EL3=0x3, EL2=0x2, EL1=0x1, EL0=0x0)
-        SYS_LED[7:3] - Exception Class (Sync/Async & origin). The values for
-                       each exception class are:
+    exceptions. The default behavior upon receiving an exception is to populate
+    a status code in the general purpose register `X0` and call the
+    `plat_report_exception()` function (see the [Porting Guide]). The status
+    code is one of:
 
         0x0 : Synchronous exception from Current EL with SP_EL0
         0x1 : IRQ exception from Current EL with SP_EL0
@@ -123,14 +136,30 @@ BL1 performs minimal architectural initialization as follows.
         0xe : FIQ exception from Lower EL using aarch32
         0xf : System Error exception from Lower EL using aarch32
 
+    The `plat_report_exception()` implementation on the ARM FVP port programs
+    the Versatile Express System LED register in the following format to
+    indicate the occurence of an unexpected exception:
+
+        SYS_LED[0]   - Security state (Secure=0/Non-Secure=1)
+        SYS_LED[2:1] - Exception Level (EL3=0x3, EL2=0x2, EL1=0x1, EL0=0x0)
+        SYS_LED[7:3] - Exception Class (Sync/Async & origin). This is the value
+                       of the status code
+
     A write to the LED register reflects in the System LEDs (S6LED0..7) in the
-    CLCD window of the FVP. This behavior is because this boot loader stage
-    does not expect to receive any exceptions other than the SMC exception.
+    CLCD window of the FVP.
+
+    BL1 does not expect to receive any exceptions other than the SMC exception.
     For the latter, BL1 installs a simple stub. The stub expects to receive
     only a single type of SMC (determined by its function ID in the general
     purpose register `X0`). This SMC is raised by BL2 to make BL1 pass control
     to BL3-1 (loaded by BL2) at EL3. Any other SMC leads to an assertion
     failure.
+
+*   CPU initialization
+
+    BL1 calls the `reset_handler()` function which in turn calls the CPU
+    specific reset handler function (see the section: "CPU specific operations
+    framework").
 
 *   MMU setup
 
@@ -144,17 +173,8 @@ BL1 performs minimal architectural initialization as follows.
         `SCTLR_EL3.A` and `SCTLR_EL3.SA` bits. Exception endianness is set to
         little-endian by clearing the `SCTLR_EL3.EE` bit.
 
-    -   `CPUECTLR`. When the FVP includes a model of a specific ARM processor
-        implementation (for example A57 or A53), then intra-cluster coherency is
-        enabled by setting the `CPUECTLR.SMPEN` bit. The AEMv8 Base FVP is
-        inherently coherent so does not implement `CPUECTLR`.
-
-    -   `SCR`. Use of the HVC instruction from EL1 is enabled by setting the
-        `SCR.HCE` bit. FIQ exceptions are configured to be taken in EL3 by
-        setting the `SCR.FIQ` bit. The register width of the next lower
-        exception level is set to AArch64 by setting the `SCR.RW` bit. External
-        Aborts and SError Interrupts are configured to be taken in EL3 by
-        setting the `SCR.EA` bit.
+    -  `SCR_EL3`. The register width of the next lower exception level is set to
+        AArch64 by setting the `SCR.RW` bit.
 
     -   `CPTR_EL3`. Accesses to the `CPACR_EL1` register from EL1 or EL2, or the
         `CPTR_EL2` register from EL2 are configured to not trap to EL3 by
@@ -227,19 +247,19 @@ defined base address is used to specify the load address for the BL3-1 image.
 It also defines the extents of memory available for use by the BL3-2 image.
 BL2 also initializes UART0 (PL011 console), which enables  access to the
 `printf` family of functions in BL2. Platform security is initialized to allow
-access to access controlled components. On the Base FVP a TrustZone controller
-(TZC-400) is configured to give full access to the platform DRAM. The storage
-abstraction layer is initialized which is used to load further bootloader
-images.
+access to controlled components. The storage abstraction layer is initialized
+which is used to load further bootloader images.
 
 #### BL3-0 (System Control Processor Firmware) image load
 
 Some systems have a separate System Control Processor (SCP) for power, clock,
 reset and system control. BL2 loads the optional BL3-0 image from platform
 storage into a platform-specific region of secure memory. The subsequent
-handling of BL3-0 is platform specific. Typically the image is transferred into
-SCP memory using a platform-specific protocol. The SCP executes BL3-0 and
-signals to the Application Processor (AP) for BL2 execution to continue.
+handling of BL3-0 is platform specific. For example, on the Juno ARM development
+platform port the image is transferred into SCP memory using the SCPI protocol
+after being loaded in the trusted SRAM memory at address `0x04009000`. The SCP
+executes BL3-0 and signals to the Application Processor (AP) for BL2 execution
+to continue.
 
 #### BL3-1 (EL3 Runtime Firmware) image load
 
@@ -263,8 +283,7 @@ managing interaction with BL3-2. This information is passed to BL3-1.
 #### BL3-3 (Non-trusted Firmware) image load
 
 BL2 loads the BL3-3 image (e.g. UEFI or other test or boot software) from
-platform storage into non-secure memory as defined by the platform
-(`0x88000000` for FVPs).
+platform storage into non-secure memory as defined by the platform.
 
 BL2 relies on BL3-1 to pass control to BL3-3 once secure state initialization is
 complete. Hence, BL2 populates a platform-specific area of memory with the
@@ -302,8 +321,8 @@ far as system register settings are concerned. Since BL1 code resides in ROM,
 architectural initialization in BL3-1 allows override of any previous
 initialization done by BL1. BL3-1 creates page tables to address the first
 4GB of physical address space and initializes the MMU accordingly. It initializes
-a buffer of frequently used pointers, called per-cpu pointer cache, in memory for
-faster access. Currently the per-cpu pointer cache contains only the pointer
+a buffer of frequently used pointers, called per-CPU pointer cache, in memory for
+faster access. Currently the per-CPU pointer cache contains only the pointer
 to crash stack. It then replaces the exception vectors populated by BL1 with its
 own. BL3-1 exception vectors implement more elaborate support for
 handling SMCs since this is the only mechanism to access the runtime services
@@ -722,6 +741,8 @@ currently implemented:
 -   `CPU_ON`
 -   `CPU_SUSPEND`
 -   `AFFINITY_INFO`
+-   `SYSTEM_OFF`
+-   `SYSTEM_RESET`
 
 The `CPU_ON`, `CPU_OFF` and `CPU_SUSPEND` functions implement the warm boot
 path in ARM Trusted Firmware. `CPU_ON` and `CPU_OFF` have undergone testing
@@ -731,21 +752,13 @@ experimental. Support for `CPU_SUSPEND` is stable for entry into power down
 states. Standby states are currently not supported. `PSCI_VERSION` is
 present but completely untested in this version of the software.
 
-Unsupported PSCI functions can be divided into ones that can return
-execution to the caller and ones that cannot. The following functions
-return with a error code as documented in the [Power State Coordination
-Interface PDD] [PSCI].
+The following unsupported functions return with a error code as documented in
+the [Power State Coordination Interface PDD] [PSCI].
 
 -   `MIGRATE` : -1 (NOT_SUPPORTED)
 -   `MIGRATE_INFO_TYPE` : 2 (Trusted OS is either not present or does not
      require migration)
 -   `MIGRATE_INFO_UP_CPU` : 0 (Return value is UNDEFINED)
-
-The following unsupported functions do not return and signal an assertion
-failure if invoked.
-
--   `SYSTEM_OFF`
--   `SYSTEM_RESET`
 
 
 5.  Secure-EL1 Payloads and Dispatchers
@@ -811,10 +824,10 @@ and is registered using the `bl31_register_bl32_init()` function.
 Trusted Firmware supports two approaches for the SPD to pass control to BL3-2
 before returning through EL3 and running the non-trusted firmware (BL3-3):
 
-1.  In the BL3-2 initialization function, set up a secure context (see below
-    for more details of CPU context support) for this CPU and use
-    `bl31_set_next_image_type()` to request that the exit from `bl31_main()` is
-    to the BL3-2 entrypoint in Secure-EL1.
+1.  In the BL3-2 setup function, use `bl31_set_next_image_type()` to
+    request that the exit from `bl31_main()` is to the BL3-2 entrypoint in
+    Secure-EL1. BL3-1 will exit to BL3-2 using the asynchronous method by
+    calling bl31_prepare_next_image_entry() and el3_exit().
 
     When the BL3-2 has completed initialization at Secure-EL1, it returns to
     BL3-1 by issuing an SMC, using a Function ID allocated to the SPD. On
@@ -824,7 +837,8 @@ before returning through EL3 and running the non-trusted firmware (BL3-3):
     the normal world firmware BL3-3. On return from the handler the framework
     will exit to EL2 and run BL3-3.
 
-2.  In the BL3-2 initialization function, use an SPD-defined mechanism to
+2.  The BL3-2 setup function registers a initialization function using
+    `bl31_register_bl32_init()` which provides a SPD-defined mechanism to
     invoke a 'world-switch synchronous call' to Secure-EL1 to run the BL3-2
     entrypoint.
     NOTE: The Test SPD service included with the Trusted Firmware provides one
@@ -836,16 +850,17 @@ before returning through EL3 and running the non-trusted firmware (BL3-3):
     `bl31_main()` will set up the return to the normal world firmware BL3-3 and
     continue the boot process in the normal world.
 
+
 6.  Crash Reporting in BL3-1
-----------------------------------
+----------------------------
 
 The BL3-1 implements a scheme for reporting the processor state when an unhandled
 exception is encountered. The reporting mechanism attempts to preserve all the
 register contents and report it via the default serial output. The general purpose
 registers, EL3, Secure EL1 and some EL2 state registers are reported.
 
-A dedicated per-cpu crash stack is maintained by BL3-1 and this is retrieved via
-the per-cpu pointer cache. The implementation attempts to minimise the memory
+A dedicated per-CPU crash stack is maintained by BL3-1 and this is retrieved via
+the per-CPU pointer cache. The implementation attempts to minimise the memory
 required for this feature. The file `crash_reporting.S` contains the
 implementation for crash reporting.
 
@@ -931,8 +946,102 @@ The sample crash output is shown below.
     sp_el0	:0x0000000004010780
 
 
-7.  Memory layout on FVP platforms
-----------------------------------
+7.  CPU specific operations framework
+-----------------------------
+
+Certain aspects of the ARMv8 architecture are implementation defined,
+that is, certain behaviours are not architecturally defined, but must be defined
+and documented by individual processor implementations. The ARM Trusted
+Firmware implements a framework which categorises the common implementation
+defined behaviours and allows a processor to export its implementation of that
+behaviour. The categories are:
+
+1.  Processor specific reset sequence.
+
+2.  Processor specific power down sequences.
+
+3.  Processor specific register dumping as a part of crash reporting.
+
+Each of the above categories fulfils a different requirement.
+
+1.  allows any processor specific initialization before the caches and MMU
+    are turned on, like implementation of errata workarounds, entry into
+    the intra-cluster coherency domain etc.
+
+2.  allows each processor to implement the power down sequence mandated in
+    its Technical Reference Manual (TRM).
+
+3.  allows a processor to provide additional information to the developer
+    in the event of a crash, for example Cortex-A53 has registers which
+    can expose the data cache contents.
+
+Please note that only 2. is mandated by the TRM.
+
+The CPU specific operations framework scales to accommodate a large number of
+different CPUs during power down and reset handling. The platform can specify
+the CPU errata workarounds to be applied for each CPU type during reset
+handling by defining CPU errata compile time macros. Details on these macros
+can be found in the [cpu-errata-workarounds.md][ERRW] file.
+
+The CPU specific operations framework depends on the `cpu_ops` structure which
+needs to be exported for each type of CPU in the platform. It is defined in
+`include/lib/cpus/aarch64/cpu_macros.S` and has the following fields : `midr`,
+`reset_func()`, `core_pwr_dwn()`, `cluster_pwr_dwn()` and `cpu_reg_dump()`.
+
+The CPU specific files in `lib/cpus` export a `cpu_ops` data structure with
+suitable handlers for that CPU.  For example, `lib/cpus/cortex_a53.S` exports
+the `cpu_ops` for Cortex-A53 CPU. According to the platform configuration,
+these CPU specific files must must be included in the build by the platform
+makefile. The generic CPU specific operations framework code exists in
+`lib/cpus/aarch64/cpu_helpers.S`.
+
+### CPU specific Reset Handling
+
+After a reset, the state of the CPU when it calls generic reset handler is:
+MMU turned off, both instruction and data caches turned off and not part
+of any coherency domain.
+
+The BL entrypoint code first invokes the `plat_reset_handler()` to allow
+the platform to perform any system initialization required and any system
+errata wrokarounds that needs to be applied. The `get_cpu_ops_ptr()` reads
+the current CPU midr, finds the matching `cpu_ops` entry in the `cpu_ops`
+array and returns it. Note that only the part number and implementator fields
+in midr are used to find the matching `cpu_ops` entry. The `reset_func()` in
+the returned `cpu_ops` is then invoked which executes the required reset
+handling for that CPU and also any errata workarounds enabled by the platform.
+
+### CPU specific power down sequence
+
+During the BL3-1 initialization sequence, the pointer to the matching `cpu_ops`
+entry is stored in per-CPU data by `init_cpu_ops()` so that it can be quickly
+retrieved during power down sequences.
+
+The PSCI service, upon receiving a power down request, determines the highest
+affinity level at which to execute power down sequence for a particular CPU and
+invokes the corresponding 'prepare' power down handler in the CPU specific
+operations framework. For example, when a CPU executes a power down for affinity
+level 0, the `prepare_core_pwr_dwn()` retrieves the `cpu_ops` pointer from the
+per-CPU data and the corresponding `core_pwr_dwn()` is invoked. Similarly when
+a CPU executes power down at affinity level 1, the `prepare_cluster_pwr_dwn()`
+retrieves the `cpu_ops` pointer and the corresponding `cluster_pwr_dwn()` is
+invoked.
+
+At runtime the platform hooks for power down are invoked by the PSCI service to
+perform platform specific operations during a power down sequence, for example
+turning off CCI coherency during a cluster power down.
+
+### CPU specific register reporting during crash
+
+If the crash reporting is enabled in BL3-1, when a crash occurs, the crash
+reporting framework calls `do_cpu_reg_dump` which retrieves the matching
+`cpu_ops` using `get_cpu_ops_ptr()` function. The `cpu_reg_dump()` in
+`cpu_ops` is invoked, which then returns the CPU specific register values to
+be reported and a pointer to the ASCII list of register names in a format
+expected by the crash reporting framework.
+
+
+8. Memory layout of BL images
+-----------------------------
 
 Each bootloader image can be divided in 2 parts:
 
@@ -954,41 +1063,7 @@ PROGBITS sections then the resulting binary file would contain a bunch of zero
 bytes at the location of this NOBITS section, making the image unnecessarily
 bigger. Smaller images allow faster loading from the FIP to the main memory.
 
-On FVP platforms, we use the Trusted ROM and Trusted SRAM to store the trusted
-firmware binaries.
-
- *    BL1 is originally sitting in the Trusted ROM at address `0x0`. Its
-      read-write data are relocated at the top of the Trusted SRAM at runtime.
-
- *    BL3-1 is loaded at the top of the Trusted SRAM, such that its NOBITS
-      sections will overwrite BL1 R/W data.
-
- *    BL2 is loaded below BL3-1.
-
- *    The TSP is loaded as the BL3-2 image at the base of the Trusted SRAM. Its
-      NOBITS sections are allowed to overlay BL2.
-
-This memory layout is designed to give the BL3-2 image as much memory as
-possible. It is illustrated by the following diagram.
-
-               Trusted SRAM
-    0x04040000 +----------+  loaded by BL2  ------------------
-               | BL1 (rw) |  <<<<<<<<<<<<<  |  BL3-1 NOBITS  |
-               |----------|  <<<<<<<<<<<<<  |----------------|
-               |          |  <<<<<<<<<<<<<  | BL3-1 PROGBITS |
-               |----------|                 ------------------
-               |   BL2    |  <<<<<<<<<<<<<  |  BL3-2 NOBITS  |
-               |----------|  <<<<<<<<<<<<<  |----------------|
-               |          |  <<<<<<<<<<<<<  | BL3-2 PROGBITS |
-    0x04000000 +----------+                 ------------------
-
-               Trusted ROM
-    0x04000000 +----------+
-               | BL1 (ro) |
-    0x00000000 +----------+
-
-The TSP image may be loaded in Trusted DRAM instead. This doesn't change the
-memory layout of the other boot loader images in Trusted SRAM.
+### Linker scripts and symbols
 
 Each bootloader stage image layout is described by its own linker script. The
 linker scripts export some symbols into the program symbol table. Their values
@@ -1039,7 +1114,7 @@ The linker scripts define some extra, optional symbols. They are not actually
 used by any code but they help in understanding the bootloader images' memory
 layout as they are easy to spot in the link map files.
 
-### Common linker symbols
+#### Common linker symbols
 
 Early setup code needs to know the extents of the BSS section to zero-initialise
 it before executing any C code. The following linker symbols are defined for
@@ -1056,7 +1131,7 @@ attributes for it. The following linker symbols are defined for this purpose:
 * `__COHERENT_RAM_END__` This address must be aligned on a page-size boundary.
 * `__COHERENT_RAM_UNALIGNED_SIZE__`
 
-### BL1's linker symbols
+#### BL1's linker symbols
 
 BL1's early setup code needs to know the extents of the .data section to
 relocate it from ROM to RAM before executing any C code. The following linker
@@ -1073,7 +1148,7 @@ for this purpose:
 * `__BL1_RAM_START__` This is the start address of BL1 RW data.
 * `__BL1_RAM_END__` This is the end address of BL1 RW data.
 
-### BL2's, BL3-1's and TSP's linker symbols
+#### BL2's, BL3-1's and TSP's linker symbols
 
 BL2, BL3-1 and TSP need to know the extents of their read-only section to set
 the right memory attributes for this memory region in their MMU setup code. The
@@ -1115,8 +1190,153 @@ Additionally, if the platform memory layout implies some image overlaying like
 on FVP, BL3-1 and TSP need to know the limit address that their PROGBITS
 sections must not overstep. The platform code must provide those.
 
-8.  Firmware Image Package (FIP)
---------------------------------
+
+####  Memory layout on ARM FVPs
+
+The following list describes the memory layout on the FVP:
+
+*   A 4KB page of shared memory is used to store the entrypoint mailboxes
+    and the parameters passed between bootloaders. The shared memory can be
+    allocated either at the top of Trusted SRAM or at the base of Trusted
+    DRAM at build time. When allocated in Trusted SRAM, the amount of Trusted
+    SRAM available to load the bootloader images will be reduced by the size
+    of the shared memory.
+
+*   BL1 is originally sitting in the Trusted ROM at address `0x0`. Its
+    read-write data are relocated at the top of the Trusted SRAM at runtime.
+    If the shared memory is allocated in Trusted SRAM, the BL1 read-write data
+    is relocated just below the shared memory.
+
+*   BL3-1 is loaded at the top of the Trusted SRAM, such that its NOBITS
+    sections will overwrite BL1 R/W data.
+
+*   BL2 is loaded below BL3-1.
+
+*   The TSP is loaded as the BL3-2 image at the base of either the Trusted
+    SRAM or Trusted DRAM. When loaded into Trusted SRAM, its NOBITS sections
+    are allowed to overlay BL2. When loaded into Trusted DRAM, an offset
+    corresponding to the size of the shared memory is applied to avoid
+    overlap.
+
+This memory layout is designed to give the BL3-2 image as much memory as
+possible when it is loaded into Trusted SRAM. Depending on the location of the
+shared memory page and the TSP, it will result in different memory maps,
+illustrated by the following diagrams.
+
+**Shared data & TSP in Trusted SRAM (default option):**
+
+               Trusted SRAM
+    0x04040000 +----------+
+               |  Shared  |
+    0x0403F000 +----------+  loaded by BL2  ------------------
+               | BL1 (rw) |  <<<<<<<<<<<<<  |  BL3-1 NOBITS  |
+               |----------|  <<<<<<<<<<<<<  |----------------|
+               |          |  <<<<<<<<<<<<<  | BL3-1 PROGBITS |
+               |----------|                 ------------------
+               |   BL2    |  <<<<<<<<<<<<<  |  BL3-2 NOBITS  |
+               |----------|  <<<<<<<<<<<<<  |----------------|
+               |          |  <<<<<<<<<<<<<  | BL3-2 PROGBITS |
+    0x04000000 +----------+                 ------------------
+
+               Trusted ROM
+    0x04000000 +----------+
+               | BL1 (ro) |
+    0x00000000 +----------+
+
+
+**Shared data & TSP in Trusted DRAM:**
+
+               Trusted DRAM
+    0x08000000 +----------+
+               |          |
+               |  BL3-2   |
+               |          |
+    0x06001000 |----------|
+               |  Shared  |
+    0x06000000 +----------+
+
+               Trusted SRAM
+    0x04040000 +----------+  loaded by BL2  ------------------
+               | BL1 (rw) |  <<<<<<<<<<<<<  |  BL3-1 NOBITS  |
+               |----------|  <<<<<<<<<<<<<  |----------------|
+               |          |  <<<<<<<<<<<<<  | BL3-1 PROGBITS |
+               |----------|                 ------------------
+               |   BL2    |
+               |----------|
+               |          |
+    0x04000000 +----------+
+
+               Trusted ROM
+    0x04000000 +----------+
+               | BL1 (ro) |
+    0x00000000 +----------+
+
+**Shared data in Trusted DRAM, TSP in Trusted SRAM:**
+
+               Trusted DRAM
+    0x08000000 +----------+
+               |          |
+               |          |
+               |          |
+    0x06001000 |----------|
+               |  Shared  |
+    0x06000000 +----------+
+
+               Trusted SRAM
+    0x04040000 +----------+  loaded by BL2  ------------------
+               | BL1 (rw) |  <<<<<<<<<<<<<  |  BL3-1 NOBITS  |
+               |----------|  <<<<<<<<<<<<<  |----------------|
+               |          |  <<<<<<<<<<<<<  | BL3-1 PROGBITS |
+               |----------|                 ------------------
+               |   BL2    |  <<<<<<<<<<<<<  |  BL3-2 NOBITS  |
+               |----------|  <<<<<<<<<<<<<  |----------------|
+               |          |  <<<<<<<<<<<<<  | BL3-2 PROGBITS |
+    0x04000000 +----------+                 ------------------
+
+               Trusted ROM
+    0x04000000 +----------+
+               | BL1 (ro) |
+    0x00000000 +----------+
+
+Loading the TSP image in Trusted DRAM doesn't change the memory layout of the
+other boot loader images in Trusted SRAM.
+
+####  Memory layout on Juno ARM development platform
+
+                  Flash0
+    0x0C000000 +----------+
+               :          :
+    0x0BED0000 |----------|
+               | BL1 (ro) |
+    0x0BEC0000 |----------|
+               :          :
+               |  Bypass  |
+    0x08000000 +----------+
+
+               Trusted SRAM
+    0x04040000 +----------+
+               |   BL2    |                 BL3-1 is loaded
+    0x04033000 |----------|                 after BL3-0 has
+               |  BL3-2   |                 been sent to SCP
+    0x04023000 |----------|                 ------------------
+               |  BL3-0   |  <<<<<<<<<<<<<  |     BL3-1      |
+    0x04009000 |----------|                 ------------------
+               | BL1 (rw) |
+    0x04001000 |----------|
+               |   MHU    |
+    0x04000000 +----------+
+
+The Message Handling Unit (MHU) page contains the entrypoint mailboxes and a
+shared memory area. This shared memory is used as a communication channel
+between the AP and the SCP.
+
+BL1 code starts at `0x0BEC0000`. The BL1 data section is copied to trusted SRAM
+at `0x04001000`, right after the MHU page. Entrypoint mailboxes are stored in
+the first 128 bytes of the MHU page.
+
+
+9.  Firmware Image Package (FIP)
+---------------------------------
 
 Using a Firmware Image Package (FIP) allows for packing bootloader images (and
 potentially other payloads) into a single archive that can be loaded by the ARM
@@ -1193,8 +1413,8 @@ Currently the FVP's policy only allows loading of a known set of images. The
 platform policy can be modified to allow additional images.
 
 
-9.  Code Structure
-------------------
+10.  Code Structure
+-------------------
 
 Trusted Firmware code is logically divided between the three boot loader
 stages mentioned in the previous sections. The code is also divided into the
@@ -1225,6 +1445,11 @@ categories. Based upon the above, the code layout looks like this:
     lib          Yes             Yes             Yes
     services     No              No              Yes
 
+The build system provides a non configurable build option IMAGE_BLx for each
+boot loader stage (where x = BL stage). e.g. for BL1 , IMAGE_BL1 will be
+defined by the build system. This enables the Trusted Firmware to compile
+certain code only for specific boot loader stages
+
 All assembler files have the `.S` extension. The linker source files for each
 boot stage have the extension `.ld.S`. These are processed by GCC to create the
 linker scripts which have the extension `.ld`.
@@ -1233,8 +1458,8 @@ FDTs provide a description of the hardware platform and are used by the Linux
 kernel at boot time. These can be found in the `fdts` directory.
 
 
-10.  References
---------------
+11.  References
+---------------
 
 1.  Trusted Board Boot Requirements CLIENT PDD (ARM DEN 0006B-5). Available
     under NDA through your ARM account representative.
@@ -1245,7 +1470,6 @@ kernel at boot time. These can be found in the `fdts` directory.
 
 4.  [ARM Trusted Firmware Interrupt Management Design guide][INTRG].
 
-
 - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 _Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved._
@@ -1255,4 +1479,6 @@ _Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved._
 [SMCCC]:            http://infocenter.arm.com/help/topic/com.arm.doc.den0028a/index.html "SMC Calling Convention PDD (ARM DEN 0028A)"
 [UUID]:             https://tools.ietf.org/rfc/rfc4122.txt "A Universally Unique IDentifier (UUID) URN Namespace"
 [User Guide]:       ./user-guide.md
+[Porting Guide]:    ./porting-guide.md
 [INTRG]:            ./interrupt-framework-design.md
+[ERRW]:             ./cpu-errata-workarounds.md

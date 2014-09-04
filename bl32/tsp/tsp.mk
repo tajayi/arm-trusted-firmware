@@ -28,6 +28,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+INCLUDES		+=	-Iinclude/bl32/tsp
+
 BL32_SOURCES		+=	bl32/tsp/tsp_main.c			\
 				bl32/tsp/aarch64/tsp_entrypoint.S	\
 				bl32/tsp/aarch64/tsp_exceptions.S	\
@@ -39,10 +41,18 @@ BL32_SOURCES		+=	bl32/tsp/tsp_main.c			\
 
 BL32_LINKERFILE		:=	bl32/tsp/tsp.ld.S
 
+# This flag determines if the TSPD initializes BL3-2 in tspd_init() (synchronous
+# method) or configures BL3-1 to pass control to BL3-2 instead of BL3-3
+# (asynchronous method).
+TSP_INIT_ASYNC         :=      0
+
+$(eval $(call assert_boolean,TSP_INIT_ASYNC))
+$(eval $(call add_define,TSP_INIT_ASYNC))
+
 # Include the platform-specific TSP Makefile
 # If no platform-specific TSP Makefile exists, it means TSP is not supported
 # on this platform.
-TSP_PLAT_MAKEFILE := bl32/tsp/tsp-${PLAT}.mk
+TSP_PLAT_MAKEFILE := plat/${PLAT}/tsp/tsp-${PLAT}.mk
 ifeq (,$(wildcard ${TSP_PLAT_MAKEFILE}))
   $(error TSP is not supported on platform ${PLAT})
 else

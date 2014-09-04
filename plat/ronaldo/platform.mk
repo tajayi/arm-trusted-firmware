@@ -67,6 +67,9 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				drivers/arm/gic/gic_v2.c			\
 				drivers/arm/gic/gic_v3.c			\
 				drivers/arm/tzc400/tzc400.c			\
+				lib/cpus/aarch64/aem_generic.S			\
+				lib/cpus/aarch64/cortex_a53.S			\
+				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/ronaldo/bl31_fvp_setup.c			\

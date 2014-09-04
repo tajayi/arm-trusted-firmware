@@ -34,9 +34,12 @@
 
 
 	.weak	platform_get_core_pos
-	.weak	platform_is_primary_cpu
 	.weak	platform_check_mpidr
 	.weak	plat_report_exception
+	.weak	plat_crash_console_init
+	.weak	plat_crash_console_putc
+	.weak	plat_reset_handler
+	.weak	plat_disable_acp
 
 	/* -----------------------------------------------------
 	 *  int platform_get_core_pos(int mpidr);
@@ -48,19 +51,6 @@ func platform_get_core_pos
 	and	x1, x0, #MPIDR_CPU_MASK
 	and	x0, x0, #MPIDR_CLUSTER_MASK
 	add	x0, x1, x0, LSR #6
-	ret
-
-	/* -----------------------------------------------------
-	 * void platform_is_primary_cpu (unsigned int mpid);
-	 *
-	 * Given the mpidr say whether this cpu is the primary
-	 * cpu (applicable ony after a cold boot)
-	 * -----------------------------------------------------
-	 */
-func platform_is_primary_cpu
-	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)
-	cmp	x0, #PRIMARY_CPU
-	cset	x0, eq
 	ret
 
 	/* -----------------------------------------------------
@@ -78,4 +68,38 @@ func platform_check_mpidr
 	 * -----------------------------------------------------
 	 */
 func plat_report_exception
+	ret
+
+	/* -----------------------------------------------------
+	 * Placeholder function which should be redefined by
+	 * each platform.
+	 * -----------------------------------------------------
+	 */
+func plat_crash_console_init
+	mov	x0, #0
+	ret
+
+	/* -----------------------------------------------------
+	 * Placeholder function which should be redefined by
+	 * each platform.
+	 * -----------------------------------------------------
+	 */
+func plat_crash_console_putc
+	ret
+
+	/* -----------------------------------------------------
+	 * Placeholder function which should be redefined by
+	 * each platform. This function should preserve x10.
+	 * -----------------------------------------------------
+	 */
+func plat_reset_handler
+	ret
+
+	/* -----------------------------------------------------
+	 * Placeholder function which should be redefined by
+	 * each platform. This function is allowed to use
+	 * registers x0 - x17.
+	 * -----------------------------------------------------
+	 */
+func plat_disable_acp
 	ret

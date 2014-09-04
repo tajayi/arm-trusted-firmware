@@ -48,28 +48,28 @@ func bl2_entrypoint
 	mov	x21, x1
 
 	/* ---------------------------------------------
-	 * This is BL2 which is expected to be executed
-	 * only by the primary cpu (at least for now).
-	 * So, make sure no secondary has lost its way.
-	 * ---------------------------------------------
-	 */
-	mrs	x0, mpidr_el1
-	bl	platform_is_primary_cpu
-	cbz	x0, _panic
-
-	/* ---------------------------------------------
 	 * Set the exception vector to something sane.
 	 * ---------------------------------------------
 	 */
 	adr	x0, early_exceptions
 	msr	vbar_el1, x0
+	isb
 
 	/* ---------------------------------------------
-	 * Enable the instruction cache.
+	 * Enable the SError interrupt now that the
+	 * exception vectors have been setup.
 	 * ---------------------------------------------
 	 */
+	msr	daifclr, #DAIF_ABT_BIT
+
+	/* ---------------------------------------------
+	 * Enable the instruction cache, stack pointer
+	 * and data access alignment checks
+	 * ---------------------------------------------
+	 */
+	mov	x1, #(SCTLR_I_BIT | SCTLR_A_BIT | SCTLR_SA_BIT)
 	mrs	x0, sctlr_el1
-	orr	x0, x0, #SCTLR_I_BIT
+	orr	x0, x0, x1
 	msr	sctlr_el1, x0
 	isb
 
@@ -96,12 +96,15 @@ func bl2_entrypoint
 	bl	zeromem16
 
 	/* --------------------------------------------
-	 * Give ourselves a small coherent stack to
-	 * ease the pain of initializing the MMU
+	 * Allocate a stack whose memory will be marked
+	 * as Normal-IS-WBWA when the MMU is enabled.
+	 * There is no risk of reading stale stack
+	 * memory after enabling the MMU as only the
+	 * primary cpu is running at the moment.
 	 * --------------------------------------------
 	 */
 	mrs	x0, mpidr_el1
-	bl	platform_set_coherent_stack
+	bl	platform_set_stack
 
 	/* ---------------------------------------------
 	 * Perform early platform setup & platform
@@ -111,14 +114,6 @@ func bl2_entrypoint
 	mov	x0, x21
 	bl	bl2_early_platform_setup
 	bl	bl2_plat_arch_setup
-
-	/* ---------------------------------------------
-	 * Give ourselves a stack allocated in Normal
-	 * -IS-WBWA memory
-	 * ---------------------------------------------
-	 */
-	mrs	x0, mpidr_el1
-	bl	platform_set_stack
 
 	/* ---------------------------------------------
 	 * Jump to main function.

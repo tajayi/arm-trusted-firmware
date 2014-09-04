@@ -31,7 +31,6 @@
 #include <arch.h>
 #include <arch_helpers.h>
 #include <arm_gic.h>
-#include <assert.h>
 #include <bl_common.h>
 #include <cci400.h>
 #include <debug.h>
@@ -56,9 +55,9 @@ plat_config_t plat_config;
  * configure_mmu_elx() will give the available subset of that,
  */
 const mmap_region_t fvp_mmap[] = {
-	{ TZROM_BASE,	TZROM_BASE,	TZROM_SIZE,
-						MT_MEMORY | MT_RO | MT_SECURE },
-	{ TZDRAM_BASE,  TZDRAM_BASE,    TZDRAM_SIZE,
+	{ FVP_SHARED_RAM_BASE,	FVP_SHARED_RAM_BASE,	FVP_SHARED_RAM_SIZE,
+						MT_MEMORY | MT_RW | MT_SECURE },
+	{ FVP_TRUSTED_DRAM_BASE, FVP_TRUSTED_DRAM_BASE,	FVP_TRUSTED_DRAM_SIZE,
 						MT_MEMORY | MT_RW | MT_SECURE },
 	{ DEVICE0_BASE,	DEVICE0_BASE,	DEVICE0_SIZE,
 						MT_DEVICE | MT_RW | MT_SECURE },
@@ -112,7 +111,7 @@ const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
 		mmap_add(fvp_mmap);					\
 		init_xlat_tables();					\
 									\
-		enable_mmu_el##_el();					\
+		enable_mmu_el##_el(0);					\
 	}
 
 /* Define EL1 and EL3 variants of the function initialising the MMU */
@@ -150,15 +149,26 @@ uint64_t plat_get_syscnt_freq(void)
 	return counter_base_frequency;
 }
 
-void fvp_cci_setup(void)
+void fvp_cci_init(void)
 {
 	/*
-	 * Enable CCI-400 for this cluster. No need
+	 * Initialize CCI-400 driver
+	 */
+	if (plat_config.flags & CONFIG_HAS_CCI)
+		cci_init(CCI400_BASE,
+			CCI400_SL_IFACE3_CLUSTER_IX,
+			CCI400_SL_IFACE4_CLUSTER_IX);
+}
+
+void fvp_cci_enable(void)
+{
+	/*
+	 * Enable CCI-400 coherency for this cluster. No need
 	 * for locks as no other cpu is active at the
 	 * moment
 	 */
 	if (plat_config.flags & CONFIG_HAS_CCI)
-		cci_enable_coherency(read_mpidr());
+		cci_enable_cluster_coherency(read_mpidr());
 }
 
 void fvp_gic_init(void)

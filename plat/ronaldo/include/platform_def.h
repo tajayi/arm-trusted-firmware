@@ -32,6 +32,7 @@
 #define __PLATFORM_DEF_H__
 
 #include <arch.h>
+#include "../fvp_def.h"
 
 
 /*******************************************************************************
@@ -45,16 +46,19 @@
  ******************************************************************************/
 
 /* Size of cacheable stacks */
-#define PLATFORM_STACK_SIZE	0x800
-
-/* Size of coherent stacks for debug and release builds */
-#if DEBUG
-#define PCPU_DV_MEM_STACK_SIZE	0x400
-#else
-#define PCPU_DV_MEM_STACK_SIZE	0x300
+#if DEBUG_XLAT_TABLE
+#define PLATFORM_STACK_SIZE 0x800
+#elif IMAGE_BL1
+#define PLATFORM_STACK_SIZE 0x440
+#elif IMAGE_BL2
+#define PLATFORM_STACK_SIZE 0x400
+#elif IMAGE_BL31
+#define PLATFORM_STACK_SIZE 0x400
+#elif IMAGE_BL32
+#define PLATFORM_STACK_SIZE 0x440
 #endif
 
-#define FIRMWARE_WELCOME_STR		"Booting trusted firmware boot loader stage 1\n\r"
+#define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
 
 /* Trusted Boot Firmware BL2 */
 #define BL2_IMAGE_NAME			"bl2.bin"
@@ -77,36 +81,24 @@
 #define PLATFORM_MAX_CPUS_PER_CLUSTER	4
 #define PLATFORM_NUM_AFFS		(PLATFORM_CLUSTER_COUNT + \
 					 PLATFORM_CORE_COUNT)
-#define PRIMARY_CPU			0x0
 #define MAX_IO_DEVICES			3
 #define MAX_IO_HANDLES			4
-
-/*******************************************************************************
- * Platform memory map related constants
- ******************************************************************************/
-#define TZROM_BASE		0x00000000
-#define TZROM_SIZE		0x04000000
-
-#define TZRAM_BASE		0xFFFC0000
-#define TZRAM_SIZE		0x00040000
-
-/* Location of trusted dram on the base fvp */
-#define TZDRAM_BASE		0x04000000 /* Can't overlap TZROM area */
-#define TZDRAM_SIZE		0x02000000
 
 /*******************************************************************************
  * BL1 specific defines.
  * BL1 RW data is relocated from ROM to RAM at runtime so we need 2 sets of
  * addresses.
  ******************************************************************************/
-#define BL1_RO_BASE			TZROM_BASE
-#define BL1_RO_LIMIT			(TZROM_BASE + TZROM_SIZE)
+#define BL1_RO_BASE			FVP_TRUSTED_ROM_BASE
+#define BL1_RO_LIMIT			(FVP_TRUSTED_ROM_BASE \
+					+ FVP_TRUSTED_ROM_SIZE)
 /*
- * Put BL1 RW at the top of the Trusted SRAM. BL1_RW_BASE is calculated using
- * the current BL1 RW debug size plus a little space for growth.
+ * Put BL1 RW at the top of the Trusted SRAM (just below the shared memory, if
+ * present). BL1_RW_BASE is calculated using the current BL1 RW debug size plus
+ * a little space for growth.
  */
-#define BL1_RW_BASE			(TZRAM_BASE + TZRAM_SIZE - 0x6000)
-#define BL1_RW_LIMIT			(TZRAM_BASE + TZRAM_SIZE)
+#define BL1_RW_BASE			(FVP_TRUSTED_SRAM_LIMIT - 0x6000)
+#define BL1_RW_LIMIT			FVP_TRUSTED_SRAM_LIMIT
 
 /*******************************************************************************
  * BL2 specific defines.
@@ -122,12 +114,13 @@
  * BL31 specific defines.
  ******************************************************************************/
 /*
- * Put BL3-1 at the top of the Trusted SRAM. BL31_BASE is calculated using the
- * current BL3-1 debug size plus a little space for growth.
+ * Put BL3-1 at the top of the Trusted SRAM (just below the shared memory, if
+ * present). BL31_BASE is calculated using the current BL3-1 debug size plus a
+ * little space for growth.
  */
-#define BL31_BASE			(TZRAM_BASE + TZRAM_SIZE - 0x1D000)
+#define BL31_BASE			(FVP_TRUSTED_SRAM_LIMIT - 0x1D000)
 #define BL31_PROGBITS_LIMIT		BL1_RW_BASE
-#define BL31_LIMIT			(TZRAM_BASE + TZRAM_SIZE)
+#define BL31_LIMIT			FVP_TRUSTED_SRAM_LIMIT
 
 /*******************************************************************************
  * BL32 specific defines.
@@ -135,23 +128,26 @@
 /*
  * On FVP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
  */
-#define TSP_IN_TZRAM			0
-#define TSP_IN_TZDRAM			1
-
-#if TSP_RAM_LOCATION_ID == TSP_IN_TZRAM
-# define TSP_SEC_MEM_BASE		TZRAM_BASE
-# define TSP_SEC_MEM_SIZE		TZRAM_SIZE
-# define BL32_BASE			TZRAM_BASE
-# define BL32_PROGBITS_LIMIT		BL2_BASE
+#if FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_SRAM
+# define TSP_SEC_MEM_BASE		FVP_TRUSTED_SRAM_BASE
+# define TSP_SEC_MEM_SIZE		FVP_TRUSTED_SRAM_SIZE
+# define TSP_PROGBITS_LIMIT		BL2_BASE
+# define BL32_BASE			FVP_TRUSTED_SRAM_BASE
 # define BL32_LIMIT			BL31_BASE
-#elif TSP_RAM_LOCATION_ID == TSP_IN_TZDRAM
-# define TSP_SEC_MEM_BASE		TZDRAM_BASE
-# define TSP_SEC_MEM_SIZE		TZDRAM_SIZE
-# define BL32_BASE			(TZDRAM_BASE + 0x2000)
-# define BL32_LIMIT			(TZDRAM_BASE + (1 << 21))
+#elif FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_DRAM
+# define TSP_SEC_MEM_BASE		FVP_TRUSTED_DRAM_BASE
+# define TSP_SEC_MEM_SIZE		FVP_TRUSTED_DRAM_SIZE
+# define BL32_BASE			(FVP_TRUSTED_DRAM_BASE \
+					+ FVP_SHARED_RAM_SIZE)
+# define BL32_LIMIT			(FVP_TRUSTED_DRAM_BASE + (1 << 21))
 #else
-# error "Unsupported TSP_RAM_LOCATION_ID value"
+# error "Unsupported FVP_TSP_RAM_LOCATION_ID value"
 #endif
+
+/*
+ * ID of the secure physical generic timer interrupt used by the TSP.
+ */
+#define TSP_IRQ_SEC_PHY_TIMER		IRQ_SEC_PHY_TIMER
 
 /*******************************************************************************
  * Platform specific page table and MMU setup constants
@@ -159,22 +155,6 @@
 #define ADDR_SPACE_SIZE			(1ull << 32)
 #define MAX_XLAT_TABLES			4
 #define MAX_MMAP_REGIONS		16
-
-/*******************************************************************************
- * ID of the secure physical generic timer interrupt.
- ******************************************************************************/
-#define IRQ_SEC_PHY_TIMER		29
-
-/*******************************************************************************
- * CCI-400 related constants
- ******************************************************************************/
-#define CCI400_BASE			0x2c090000
-#define CCI400_SL_IFACE_CLUSTER0	3
-#define CCI400_SL_IFACE_CLUSTER1	4
-#define CCI400_SL_IFACE_INDEX(mpidr)	(mpidr & MPIDR_CLUSTER_MASK ? \
-					 CCI400_SL_IFACE_CLUSTER1 :   \
-					 CCI400_SL_IFACE_CLUSTER0)
-
 
 /*******************************************************************************
  * Declarations and constants to access the mailboxes safely. Each mailbox is

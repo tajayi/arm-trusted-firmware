@@ -35,8 +35,8 @@ OUTPUT_ARCH(PLATFORM_LINKER_ARCH)
 ENTRY(bl1_entrypoint)
 
 MEMORY {
-    ROM (rx): ORIGIN = TZROM_BASE, LENGTH = TZROM_SIZE
-    RAM (rwx): ORIGIN = TZRAM_BASE, LENGTH = TZRAM_SIZE
+    ROM (rx): ORIGIN = BL1_RO_BASE, LENGTH = BL1_RO_LIMIT
+    RAM (rwx): ORIGIN = BL1_RW_BASE, LENGTH = BL1_RW_LIMIT
 }
 
 SECTIONS
@@ -50,9 +50,22 @@ SECTIONS
         *bl1_entrypoint.o(.text*)
         *(.text*)
         *(.rodata*)
+
+        /*
+         * Ensure 8-byte alignment for cpu_ops so that its fields are also
+         * aligned. Also ensure cpu_ops inclusion.
+         */
+        . = ALIGN(8);
+        __CPU_OPS_START__ = .;
+        KEEP(*(cpu_ops))
+        __CPU_OPS_END__ = .;
+
         *(.vectors)
         __RO_END__ = .;
     } >ROM
+
+    ASSERT(__CPU_OPS_END__ > __CPU_OPS_START__,
+           "cpu_ops not defined for this platform.")
 
     /*
      * The .data section gets copied from ROM to RAM at runtime.

@@ -32,9 +32,10 @@
 #include <assert.h>
 #include <debug.h>
 #include <gic_v2.h>
-#include <tsp.h>
 #include <platform.h>
 #include <platform_def.h>
+#include <tsp.h>
+#include "tsp_private.h"
 
 /*******************************************************************************
  * This function updates the TSP statistics for FIQs handled synchronously i.e
@@ -55,14 +56,16 @@ void tsp_update_sync_fiq_stats(uint32_t type, uint64_t elr_el3)
 	if (type == TSP_HANDLE_FIQ_AND_RETURN)
 		tsp_stats[linear_id].sync_fiq_ret_count++;
 
+#if LOG_LEVEL >= LOG_LEVEL_VERBOSE
 	spin_lock(&console_lock);
-	tf_printf("TSP: cpu 0x%x sync fiq request from 0x%llx \n\r",
-	       mpidr, elr_el3);
-	INFO("cpu 0x%x: %d sync fiq requests, %d sync fiq returns\n",
-	     mpidr,
-	     tsp_stats[linear_id].sync_fiq_count,
-	     tsp_stats[linear_id].sync_fiq_ret_count);
+	VERBOSE("TSP: cpu 0x%x sync fiq request from 0x%llx\n",
+		mpidr, elr_el3);
+	VERBOSE("TSP: cpu 0x%x: %d sync fiq requests, %d sync fiq returns\n",
+		mpidr,
+		tsp_stats[linear_id].sync_fiq_count,
+		tsp_stats[linear_id].sync_fiq_ret_count);
 	spin_unlock(&console_lock);
+#endif
 }
 
 /*******************************************************************************
@@ -85,7 +88,7 @@ int32_t tsp_fiq_handler(void)
 	id = plat_ic_get_pending_interrupt_id();
 
 	/* TSP can only handle the secure physical timer interrupt */
-	if (id != IRQ_SEC_PHY_TIMER)
+	if (id != TSP_IRQ_SEC_PHY_TIMER)
 		return TSP_EL3_FIQ;
 
 	/*
@@ -93,19 +96,20 @@ int32_t tsp_fiq_handler(void)
 	 * another secure interrupt through an assertion.
 	 */
 	id = plat_ic_acknowledge_interrupt();
-	assert(id == IRQ_SEC_PHY_TIMER);
+	assert(id == TSP_IRQ_SEC_PHY_TIMER);
 	tsp_generic_timer_handler();
 	plat_ic_end_of_interrupt(id);
 
 	/* Update the statistics and print some messages */
 	tsp_stats[linear_id].fiq_count++;
+#if LOG_LEVEL >= LOG_LEVEL_VERBOSE
 	spin_lock(&console_lock);
-	tf_printf("TSP: cpu 0x%x handled fiq %d \n\r",
+	VERBOSE("TSP: cpu 0x%x handled fiq %d\n",
 	       mpidr, id);
-	INFO("cpu 0x%x: %d fiq requests \n",
+	VERBOSE("TSP: cpu 0x%x: %d fiq requests\n",
 	     mpidr, tsp_stats[linear_id].fiq_count);
 	spin_unlock(&console_lock);
-
+#endif
 	return 0;
 }
 
@@ -115,11 +119,12 @@ int32_t tsp_irq_received(void)
 	uint32_t linear_id = platform_get_core_pos(mpidr);
 
 	tsp_stats[linear_id].irq_count++;
+#if LOG_LEVEL >= LOG_LEVEL_VERBOSE
 	spin_lock(&console_lock);
-	tf_printf("TSP: cpu 0x%x received irq\n\r", mpidr);
-	INFO("cpu 0x%x: %d irq requests \n",
-	     mpidr, tsp_stats[linear_id].irq_count);
+	VERBOSE("TSP: cpu 0x%x received irq\n", mpidr);
+	VERBOSE("TSP: cpu 0x%x: %d irq requests\n",
+		mpidr, tsp_stats[linear_id].irq_count);
 	spin_unlock(&console_lock);
-
+#endif
 	return TSP_PREEMPTED;
 }

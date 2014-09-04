@@ -52,6 +52,15 @@ func bl31_entrypoint
 	mov	x20, x0
 	mov	x21, x1
 #else
+	/* ---------------------------------------------
+	 * Set the CPU endianness before doing anything
+	 * that might involve memory reads or writes.
+	 * ---------------------------------------------
+	 */
+	mrs	x0, sctlr_el3
+	bic	x0, x0, #SCTLR_EE_BIT
+	msr	sctlr_el3, x0
+	isb
 
 	/* -----------------------------------------------------
 	 * Perform any processor specific actions upon reset
@@ -59,26 +68,44 @@ func bl31_entrypoint
 	 * Boot ROM(BL0) programming sequence
 	 * -----------------------------------------------------
 	 */
-	bl	cpu_reset_handler
+	bl	reset_handler
 #endif
-
 	/* ---------------------------------------------
-	 * Enable the instruction cache.
+	 * Enable the instruction cache, stack pointer
+	 * and data access alignment checks
 	 * ---------------------------------------------
 	 */
-	mrs	x1, sctlr_el3
-	orr	x1, x1, #SCTLR_I_BIT
-	msr	sctlr_el3, x1
+	mov	x1, #(SCTLR_I_BIT | SCTLR_A_BIT | SCTLR_SA_BIT)
+	mrs	x0, sctlr_el3
+	orr	x0, x0, x1
+	msr	sctlr_el3, x0
 	isb
 
 	/* ---------------------------------------------
-	 * Set the exception vector and zero tpidr_el3
-	 * until the crash reporting is set up
+	 * Initialise cpu_data early to enable crash
+	 * reporting to have access to crash stack.
+	 * Since crash reporting depends on cpu_data to
+	 * report the unhandled exception, not
+	 * doing so can lead to recursive exceptions due
+	 * to a NULL TPIDR_EL3
+	 * ---------------------------------------------
+	 */
+	bl	init_cpu_data_ptr
+
+	/* ---------------------------------------------
+	 * Set the exception vector.
 	 * ---------------------------------------------
 	 */
 	adr	x1, runtime_exceptions
 	msr	vbar_el3, x1
-	msr	tpidr_el3, xzr
+	isb
+
+	/* ---------------------------------------------
+	 * Enable the SError interrupt now that the
+	 * exception vectors have been setup.
+	 * ---------------------------------------------
+	 */
+	msr	daifclr, #DAIF_ABT_BIT
 
 	/* ---------------------------------------------------------------------
 	 * The initial state of the Architectural feature trap register
@@ -110,16 +137,6 @@ func bl31_entrypoint
 	 */
 	wait_for_entrypoint
 	bl	platform_mem_init
-#else
-	/* ---------------------------------------------
-	 * This is BL31 which is expected to be executed
-	 * only by the primary cpu (at least for now).
-	 * So, make sure no secondary has lost its way.
-	 * ---------------------------------------------
-	 */
-	mrs	x0, mpidr_el1
-	bl	platform_is_primary_cpu
-	cbz	x0, _panic
 #endif
 
 	/* ---------------------------------------------
@@ -137,13 +154,10 @@ func bl31_entrypoint
 	bl	zeromem16
 
 	/* ---------------------------------------------
-	 * Initialise cpu_data and crash reporting
+	 * Initialize the cpu_ops pointer.
 	 * ---------------------------------------------
 	 */
-#if CRASH_REPORTING
-	bl	init_crash_reporting
-#endif
-	bl	init_cpu_data_ptr
+	bl	init_cpu_ops
 
 	/* ---------------------------------------------
 	 * Use SP_EL0 for the C runtime stack.
@@ -152,12 +166,15 @@ func bl31_entrypoint
 	msr	spsel, #0
 
 	/* --------------------------------------------
-	 * Give ourselves a small coherent stack to
-	 * ease the pain of initializing the MMU
+	 * Allocate a stack whose memory will be marked
+	 * as Normal-IS-WBWA when the MMU is enabled.
+	 * There is no risk of reading stale stack
+	 * memory after enabling the MMU as only the
+	 * primary cpu is running at the moment.
 	 * --------------------------------------------
 	 */
 	mrs	x0, mpidr_el1
-	bl	platform_set_coherent_stack
+	bl	platform_set_stack
 
 	/* ---------------------------------------------
 	 * Perform platform specific early arch. setup
@@ -175,21 +192,9 @@ func bl31_entrypoint
 	bl	bl31_plat_arch_setup
 
 	/* ---------------------------------------------
-	 * Give ourselves a stack allocated in Normal
-	 * -IS-WBWA memory
-	 * ---------------------------------------------
-	 */
-	mrs	x0, mpidr_el1
-	bl	platform_set_stack
-
-	/* ---------------------------------------------
 	 * Jump to main function.
 	 * ---------------------------------------------
 	 */
 	bl	bl31_main
 
 	b	el3_exit
-
-_panic:
-	wfi
-	b	_panic

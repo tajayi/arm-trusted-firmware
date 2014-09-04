@@ -52,10 +52,9 @@
 #define PSCI_SYSTEM_RESET		0x84000009
 
 /*
- * Number of PSCI calls (above) implemented. System off and reset aren't
- * implemented as yet
+ * Number of PSCI calls (above) implemented
  */
-#define PSCI_NUM_CALLS			13
+#define PSCI_NUM_CALLS			15
 
 /*******************************************************************************
  * PSCI Migrate and friends
@@ -132,6 +131,16 @@
 
 #include <stdint.h>
 
+/*******************************************************************************
+ * Structure used to store per-cpu information relevant to the PSCI service.
+ * It is populated in the per-cpu data array. In return we get a guarantee that
+ * this information will not reside on a cache line shared with another cpu.
+ ******************************************************************************/
+typedef struct psci_cpu_data {
+	uint32_t power_state;
+	uint32_t max_phys_off_afflvl;	/* Highest affinity level in physically
+					   powered off state */
+} psci_cpu_data_t;
 
 /*******************************************************************************
  * Structure populated by platform specific code to export routines which
@@ -154,6 +163,8 @@ typedef struct plat_pm_ops {
 	int (*affinst_suspend_finish)(unsigned long,
 				      unsigned int,
 				      unsigned int);
+	void (*system_off)(void) __dead2;
+	void (*system_reset)(void) __dead2;
 } plat_pm_ops_t;
 
 /*******************************************************************************
@@ -170,20 +181,18 @@ typedef struct spd_pm_ops {
 	void (*svc_suspend_finish)(uint64_t suspend_level);
 	void (*svc_migrate)(uint64_t __unused1, uint64_t __unused2);
 	int32_t (*svc_migrate_info)(uint64_t *__unused);
+	void (*svc_system_off)(void);
+	void (*svc_system_reset)(void);
 } spd_pm_ops_t;
 
 /*******************************************************************************
  * Function & Data prototypes
  ******************************************************************************/
 unsigned int psci_version(void);
-int __psci_cpu_suspend(unsigned int, unsigned long, unsigned long);
-int __psci_cpu_off(void);
 int psci_affinity_info(unsigned long, unsigned int);
 int psci_migrate(unsigned int);
 unsigned int psci_migrate_info_type(void);
 unsigned long psci_migrate_info_up_cpu(void);
-void psci_system_off(void);
-void psci_system_reset(void);
 int psci_cpu_on(unsigned long,
 		unsigned long,
 		unsigned long);
@@ -191,8 +200,10 @@ void __dead2 psci_power_down_wfi(void);
 void psci_aff_on_finish_entry(void);
 void psci_aff_suspend_finish_entry(void);
 void psci_register_spd_pm_hook(const spd_pm_ops_t *);
-int psci_get_suspend_stateid(unsigned long mpidr);
-int psci_get_suspend_afflvl(unsigned long mpidr);
+int psci_get_suspend_stateid_by_mpidr(unsigned long);
+int psci_get_suspend_stateid(void);
+int psci_get_suspend_afflvl(void);
+uint32_t psci_get_max_phys_off_afflvl(void);
 
 uint64_t psci_smc_handler(uint32_t smc_fid,
 			  uint64_t x1,

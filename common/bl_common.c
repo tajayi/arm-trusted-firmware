@@ -61,12 +61,11 @@ void change_security_state(unsigned int target_security_state)
 {
 	unsigned long scr = read_scr();
 
+	assert(sec_state_is_valid(target_security_state));
 	if (target_security_state == SECURE)
 		scr &= ~SCR_NS_BIT;
-	else if (target_security_state == NON_SECURE)
-		scr |= SCR_NS_BIT;
 	else
-		assert(0);
+		scr |= SCR_NS_BIT;
 
 	write_scr(scr);
 }
@@ -138,7 +137,7 @@ void reserve_mem(uint64_t *free_base, size_t *free_size,
 	if (pos == BOTTOM)
 		*free_base = addr + size;
 
-	INFO("Reserved %u bytes (discarded %u bytes %s)\n",
+	VERBOSE("Reserved %u bytes (discarded %u bytes %s)\n",
 	     reserved_size, discard_size,
 	     pos == TOP ? "above" : "below");
 }
@@ -147,15 +146,13 @@ static void dump_load_info(unsigned long image_load_addr,
 			   unsigned long image_size,
 			   const meminfo_t *mem_layout)
 {
-#if DEBUG
-	tf_printf("Trying to load image at address 0x%lx, size = 0x%lx\r\n",
+	INFO("Trying to load image at address 0x%lx, size = 0x%lx\n",
 		image_load_addr, image_size);
-	tf_printf("Current memory layout:\r\n");
-	tf_printf("  total region = [0x%lx, 0x%lx]\r\n", mem_layout->total_base,
+	INFO("Current memory layout:\n");
+	INFO("  total region = [0x%lx, 0x%lx]\n", mem_layout->total_base,
 			mem_layout->total_base + mem_layout->total_size);
-	tf_printf("  free region = [0x%lx, 0x%lx]\r\n", mem_layout->free_base,
+	INFO("  free region = [0x%lx, 0x%lx]\n", mem_layout->free_base,
 			mem_layout->free_base + mem_layout->free_size);
-#endif
 }
 
 /* Generic function to return the size of an image */

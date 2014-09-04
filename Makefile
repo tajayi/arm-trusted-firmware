@@ -31,8 +31,8 @@
 #
 # Trusted Firmware Version
 #
-VERSION_MAJOR		:= 0
-VERSION_MINOR		:= 4
+VERSION_MAJOR		:= 1
+VERSION_MINOR		:= 0
 
 #
 # Default values for build configurations
@@ -60,7 +60,9 @@ CTX_INCLUDE_FPREGS		:= 0
 # Determine the version of ARM GIC architecture to use for interrupt management
 # in EL3. The platform port can change this value if needed.
 ARM_GIC_ARCH		:=	2
-
+# Flag used to indicate if ASM_ASSERTION should be enabled for the build.
+# This defaults to being present in DEBUG builds only.
+ASM_ASSERTION		:=	${DEBUG}
 
 # Checkpatch ignores
 CHECK_IGNORE		=	--ignore COMPLEX_MACRO
@@ -78,8 +80,12 @@ export Q
 
 ifneq (${DEBUG}, 0)
 	BUILD_TYPE	:=	debug
+	# Use LOG_LEVEL_INFO by default for debug builds
+	LOG_LEVEL	:=	40
 else
 	BUILD_TYPE	:=	release
+	# Use LOG_LEVEL_NOTICE by default for release builds
+	LOG_LEVEL	:=	20
 endif
 
 # Default build string (git branch and commit)
@@ -90,13 +96,12 @@ endif
 VERSION_STRING		:=	v${VERSION_MAJOR}.${VERSION_MINOR}(${BUILD_TYPE}):${BUILD_STRING}
 
 BL_COMMON_SOURCES	:=	common/bl_common.c			\
-				common/debug.c				\
 				common/tf_printf.c			\
+				common/aarch64/debug.S			\
 				lib/aarch64/cache_helpers.S		\
 				lib/aarch64/misc_helpers.S		\
 				lib/aarch64/xlat_helpers.c		\
 				lib/stdlib/std.c			\
-				lib/io_storage.c			\
 				plat/common/aarch64/platform_helpers.S
 
 BUILD_BASE		:=	./build
@@ -132,6 +137,10 @@ msg_start:
 	@echo "Building ${PLAT}"
 
 include plat/${PLAT}/platform.mk
+
+# By default all CPU errata workarounds are disabled. This can be
+# overridden by the platform.
+include lib/cpus/cpu-errata.mk
 
 ifdef BL1_SOURCES
 NEED_BL1 := yes
@@ -169,13 +178,13 @@ endif
 
 INCLUDES		+=	-Iinclude/bl31			\
 				-Iinclude/bl31/services		\
-				-Iinclude/bl32			\
-				-Iinclude/bl32/payloads		\
 				-Iinclude/common		\
 				-Iinclude/drivers		\
 				-Iinclude/drivers/arm		\
+				-Iinclude/drivers/io		\
 				-Iinclude/lib			\
 				-Iinclude/lib/aarch64		\
+				-Iinclude/lib/cpus/aarch64	\
 				-Iinclude/plat/common		\
 				-Iinclude/stdlib		\
 				-Iinclude/stdlib/sys		\
@@ -207,6 +216,12 @@ $(eval $(call add_define,CTX_INCLUDE_FPREGS))
 # Process ARM_GIC_ARCH flag
 $(eval $(call add_define,ARM_GIC_ARCH))
 
+# Process ASM_ASSERTION flag
+$(eval $(call assert_boolean,ASM_ASSERTION))
+$(eval $(call add_define,ASM_ASSERTION))
+
+# Process LOG_LEVEL flag
+$(eval $(call add_define,LOG_LEVEL))
 
 ASFLAGS			+= 	-nostdinc -ffreestanding -Wa,--fatal-warnings	\
 				-Werror -Wmissing-include-dirs			\
@@ -295,7 +310,7 @@ $(eval PREREQUISITES := $(patsubst %.o,%.d,$(OBJ)))
 
 $(OBJ) : $(2)
 	@echo "  CC      $$<"
-	$$(Q)$$(CC) $$(CFLAGS) -c $$< -o $$@
+	$$(Q)$$(CC) $$(CFLAGS) -DIMAGE_BL$(3) -c $$< -o $$@
 
 
 $(PREREQUISITES) : $(2)
@@ -317,7 +332,7 @@ $(eval PREREQUISITES := $(patsubst %.o,%.d,$(OBJ)))
 
 $(OBJ) : $(2)
 	@echo "  AS      $$<"
-	$$(Q)$$(AS) $$(ASFLAGS) -c $$< -o $$@
+	$$(Q)$$(AS) $$(ASFLAGS) -DIMAGE_BL$(3) -c $$< -o $$@
 
 $(PREREQUISITES) : $(2)
 	@echo "  DEPS    $$@"
@@ -354,11 +369,11 @@ endef
 define MAKE_OBJS
 	$(eval C_OBJS := $(filter %.c,$(2)))
 	$(eval REMAIN := $(filter-out %.c,$(2)))
-	$(eval $(foreach obj,$(C_OBJS),$(call MAKE_C,$(1),$(obj))))
+	$(eval $(foreach obj,$(C_OBJS),$(call MAKE_C,$(1),$(obj),$(3))))
 
 	$(eval S_OBJS := $(filter %.S,$(REMAIN)))
 	$(eval REMAIN := $(filter-out %.S,$(REMAIN)))
-	$(eval $(foreach obj,$(S_OBJS),$(call MAKE_S,$(1),$(obj))))
+	$(eval $(foreach obj,$(S_OBJS),$(call MAKE_S,$(1),$(obj),$(3))))
 
 	$(and $(REMAIN),$(error Unexpected source files present: $(REMAIN)))
 endef
@@ -382,7 +397,7 @@ define MAKE_BL
 	$(eval DUMP       := $(BUILD_DIR)/bl$(1).dump)
 	$(eval BIN        := $(BUILD_PLAT)/bl$(1).bin)
 
-	$(eval $(call MAKE_OBJS,$(BUILD_DIR),$(SOURCES)))
+	$(eval $(call MAKE_OBJS,$(BUILD_DIR),$(SOURCES),$(1)))
 	$(eval $(call MAKE_LD,$(LINKERFILE),$(BL$(1)_LINKERFILE)))
 
 $(BUILD_DIR) :

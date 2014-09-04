@@ -39,7 +39,7 @@ BL31_SOURCES		+=	bl31/bl31_main.c				\
 				bl31/aarch64/cpu_data.S				\
 				bl31/aarch64/runtime_exceptions.S		\
 				bl31/aarch64/crash_reporting.S			\
-				lib/aarch64/cpu_helpers.S			\
+				lib/cpus/aarch64/cpu_helpers.S			\
 				lib/locks/bakery/bakery_lock.c			\
 				lib/locks/exclusive/spinlock.S			\
 				services/std_svc/std_svc_setup.c		\
@@ -48,8 +48,10 @@ BL31_SOURCES		+=	bl31/bl31_main.c				\
 				services/std_svc/psci/psci_afflvl_suspend.c	\
 				services/std_svc/psci/psci_common.c		\
 				services/std_svc/psci/psci_entry.S		\
+				services/std_svc/psci/psci_helpers.S		\
 				services/std_svc/psci/psci_main.c		\
-				services/std_svc/psci/psci_setup.c
+				services/std_svc/psci/psci_setup.c		\
+				services/std_svc/psci/psci_system_off.c
 
 BL31_LINKERFILE		:=	bl31/bl31.ld.S
 

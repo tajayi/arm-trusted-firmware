@@ -1,4 +1,4 @@
-#/*
+/*
  * Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,27 @@
 #ifndef __FVP_DEF_H__
 #define __FVP_DEF_H__
 
-#include <platform_def.h> /* for TZROM_SIZE */
-
-
 /* Firmware Image Package */
 #define FIP_IMAGE_NAME			"fip.bin"
+#define FVP_PRIMARY_CPU			0x0
+
+/* Memory location options for Shared data and TSP in FVP */
+#define FVP_IN_TRUSTED_SRAM		0
+#define FVP_IN_TRUSTED_DRAM		1
 
 /*******************************************************************************
  * FVP memory map related constants
  ******************************************************************************/
+
+#define FVP_TRUSTED_ROM_BASE	0x00000000
+#define FVP_TRUSTED_ROM_SIZE	0x04000000
+
+#define FVP_TRUSTED_SRAM_BASE	0xFFFC0000
+#define FVP_TRUSTED_SRAM_SIZE	0x00040000
+
+/* Location of trusted dram on the base fvp */
+#define FVP_TRUSTED_DRAM_BASE	0x04000000 /* Can't overlap TZROM area */
+#define FVP_TRUSTED_DRAM_SIZE	0x02000000
 
 #define FLASH0_BASE		0x08000000
 #define FLASH0_SIZE		TZROM_SIZE
@@ -71,10 +83,27 @@
 #define NSRAM_BASE		0x2e000000
 #define NSRAM_SIZE		0x10000
 
-#define MBOX_OFF		0x1000
+/* 4KB shared memory */
+#define FVP_SHARED_RAM_SIZE	0x1000
 
-/* Base address where parameters to BL31 are stored */
-#define PARAMS_BASE		TZDRAM_BASE
+/* Location of shared memory */
+#if (FVP_SHARED_DATA_LOCATION_ID == FVP_IN_TRUSTED_DRAM)
+/* Shared memory at the base of Trusted DRAM */
+# define FVP_SHARED_RAM_BASE		FVP_TRUSTED_DRAM_BASE
+# define FVP_TRUSTED_SRAM_LIMIT		(FVP_TRUSTED_SRAM_BASE \
+					+ FVP_TRUSTED_SRAM_SIZE)
+#elif (FVP_SHARED_DATA_LOCATION_ID == FVP_IN_TRUSTED_SRAM)
+# if (FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_DRAM)
+#  error "Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported"
+# endif
+/* Shared memory at the top of the Trusted SRAM */
+# define FVP_SHARED_RAM_BASE		(FVP_TRUSTED_SRAM_BASE \
+					+ FVP_TRUSTED_SRAM_SIZE \
+					- FVP_SHARED_RAM_SIZE)
+# define FVP_TRUSTED_SRAM_LIMIT		FVP_SHARED_RAM_BASE
+#else
+# error "Unsupported FVP_SHARED_DATA_LOCATION_ID value"
+#endif
 
 #define DRAM1_BASE		0x00000000ull
 #define DRAM1_SIZE		0x10000000ull
@@ -150,11 +179,8 @@
  * CCI-400 related constants
  ******************************************************************************/
 #define CCI400_BASE			0x2c090000
-#define CCI400_SL_IFACE_CLUSTER0	3
-#define CCI400_SL_IFACE_CLUSTER1	4
-#define CCI400_SL_IFACE_INDEX(mpidr)	(mpidr & MPIDR_CLUSTER_MASK ? \
-					 CCI400_SL_IFACE_CLUSTER1 :   \
-					 CCI400_SL_IFACE_CLUSTER0)
+#define CCI400_SL_IFACE3_CLUSTER_IX	0
+#define CCI400_SL_IFACE4_CLUSTER_IX	1
 
 /*******************************************************************************
  * GIC-400 & interrupt handling related constants
@@ -182,6 +208,9 @@
 #define RDO_UART0_BASE         0xFF000000
 #define RDO_UART1_BASE         0xFF001000
 
+#define CADENCE_UART_CLK_IN_HZ (0)
+#define CADENCE_UART_BAUDRATE (0)
+
 /*******************************************************************************
  * TrustZone address space controller related constants
  ******************************************************************************/
@@ -190,9 +219,6 @@
 /*
  * The NSAIDs for this platform as used to program the TZC400.
  */
-
-/* The FVP has 4 bits of NSAIDs. Used with TZC FAIL_ID (ACE Lite ID width) */
-#define FVP_AID_WIDTH			4
 
 /* NSAIDs used by devices in TZC filter 0 on FVP */
 #define FVP_NSAID_DEFAULT		0
@@ -205,5 +231,15 @@
 #define FVP_NSAID_HDLCD0		2
 #define FVP_NSAID_CLCD			7
 
+/*******************************************************************************
+ *  Shared Data
+ ******************************************************************************/
+
+/* Entrypoint mailboxes */
+#define MBOX_BASE		FVP_SHARED_RAM_BASE
+#define MBOX_SIZE		0x200
+
+/* Base address where parameters to BL31 are stored */
+#define PARAMS_BASE		(MBOX_BASE + MBOX_SIZE)
 
 #endif /* __FVP_DEF_H__ */

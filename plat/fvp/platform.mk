@@ -28,28 +28,45 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# On FVP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
-# Trusted SRAM is the default.
-TSP_RAM_LOCATION	:=	tsram
-
-ifeq (${TSP_RAM_LOCATION}, tsram)
-  TSP_RAM_LOCATION_ID := TSP_IN_TZRAM
-else ifeq (${TSP_RAM_LOCATION}, tdram)
-  TSP_RAM_LOCATION_ID := TSP_IN_TZDRAM
+# Shared memory may be allocated at the top of Trusted SRAM (tsram) or at the
+# base of Trusted SRAM (tdram)
+FVP_SHARED_DATA_LOCATION	:=	tsram
+ifeq (${FVP_SHARED_DATA_LOCATION}, tsram)
+  FVP_SHARED_DATA_LOCATION_ID := FVP_IN_TRUSTED_SRAM
+else ifeq (${FVP_SHARED_DATA_LOCATION}, tdram)
+  FVP_SHARED_DATA_LOCATION_ID := FVP_IN_TRUSTED_DRAM
 else
-  $(error "Unsupported TSP_RAM_LOCATION value")
+  $(error "Unsupported FVP_SHARED_DATA_LOCATION value")
 endif
 
-# Process TSP_RAM_LOCATION_ID flag
-$(eval $(call add_define,TSP_RAM_LOCATION_ID))
+# On FVP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
+# Trusted SRAM is the default.
+FVP_TSP_RAM_LOCATION	:=	tsram
+ifeq (${FVP_TSP_RAM_LOCATION}, tsram)
+  FVP_TSP_RAM_LOCATION_ID := FVP_IN_TRUSTED_SRAM
+else ifeq (${FVP_TSP_RAM_LOCATION}, tdram)
+  FVP_TSP_RAM_LOCATION_ID := FVP_IN_TRUSTED_DRAM
+else
+  $(error "Unsupported FVP_TSP_RAM_LOCATION value")
+endif
+
+ifeq (${FVP_SHARED_DATA_LOCATION}, tsram)
+  ifeq (${FVP_TSP_RAM_LOCATION}, tdram)
+    $(error Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported)
+  endif
+endif
+
+# Process flags
+$(eval $(call add_define,FVP_SHARED_DATA_LOCATION_ID))
+$(eval $(call add_define,FVP_TSP_RAM_LOCATION_ID))
 
 PLAT_INCLUDES		:=	-Iplat/fvp/include/
 
-PLAT_BL_COMMON_SOURCES	:=	drivers/arm/pl011/pl011.c			\
-				drivers/arm/pl011/pl011_console.c		\
+PLAT_BL_COMMON_SOURCES	:=	drivers/arm/pl011/pl011_console.S		\
 				drivers/io/io_fip.c				\
 				drivers/io/io_memmap.c				\
 				drivers/io/io_semihosting.c			\
+				drivers/io/io_storage.c				\
 				lib/aarch64/xlat_tables.c			\
 				lib/semihosting/semihosting.c			\
 				lib/semihosting/aarch64/semihosting_call.S	\
@@ -57,6 +74,9 @@ PLAT_BL_COMMON_SOURCES	:=	drivers/arm/pl011/pl011.c			\
 				plat/fvp/fvp_io_storage.c
 
 BL1_SOURCES		+=	drivers/arm/cci400/cci400.c			\
+				lib/cpus/aarch64/aem_generic.S			\
+				lib/cpus/aarch64/cortex_a53.S			\
+				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/aarch64/platform_up_stack.S		\
 				plat/fvp/bl1_fvp_setup.c			\
 				plat/fvp/aarch64/fvp_common.c			\
@@ -73,6 +93,9 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				drivers/arm/gic/gic_v2.c			\
 				drivers/arm/gic/gic_v3.c			\
 				drivers/arm/tzc400/tzc400.c			\
+				lib/cpus/aarch64/aem_generic.S			\
+				lib/cpus/aarch64/cortex_a53.S			\
+				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/fvp/bl31_fvp_setup.c			\

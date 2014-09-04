@@ -230,10 +230,10 @@ uint64_t psci_smc_handler(uint32_t smc_fid,
 			SMC_RET1(handle, psci_version());
 
 		case PSCI_CPU_OFF:
-			SMC_RET1(handle, __psci_cpu_off());
+			SMC_RET1(handle, psci_cpu_off());
 
 		case PSCI_CPU_SUSPEND_AARCH32:
-			SMC_RET1(handle, __psci_cpu_suspend(x1, x2, x3));
+			SMC_RET1(handle, psci_cpu_suspend(x1, x2, x3));
 
 		case PSCI_CPU_ON_AARCH32:
 			SMC_RET1(handle, psci_cpu_on(x1, x2, x3));
@@ -250,6 +250,14 @@ uint64_t psci_smc_handler(uint32_t smc_fid,
 		case PSCI_MIG_INFO_UP_CPU_AARCH32:
 			SMC_RET1(handle, psci_migrate_info_up_cpu());
 
+		case PSCI_SYSTEM_OFF:
+			psci_system_off();
+			/* We should never return from psci_system_off() */
+
+		case PSCI_SYSTEM_RESET:
+			psci_system_reset();
+			/* We should never return from psci_system_reset() */
+
 		default:
 			break;
 		}
@@ -258,7 +266,7 @@ uint64_t psci_smc_handler(uint32_t smc_fid,
 
 		switch (smc_fid) {
 		case PSCI_CPU_SUSPEND_AARCH64:
-			SMC_RET1(handle, __psci_cpu_suspend(x1, x2, x3));
+			SMC_RET1(handle, psci_cpu_suspend(x1, x2, x3));
 
 		case PSCI_CPU_ON_AARCH64:
 			SMC_RET1(handle, psci_cpu_on(x1, x2, x3));

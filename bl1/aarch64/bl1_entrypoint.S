@@ -44,7 +44,7 @@
 func bl1_entrypoint
 	/* ---------------------------------------------
 	 * Set the CPU endianness before doing anything
-	 * that might involve memory reads or writes
+	 * that might involve memory reads or writes.
 	 * ---------------------------------------------
 	 */
 	mrs	x0, sctlr_el3
@@ -57,14 +57,16 @@ func bl1_entrypoint
 	 * reset e.g. cache, tlb invalidations etc.
 	 * ---------------------------------------------
 	 */
-	bl	cpu_reset_handler
+	bl	reset_handler
 
-	/* -------------------------------
-	 * Enable the instruction cache.
-	 * -------------------------------
+	/* ---------------------------------------------
+	 * Enable the instruction cache, stack pointer
+	 * and data access alignment checks
+	 * ---------------------------------------------
 	 */
+	mov	x1, #(SCTLR_I_BIT | SCTLR_A_BIT | SCTLR_SA_BIT)
 	mrs	x0, sctlr_el3
-	orr	x0, x0, #SCTLR_I_BIT
+	orr	x0, x0, x1
 	msr	sctlr_el3, x0
 	isb
 
@@ -74,6 +76,14 @@ func bl1_entrypoint
 	 */
 	adr	x0, bl1_exceptions
 	msr	vbar_el3, x0
+	isb
+
+	/* ---------------------------------------------
+	 * Enable the SError interrupt now that the
+	 * exception vectors have been setup.
+	 * ---------------------------------------------
+	 */
+	msr	daifclr, #DAIF_ABT_BIT
 
 	/* ---------------------------------------------------------------------
 	 * The initial state of the Architectural feature trap register
@@ -130,14 +140,16 @@ func bl1_entrypoint
 	ldr	x2, =__DATA_SIZE__
 	bl	memcpy16
 
-	/* ---------------------------------------------
-	 * Give ourselves a small coherent stack to
-	 * ease the pain of initializing the MMU and
-	 * CCI in assembler
-	 * ---------------------------------------------
+	/* --------------------------------------------
+	 * Allocate a stack whose memory will be marked
+	 * as Normal-IS-WBWA when the MMU is enabled.
+	 * There is no risk of reading stale stack
+	 * memory after enabling the MMU as only the
+	 * primary cpu is running at the moment.
+	 * --------------------------------------------
 	 */
 	mrs	x0, mpidr_el1
-	bl	platform_set_coherent_stack
+	bl	platform_set_stack
 
 	/* ---------------------------------------------
 	 * Architectural init. can be generic e.g.
@@ -149,14 +161,6 @@ func bl1_entrypoint
 	 */
 	bl	bl1_early_platform_setup
 	bl	bl1_plat_arch_setup
-
-	/* ---------------------------------------------
-	 * Give ourselves a stack allocated in Normal
-	 * -IS-WBWA memory
-	 * ---------------------------------------------
-	 */
-	mrs	x0, mpidr_el1
-	bl	platform_set_stack
 
 	/* --------------------------------------------------
 	 * Initialize platform and jump to our c-entry point

@@ -51,7 +51,7 @@ static int32_t (*bl32_init)(void);
  * Variable to indicate whether next image to execute after BL31 is BL33
  * (non-secure & default) or BL32 (secure).
  ******************************************************************************/
-static uint32_t next_image_type;
+static uint32_t next_image_type = NON_SECURE;
 
 /*******************************************************************************
  * Simple function to initialise all BL31 helper libraries.
@@ -71,26 +71,24 @@ void bl31_lib_init(void)
  ******************************************************************************/
 void bl31_main(void)
 {
+	NOTICE("BL3-1: %s\n", version_string);
+	NOTICE("BL3-1: %s\n", build_message);
+
 	/* Perform remaining generic architectural setup from EL3 */
 	bl31_arch_setup();
 
 	/* Perform platform setup in BL1 */
 	bl31_platform_setup();
 
-	tf_printf("BL31 %s\n", version_string);
-	tf_printf("BL31 %s\n", build_message);
-
 	/* Initialise helper libraries */
 	bl31_lib_init();
 
 	/* Initialize the runtime services e.g. psci */
+	INFO("BL3-1: Initializing runtime services\n");
 	runtime_svc_init();
 
 	/* Clean caches before re-entering normal world */
 	dcsw_op_all(DCCSW);
-
-	/* By default run the non-secure BL3-3 image next */
-	next_image_type = NON_SECURE;
 
 	/*
 	 * All the cold boot actions on the primary cpu are done. We now need to
@@ -105,9 +103,10 @@ void bl31_main(void)
 	/*
 	 * If SPD had registerd an init hook, invoke it.
 	 */
-	if (bl32_init)
+	if (bl32_init) {
+		INFO("BL3-1: Initializing BL3-2\n");
 		(*bl32_init)();
-
+	}
 	/*
 	 * We are ready to enter the next EL. Prepare entry into the image
 	 * corresponding to the desired security state after the next ERET.
@@ -125,7 +124,7 @@ void bl31_main(void)
  ******************************************************************************/
 void bl31_set_next_image_type(uint32_t security_state)
 {
-	assert(security_state == NON_SECURE || security_state == SECURE);
+	assert(sec_state_is_valid(security_state));
 	next_image_type = security_state;
 }
 
@@ -151,6 +150,11 @@ void bl31_prepare_next_image_entry(void)
 	assert(next_image_info);
 	assert(image_type == GET_SECURITY_STATE(next_image_info->h.attr));
 
+	INFO("BL3-1: Preparing for EL3 exit to %s world\n",
+		(image_type == SECURE) ? "secure" : "normal");
+	INFO("BL3-1: Next image address = 0x%llx\n",
+		(unsigned long long) next_image_info->pc);
+	INFO("BL3-1: Next image spsr = 0x%x\n", next_image_info->spsr);
 	cm_init_context(read_mpidr_el1(), next_image_info);
 	cm_prepare_el3_exit(image_type);
 }

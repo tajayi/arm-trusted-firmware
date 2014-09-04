@@ -30,7 +30,7 @@
 #include <arch_helpers.h>
 #include <assert.h>
 #include <platform.h>
-#include <tsp.h>
+#include "tsp_private.h"
 
 /*******************************************************************************
  * Data structure to keep track of per-cpu secure generic timer context across
@@ -68,9 +68,14 @@ void tsp_generic_timer_handler(void)
 	/* Ensure that the timer did assert the interrupt */
 	assert(get_cntp_ctl_istatus(read_cntps_ctl_el1()));
 
-	/* Disable the timer and reprogram it */
+	/*
+	 * Disable the timer and reprogram it. The barriers ensure that there is
+	 * no reordering of instructions around the reprogramming code.
+	 */
+	isb();
 	write_cntps_ctl_el1(0);
 	tsp_generic_timer_start();
+	isb();
 }
 
 /*******************************************************************************

@@ -52,10 +52,6 @@
 #define R_UART_TX  (0x30)
 #define R_UART_RX  (0x30)
 
-
-/* FIXME:  */
-#define CADENCE_UART_BAUDRATE (0)
-
 static inline void cadence_uart_tx(unsigned long base, unsigned int val)
 {
 	uint32_t status;

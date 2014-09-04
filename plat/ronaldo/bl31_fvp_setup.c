@@ -73,7 +73,8 @@ extern unsigned long __COHERENT_RAM_END__;
 
 
 #if RESET_TO_BL31
-static entry_point_info_t  next_image_ep_info;
+static entry_point_info_t bl32_image_ep_info;
+static entry_point_info_t bl33_image_ep_info;
 #else
 /*******************************************************************************
  * Reference to structure which holds the arguments that have been passed to
@@ -91,30 +92,16 @@ static bl31_params_t *bl2_to_bl31_params;
 entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
 {
 #if RESET_TO_BL31
+	assert(sec_state_is_valid(type));
 
-	assert(type <= NON_SECURE);
-	SET_PARAM_HEAD(&next_image_ep_info,
-				PARAM_EP,
-				VERSION_1,
-				0);
-
-	SET_SECURITY_STATE(next_image_ep_info.h.attr, type);
-
-	if (type == NON_SECURE) {
-		/*
-		 * Tell BL31 where the non-trusted software image
-		 * is located and the entry state information
-		 */
-		next_image_ep_info.pc = plat_get_ns_image_entrypoint();
-		next_image_ep_info.spsr = fvp_get_spsr_for_bl33_entry();
-	} else {
-		next_image_ep_info.pc = BL32_BASE;
-		next_image_ep_info.spsr = fvp_get_spsr_for_bl32_entry();
-	}
-
-	return &next_image_ep_info;
+	if (type == NON_SECURE)
+		return &bl33_image_ep_info;
+	else
+		return &bl32_image_ep_info;
 #else
 	entry_point_info_t *next_image_info;
+
+	assert(sec_state_is_valid(type));
 
 	next_image_info = (type == NON_SECURE) ?
 		bl2_to_bl31_params->bl33_ep_info :
@@ -143,7 +130,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 				void *plat_params_from_bl2)
 {
 	/* Initialize the console to provide early debug support */
-	console_init(RDO_UART0_BASE);
+	console_init(RDO_UART0_BASE, 0, CADENCE_UART_BAUDRATE);
 
 	/* Initialize the platform config for future decision making */
 	fvp_config_setup();
@@ -161,6 +148,27 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * present.
 	 */
 	fvp_security_setup();
+
+	/* Populate entry point information for BL3-2 and BL3-3 */
+	SET_PARAM_HEAD(&bl32_image_ep_info,
+				PARAM_EP,
+				VERSION_1,
+				0);
+	SET_SECURITY_STATE(bl32_image_ep_info.h.attr, SECURE);
+	bl32_image_ep_info.pc = BL32_BASE;
+	bl32_image_ep_info.spsr = fvp_get_spsr_for_bl32_entry();
+
+	SET_PARAM_HEAD(&bl33_image_ep_info,
+				PARAM_EP,
+				VERSION_1,
+				0);
+	/*
+	 * Tell BL31 where the non-trusted software image
+	 * is located and the entry state information
+	 */
+	bl33_image_ep_info.pc = plat_get_ns_image_entrypoint();
+	bl33_image_ep_info.spsr = fvp_get_spsr_for_bl33_entry();
+	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 #else
 	/* Check params passed from BL2 should not be NULL,
 	 * We are not checking plat_params_from_bl2 as NULL as we are not
@@ -198,8 +206,9 @@ void bl31_platform_setup(void)
  ******************************************************************************/
 void bl31_plat_arch_setup(void)
 {
+	fvp_cci_init();
 #if RESET_TO_BL31
-	fvp_cci_setup();
+	fvp_cci_enable();
 
 #endif
 	fvp_configure_mmu_el3(BL31_RO_BASE,

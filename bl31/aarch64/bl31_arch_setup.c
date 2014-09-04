@@ -42,29 +42,9 @@
  ******************************************************************************/
 void bl31_arch_setup(void)
 {
-	unsigned long tmp_reg = 0;
-	uint64_t counter_freq;
-
-	/* Enable alignment checks */
-	tmp_reg = read_sctlr_el3();
-	tmp_reg |= (SCTLR_A_BIT | SCTLR_SA_BIT);
-	write_sctlr_el3(tmp_reg);
-
-	/*
-	 * Route external abort and SError interrupts to EL3
-	 * other SCR bits will be configured before exiting to a lower exception
-	 * level
-	 */
-	tmp_reg = SCR_RES1_BITS | SCR_EA_BIT;
-	write_scr(tmp_reg);
-
-	/*
-	 * Enable SError and Debug exceptions
-	 */
-	enable_serror();
-	enable_debug_exceptions();
+	/* Set the RES1 bits in the SCR_EL3 */
+	write_scr_el3(SCR_RES1_BITS);
 
 	/* Program the counter frequency */
-	counter_freq = plat_get_syscnt_freq();
-	write_cntfrq_el0(counter_freq);
+	write_cntfrq_el0(plat_get_syscnt_freq());
 }

@@ -35,7 +35,12 @@
 
 static unsigned long uart_base;
 
-void console_init(unsigned long base_addr)
+/* MS Call from ASM - fix this */
+int console_core_init(unsigned long base_addr, unsigned int uart_clk, unsigned int baud_rate) {
+	return console_init(base_addr, uart_clk, baud_rate);
+}
+
+int console_init(unsigned long base_addr, unsigned int uart_clk, unsigned int baud_rate)
 {
 	/* TODO: assert() internally calls printf() and will result in
 	 * an infinite loop. This needs to be fixed with some kind of
@@ -48,8 +53,15 @@ void console_init(unsigned long base_addr)
 	uart_base = base_addr;
 
 	/* Baud Rate */
-	cadence_uart_setbaudrate(uart_base, CADENCE_UART_BAUDRATE);
+	cadence_uart_setbaudrate(uart_base, baud_rate);
 	/* FIXME: enable Tx/Rx clear interrupts etc.  */
+	return 0;
+}
+
+/* MS call from ASM - fix this */
+int console_core_putc(int c)
+{
+	return console_putc(c);
 }
 
 int console_putc(int c)

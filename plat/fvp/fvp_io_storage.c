@@ -35,12 +35,11 @@
 #include <io_memmap.h>
 #include <io_storage.h>
 #include <io_semihosting.h>
+#include <platform_def.h>
 #include <semihosting.h>	/* For FOPEN_MODE_... */
 #include <string.h>
-#include "fvp_def.h"
 
 /* IO devices */
-static io_plat_data_t io_data;
 static const io_dev_connector_t *sh_dev_con;
 static uintptr_t sh_dev_spec;
 static uintptr_t sh_init_params;
@@ -127,7 +126,7 @@ static int open_fip(const uintptr_t spec)
 	/* See if a Firmware Image Package is available */
 	result = io_dev_init(fip_dev_handle, (uintptr_t)FIP_IMAGE_NAME);
 	if (result == IO_SUCCESS) {
-		INFO("Using FIP\n");
+		VERBOSE("Using FIP\n");
 		/*TODO: Check image defined in spec is present in FIP. */
 	}
 	return result;
@@ -143,7 +142,7 @@ static int open_memmap(const uintptr_t spec)
 	if (result == IO_SUCCESS) {
 		result = io_open(memmap_dev_handle, spec, &local_image_handle);
 		if (result == IO_SUCCESS) {
-			/* INFO("Using Memmap IO\n"); */
+			VERBOSE("Using Memmap IO\n");
 			io_close(local_image_handle);
 		}
 	}
@@ -161,7 +160,7 @@ static int open_semihosting(const uintptr_t spec)
 	if (result == IO_SUCCESS) {
 		result = io_open(sh_dev_handle, spec, &local_image_handle);
 		if (result == IO_SUCCESS) {
-			INFO("Using Semi-hosting IO\n");
+			VERBOSE("Using Semi-hosting IO\n");
 			io_close(local_image_handle);
 		}
 	}
@@ -171,9 +170,6 @@ static int open_semihosting(const uintptr_t spec)
 void fvp_io_setup (void)
 {
 	int io_result = IO_FAIL;
-
-	/* Initialise the IO layer */
-	io_init(&io_data);
 
 	/* Register the IO devices on this platform */
 	io_result = register_io_dev_sh(&sh_dev_con);

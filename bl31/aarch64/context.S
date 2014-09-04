@@ -35,77 +35,6 @@
 /* -----------------------------------------------------
  * The following function strictly follows the AArch64
  * PCS to use x9-x17 (temporary caller-saved registers)
- * to save essential EL3 system register context. It
- * assumes that 'x0' is pointing to a 'el1_sys_regs'
- * structure where the register context will be saved.
- * -----------------------------------------------------
- */
-	.global el3_sysregs_context_save
-func el3_sysregs_context_save
-
-	mrs	x10, sctlr_el3
-	str	x10, [x0, #CTX_SCTLR_EL3]
-
-	mrs	x11, cptr_el3
-	stp	x11, xzr, [x0, #CTX_CPTR_EL3]
-
-	mrs	x13, cntfrq_el0
-	mrs	x14, mair_el3
-	stp	x13, x14, [x0, #CTX_CNTFRQ_EL0]
-
-	mrs	x15, tcr_el3
-	mrs	x16, ttbr0_el3
-	stp	x15, x16, [x0, #CTX_TCR_EL3]
-
-	mrs	x17, daif
-	and	x17, x17, #(DAIF_ABT_BIT | DAIF_DBG_BIT)
-	stp	x17, xzr, [x0, #CTX_DAIF_EL3]
-
-	ret
-
-/* -----------------------------------------------------
- * The following function strictly follows the AArch64
- * PCS to use x9-x17 (temporary caller-saved registers)
- * to restore essential EL3 system register context. It
- * assumes that 'x0' is pointing to a 'el1_sys_regs'
- * structure from where the register context will be
- * restored.
- *
- * Note that the sequence differs from that of the save
- * function as we want the MMU to be enabled last
- * -----------------------------------------------------
- */
-	.global el3_sysregs_context_restore
-func el3_sysregs_context_restore
-
-	ldp	x11, xzr, [x0, #CTX_CPTR_EL3]
-	msr	cptr_el3, x11
-
-	ldp	x13, x14, [x0, #CTX_CNTFRQ_EL0]
-	msr	cntfrq_el0, x13
-	msr	mair_el3, x14
-
-	ldp	x15, x16, [x0, #CTX_TCR_EL3]
-	msr	tcr_el3, x15
-	msr	ttbr0_el3, x16
-
-	ldp	x17, xzr, [x0, #CTX_DAIF_EL3]
-	mrs	x11, daif
-	orr	x17, x17, x11
-	msr	daif, x17
-
-	/* Make sure all the above changes are observed */
-	isb
-
-	ldr	x10, [x0, #CTX_SCTLR_EL3]
-	msr	sctlr_el3, x10
-	isb
-
-	ret
-
-/* -----------------------------------------------------
- * The following function strictly follows the AArch64
- * PCS to use x9-x17 (temporary caller-saved registers)
  * to save EL1 system register context. It assumes that
  * 'x0' is pointing to a 'el1_sys_regs' structure where
  * the register context will be saved.
@@ -280,7 +209,7 @@ func el1_sysregs_context_restore
 	ret
 
 /* -----------------------------------------------------
- * The followsing function follows the aapcs_64 strictly
+ * The following function follows the aapcs_64 strictly
  * to use x9-x17 (temporary caller-saved registers
  * according to AArch64 PCS) to save floating point
  * register context. It assumes that 'x0' is pointing to
