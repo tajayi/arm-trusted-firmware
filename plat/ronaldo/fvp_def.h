@@ -208,8 +208,9 @@
 #define RDO_UART0_BASE         0xFF000000
 #define RDO_UART1_BASE         0xFF001000
 
-#define CADENCE_UART_CLK_IN_HZ (0)
-#define CADENCE_UART_BAUDRATE (0)
+/* Must be non zero */
+#define CADENCE_UART_CLK_IN_HZ (4000000)
+#define CADENCE_UART_BAUDRATE (115200)
 
 /*******************************************************************************
  * TrustZone address space controller related constants

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014, Xilinx Inc.
+ * Written by Edgar E. Iglesias.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,11 +29,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
-#include <platform.h>
-#include <cadence/uart.h>
+#ifndef __CADENCE_UART_H__
+#define __CADENCE_UART_H__
 
-void cadence_uart_setbaudrate(unsigned long base_addr, unsigned int baudrate)
-{
-	/* FIXME: Set the freq.  */
-}
+/* This is very minimalistic and will only work in QEMU.  */
+
+/* CADENCE Registers */
+#define R_UART_CR    (0x00)
+#define R_UART_IER   (0x08)
+#define R_UART_IDR   (0x0C)
+#define R_UART_IMR   (0x10)
+#define R_UART_CISR  (0x14)
+#define R_UART_RTRIG (0x20)
+#define R_UART_SR    (0x2C)
+#define UART_SR_INTR_RTRIG     0x00000001
+#define UART_SR_INTR_REMPTY    0x00000002
+#define UART_SR_INTR_TEMPTY    0x00000008
+#define UART_SR_INTR_TFUL      0x00000010
+
+#define R_UART_TX  (0x30)
+#define R_UART_RX  (0x30)
+
+#endif
