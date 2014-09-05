@@ -4,6 +4,7 @@ cscope.*
 *.patch
 .project
 .cproject
+*~
 
 # Ignore build directory
 build/
