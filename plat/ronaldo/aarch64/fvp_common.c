@@ -118,6 +118,34 @@ const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
 DEFINE_CONFIGURE_MMU_EL(1)
 DEFINE_CONFIGURE_MMU_EL(3)
 
+#define ZYNQ_SILICON_VER_MASK   0xF000
+#define ZYNQ_SILICON_VER_SHIFT  12
+#define ZYNQMP_CSU_VERSION_SILICON      0x0
+#define ZYNQMP_CSU_VERSION_EP108        0x1
+#define ZYNQMP_CSU_VERSION_VELOCE       0x2
+#define ZYNQMP_CSU_VERSION_QEMU         0x3
+
+unsigned int zynqmp_get_silicon_freq(void)
+{
+	uint32_t ver;
+	ver = mmio_read_32(0xFFCA0044);
+	ver &= ZYNQ_SILICON_VER_MASK;
+	ver >>= ZYNQ_SILICON_VER_SHIFT;
+
+	switch (ver) {
+	case ZYNQMP_CSU_VERSION_VELOCE:
+		tf_printf("ATF running on VELOCE/RTL4.0\n");
+		return 400000;
+	case ZYNQMP_CSU_VERSION_EP108:
+		tf_printf("ATF running on EP108/RTL4.0\n");
+		return 4000000;
+	}
+
+	/* FIXME Qemu is exporting incorrect bit in this reg. 0 is allocated to real silicon */
+	tf_printf("ATF running on QEMU/RTL4.0\n");
+	return 50000000;
+}
+
 /*******************************************************************************
  * A single boot loader stack is expected to work on both the Foundation FVP
  * models and the two flavours of the Base FVP models (AEMv8 & Cortex). The
@@ -127,10 +155,23 @@ DEFINE_CONFIGURE_MMU_EL(3)
  ******************************************************************************/
 int fvp_config_setup(void)
 {
+	uint32_t val;
+
 	plat_config.gicd_base = RDO_GICD_BASE;
 	plat_config.gicc_base = RDO_GICC_BASE;
 	plat_config.gich_base = RDO_GICH_BASE;
 	plat_config.gicv_base = RDO_GICV_BASE;
+
+	/* Global timer init */
+	/* Program time stamp reference clk, CRL_APB_TIMESTAMP_REF_CTRL */
+	val = mmio_read_32(0xFF5E0128);
+	val |= 0x1000000;
+	mmio_write_32(0xFF5E0128, val);
+
+	/* Program freq register in System counter  and enable system counter. */
+	mmio_write_32(0xFF250020, zynqmp_get_silicon_freq());
+	mmio_write_32(0xFF250000, 0x1);
+
 	return 0;
 }
 
@@ -143,8 +184,9 @@ uint64_t plat_get_syscnt_freq(void)
 {
 	uint64_t counter_base_frequency;
 
+
 	/* FIXME: Read the frequency from Frequency modes table */
-	counter_base_frequency = 0x1000000;
+	counter_base_frequency = zynqmp_get_silicon_freq();
 
 	return counter_base_frequency;
 }
