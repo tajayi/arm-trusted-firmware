@@ -113,6 +113,14 @@ psci_aff_common_finish_entry:
 	mrs	x0, mpidr_el1
 	bl	platform_set_stack
 
+#if RESET_TO_BL31
+	/*
+	 * Call the CPU reset handlers to get this core
+	 * into SMP mode.
+	 */
+	bl      reset_handler
+#endif
+
 	/* --------------------------------------------
 	 * Enable the MMU with the DCache disabled. It
 	 * is safe to use stacks allocated in normal
