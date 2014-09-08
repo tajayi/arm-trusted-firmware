@@ -177,7 +177,7 @@ int fvp_affinst_on(unsigned long mpidr,
 	fvp_program_mailbox(mpidr, sec_entrypoint);
 
 	mmio_write_32(R_RVBAR_L_0 + mpidr * 8, sec_entrypoint);
-	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, 0);
+	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, sec_entrypoint >> 32);
 	dsb();
 
 	fvp_pwrc_write_pponr(mpidr);
