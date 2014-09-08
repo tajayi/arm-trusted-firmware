@@ -128,7 +128,6 @@ int get_power_on_target_afflvl()
 	int afflvl;
 
 #if DEBUG
-	unsigned int state;
 	aff_map_node_t *node;
 
 	/* Retrieve our node from the topology tree */
@@ -140,8 +139,15 @@ int get_power_on_target_afflvl()
 	 * Sanity check the state of the cpu. It should be either suspend or "on
 	 * pending"
 	 */
-	state = psci_get_state(node);
-	assert(state == PSCI_STATE_SUSPEND || state == PSCI_STATE_ON_PENDING);
+#if 0
+	{
+		unsigned int state;
+		/* FIXME: Revisit this. We cannot check the state of the CPU without
+		 * taking the afflvl_locks.  */
+		state = psci_get_state(node);
+		assert(state == PSCI_STATE_SUSPEND || state == PSCI_STATE_ON_PENDING);
+	}
+#endif
 #endif
 
 	/*
