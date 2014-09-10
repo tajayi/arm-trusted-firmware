@@ -125,25 +125,46 @@ DEFINE_CONFIGURE_MMU_EL(3)
 #define ZYNQMP_CSU_VERSION_VELOCE       0x2
 #define ZYNQMP_CSU_VERSION_QEMU         0x3
 
-unsigned int zynqmp_get_silicon_freq(void)
+static unsigned int zynqmp_get_silicon_ver(void)
 {
 	uint32_t ver;
+
 	ver = mmio_read_32(0xFFCA0044);
 	ver &= ZYNQ_SILICON_VER_MASK;
 	ver >>= ZYNQ_SILICON_VER_SHIFT;
 
+	return ver;
+}
+
+static unsigned int zynqmp_get_silicon_freq(void)
+{
+	uint32_t ver = zynqmp_get_silicon_ver();
+
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		tf_printf("ATF running on VELOCE/RTL4.0\n");
 		return 400000;
 	case ZYNQMP_CSU_VERSION_EP108:
-		tf_printf("ATF running on EP108/RTL4.0\n");
 		return 4000000;
 	}
 
 	/* FIXME Qemu is exporting incorrect bit in this reg. 0 is allocated to real silicon */
-	tf_printf("ATF running on QEMU/RTL4.0\n");
 	return 50000000;
+}
+
+static void zynqmp_print_platform_name(void)
+{
+	uint32_t ver = zynqmp_get_silicon_ver();
+
+	switch (ver) {
+	case ZYNQMP_CSU_VERSION_VELOCE:
+		INFO("BL3-1: ATF running on VELOCE/RTL4.0\n");
+		return;
+	case ZYNQMP_CSU_VERSION_EP108:
+		INFO("BL3-1: ATF running on EP108/RTL4.0\n");
+		return;
+	}
+
+	INFO("BL3-1: ATF running on QEMU/RTL4.0\n");
 }
 
 /*******************************************************************************
@@ -161,6 +182,8 @@ int fvp_config_setup(void)
 	plat_config.gicc_base = RDO_GICC_BASE;
 	plat_config.gich_base = RDO_GICH_BASE;
 	plat_config.gicv_base = RDO_GICV_BASE;
+
+	zynqmp_print_platform_name();
 
 	/* Global timer init */
 	/* Program time stamp reference clk, CRL_APB_TIMESTAMP_REF_CTRL */
