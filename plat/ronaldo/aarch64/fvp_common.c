@@ -142,7 +142,7 @@ static unsigned int zynqmp_get_silicon_freq(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		return 400000;
+		return 20000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 4000000;
 	}
