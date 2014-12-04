@@ -157,14 +157,14 @@ static void zynqmp_print_platform_name(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		INFO("BL3-1: ATF running on VELOCE/RTL4.0\n");
+		NOTICE("BL3-1: ATF running on VELOCE/RTL4.0\n");
 		return;
 	case ZYNQMP_CSU_VERSION_EP108:
-		INFO("BL3-1: ATF running on EP108/RTL4.0\n");
+		NOTICE("BL3-1: ATF running on EP108/RTL4.0\n");
 		return;
 	}
 
-	INFO("BL3-1: ATF running on QEMU/RTL4.0\n");
+	NOTICE("BL3-1: ATF running on QEMU/RTL4.0\n");
 }
 
 /*******************************************************************************
