@@ -125,6 +125,9 @@ DEFINE_CONFIGURE_MMU_EL(3)
 #define ZYNQMP_CSU_VERSION_VELOCE       0x2
 #define ZYNQMP_CSU_VERSION_QEMU         0x3
 
+#define ZYNQ_RTL_VER_MASK   0xFF0
+#define ZYNQ_RTL_VER_SHIFT  4
+
 static unsigned int zynqmp_get_silicon_ver(void)
 {
 	uint32_t ver;
@@ -132,6 +135,17 @@ static unsigned int zynqmp_get_silicon_ver(void)
 	ver = mmio_read_32(0xFFCA0044);
 	ver &= ZYNQ_SILICON_VER_MASK;
 	ver >>= ZYNQ_SILICON_VER_SHIFT;
+
+	return ver;
+}
+
+static uint32_t zynqmp_get_rtl_ver(void)
+{
+	uint32_t ver;
+
+	ver = mmio_read_32(0xFFCA0044);
+	ver &= ZYNQ_RTL_VER_MASK;
+	ver >>= ZYNQ_RTL_VER_SHIFT;
 
 	return ver;
 }
@@ -154,17 +168,18 @@ static unsigned int zynqmp_get_silicon_freq(void)
 static void zynqmp_print_platform_name(void)
 {
 	uint32_t ver = zynqmp_get_silicon_ver();
+	uint32_t rtl = zynqmp_get_rtl_ver();
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		NOTICE("BL3-1: ATF running on VELOCE/RTL4.0\n");
+		NOTICE("BL3-1: ATF running on VELOCE/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
 		return;
 	case ZYNQMP_CSU_VERSION_EP108:
-		NOTICE("BL3-1: ATF running on EP108/RTL4.0\n");
+		NOTICE("BL3-1: ATF running on EP108/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
 		return;
 	}
 
-	NOTICE("BL3-1: ATF running on QEMU/RTL4.0\n");
+	NOTICE("BL3-1: ATF running on QEMU/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
 }
 
 /*******************************************************************************
