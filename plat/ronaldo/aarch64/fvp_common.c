@@ -192,8 +192,8 @@ int fvp_config_setup(void)
 	mmio_write_32(0xFF5E0128, val);
 
 	/* Program freq register in System counter  and enable system counter. */
-	mmio_write_32(0xFF250020, zynqmp_get_silicon_freq());
-	mmio_write_32(0xFF250000, 0x1);
+	mmio_write_32(0xFF260020, zynqmp_get_silicon_freq());
+	mmio_write_32(0xFF260000, 0x1);
 
 	return 0;
 }
