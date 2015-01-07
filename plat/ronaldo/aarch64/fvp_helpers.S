@@ -187,9 +187,6 @@ func platform_is_primary_cpu
 	cset	x0, eq
 	ret
 
-	/* Define a crash console for the plaform */
-#define FVP_CRASH_CONSOLE_BASE		RDO_UART0_BASE
-
 	/* ---------------------------------------------
 	 * int plat_crash_console_init(void)
 	 * Function to initialize the crash console
@@ -198,7 +195,7 @@ func platform_is_primary_cpu
 	 * ---------------------------------------------
 	 */
 func plat_crash_console_init
-	mov_imm	x0, FVP_CRASH_CONSOLE_BASE
+	mov_imm	x0, RDO_UART0_BASE
 	mov_imm	x1, CADENCE_UART_CLK_IN_HZ
 	mov_imm	x2, CADENCE_UART_BAUDRATE
 	b	console_core_init
@@ -211,5 +208,5 @@ func plat_crash_console_init
 	 * ---------------------------------------------
 	 */
 func plat_crash_console_putc
-	mov_imm	x1, FVP_CRASH_CONSOLE_BASE
+	mov_imm	x1, RDO_UART0_BASE
 	b	console_core_putc
