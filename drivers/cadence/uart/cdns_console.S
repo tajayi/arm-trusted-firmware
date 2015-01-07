@@ -76,7 +76,7 @@ func console_init
 	 *     w1 - Uart clock in Hz
 	 *     w2 - Baud rate
 	 * Out: return 1 on success
-	 * Clobber list : x1, x2
+	 * Clobber list : x1, x2, x3
 	 * -----------------------------------------------
 	 */
 func console_core_init
@@ -85,27 +85,17 @@ func console_core_init
 	/* Check baud rate and uart clock for sanity */
 	cbz	w1, init_fail
 	cbz	w2, init_fail
-#if 0
-	/* Program the baudrate */
-	/* Divisor =  (Uart clock * 4) / baudrate */
-	lsl	w1, w1, #2
-	udiv	w2, w1, w2
-	/* IBRD = Divisor >> 6 */
-	lsr	w1, w2, #6
-	/* Write the IBRD */
-	str	w1, [x0, #UARTIBRD]
-	/* FBRD = Divisor & 0x3F */
-	and	w1, w2, #0x3f
-	/* Write the FBRD */
-	str	w1, [x0, #UARTFBRD]
-	mov	w1, #PL011_LINE_CONTROL
-	str	w1, [x0, #UARTLCR_H]
-	/* Clear any pending errors */
-	str	wzr, [x0, #UARTECR]
-	/* Enable tx, rx, and uart overall */
-	mov	w1, #(PL011_UARTCR_RXE | PL011_UARTCR_TXE | PL011_UARTCR_UARTEN)
-	str	w1, [x0, #UARTCR]
-#endif
+
+	/* RX/TX enabled & reset */
+	mov	w3, #(R_UART_CR_TX_EN | R_UART_CR_RX_EN | R_UART_CR_TXRST | R_UART_CR_RXRST)
+	str	w3, [x0, #R_UART_CR]
+
+	/* 8 bit, no parity */
+	mov	w3, #(R_UART_MR_PARITY_NONE)
+	str	w3, [x0, #R_UART_MR]
+
+	/* Setup baudrate */
+	b	cadence_serial_setbrg
 	mov	w0, #1
 init_fail:
 	ret

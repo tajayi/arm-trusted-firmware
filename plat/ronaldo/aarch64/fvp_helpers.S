@@ -195,8 +195,9 @@ func platform_is_primary_cpu
 	 * ---------------------------------------------
 	 */
 func plat_crash_console_init
+	b	zynqmp_get_uart_clk
+	mov	x1, x0
 	mov_imm	x0, RDO_UART0_BASE
-	mov_imm	x1, CADENCE_UART_CLK_IN_HZ
 	mov_imm	x2, CADENCE_UART_BAUDRATE
 	b	console_core_init
 

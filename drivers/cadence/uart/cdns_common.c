@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014, Xilinx Inc.
- * Written by Edgar E. Iglesias.
+ * Copyright (c) 2015, Xilinx Inc.
+ * Written by Michal Simek.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,39 +29,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __CADENCE_UART_H__
-#define __CADENCE_UART_H__
+#include <mmio.h>
+#include <stddef.h>
+#include <cadence/cdns_uart.h>
 
-/* This is very minimalistic and will only work in QEMU.  */
+void cadence_serial_setbrg(uint32_t base, uint32_t clock, uint32_t baudrate)
+{
+	/* Calculation results. */
+	uint32_t calc_bauderror, bdiv, bgen;
+	uint32_t calc_baud = 0;
+	uint32_t baud = baudrate;
 
-/* CADENCE Registers */
-#define R_UART_CR	(0x00)
-#define R_UART_CR_TX_EN	0x00000010 /* TX enabled */
-#define R_UART_CR_RX_EN	0x00000004 /* RX enabled */
-#define R_UART_CR_TXRST	0x00000002 /* TX logic reset */
-#define R_UART_CR_RXRST	0x00000001 /* RX logic reset */
+	/* Covering case where input clock is so slow */
+	if (clock < 1000000 && baudrate > 9600) {
+		baud = 9600;
+	}
 
-#define R_UART_MR	(0x04)
-#define R_UART_MR_PARITY_NONE	0x00000020  /* No parity mode */
+	/*                master clock
+	 * Baud rate = ------------------
+	 *              bgen * (bdiv + 1)
+	 *
+	 * Find acceptable values for baud generation.
+	 */
+	for (bdiv = 4; bdiv < 255; bdiv++) {
+		bgen = clock / (baud * (bdiv + 1));
+		if (bgen < 2 || bgen > 65535)
+			continue;
 
-#define R_UART_IER	(0x08)
-#define R_UART_IDR	(0x0C)
-#define R_UART_IMR	(0x10)
-#define R_UART_CISR	(0x14)
-#define R_UART_BRG	(0x18)
-#define R_UART_RTRIG	(0x20)
-#define R_UART_SR	(0x2C)
-#define UART_SR_INTR_RTRIG	0x00000001
-#define UART_SR_INTR_REMPTY	0x00000002
-#define UART_SR_INTR_TEMPTY	0x00000008
-#define UART_SR_INTR_TFUL	0x00000010
+		calc_baud = clock / (bgen * (bdiv + 1));
 
-#define R_UART_TX	(0x30)
-#define R_UART_RX	(0x30)
-#define R_UART_BRD	(0x34)
+		/*
+		 * Use first calculated baudrate with
+		 * an acceptable (<3%) error
+		 */
+		if (baud > calc_baud)
+			calc_bauderror = baud - calc_baud;
+		else
+			calc_bauderror = calc_baud - baud;
+		if (((calc_bauderror * 100) / baud) < 3)
+			break;
+	}
 
-#ifndef __ASSEMBLY__
-void cadence_serial_setbrg(uint32_t base, uint32_t clock, uint32_t baudrate);
-#endif
-
-#endif
+	mmio_write_32(base + R_UART_BRD, bdiv);
+	mmio_write_32(base + R_UART_BRG, bgen);
+}

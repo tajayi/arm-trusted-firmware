@@ -97,5 +97,7 @@ uint32_t fvp_get_spsr_for_bl32_entry(void);
 /* Gets the SPSR for BL33 entry */
 uint32_t fvp_get_spsr_for_bl33_entry(void);
 
+/* ZynqMP specific functions */
+uint32_t zynqmp_get_uart_clk(void);
 
 #endif /* __FVP_PRIVATE_H__ */

@@ -150,6 +150,20 @@ static uint32_t zynqmp_get_rtl_ver(void)
 	return ver;
 }
 
+uint32_t zynqmp_get_uart_clk(void)
+{
+	uint32_t ver = zynqmp_get_silicon_ver();
+
+	switch (ver) {
+	case ZYNQMP_CSU_VERSION_VELOCE:
+		return  96000;
+	case ZYNQMP_CSU_VERSION_EP108:
+		return 25000000;
+	}
+
+	return 133000000;
+}
+
 static unsigned int zynqmp_get_silicon_freq(void)
 {
 	uint32_t ver = zynqmp_get_silicon_ver();

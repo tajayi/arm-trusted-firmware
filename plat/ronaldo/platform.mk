@@ -46,6 +46,7 @@ $(eval $(call add_define,TSP_RAM_LOCATION_ID))
 PLAT_INCLUDES		:=	-Iplat/ronaldo/include/
 
 PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
+				drivers/cadence/uart/cdns_common.c		\
 				lib/aarch64/xlat_tables.c			\
 				plat/common/aarch64/plat_common.c		\
 

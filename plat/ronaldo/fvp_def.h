@@ -209,7 +209,6 @@
 #define RDO_UART1_BASE         0xFF001000
 
 /* Must be non zero */
-#define CADENCE_UART_CLK_IN_HZ (4000000)
 #define CADENCE_UART_BAUDRATE (115200)
 
 /*******************************************************************************
