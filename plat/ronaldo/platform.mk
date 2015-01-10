@@ -43,7 +43,9 @@ endif
 # Process TSP_RAM_LOCATION_ID flag
 $(eval $(call add_define,TSP_RAM_LOCATION_ID))
 
-PLAT_INCLUDES		:=	-Iplat/ronaldo/include/
+PLAT_INCLUDES		:=	-Iplat/ronaldo/include/				\
+				-Iplat/ronaldo/pm_service/			\
+				-Iplat/ronaldo/pm_service/include
 
 PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				drivers/cadence/uart/cdns_common.c		\
@@ -76,9 +78,13 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/ronaldo/fvp_pm.c				\
 				plat/ronaldo/fvp_security.c			\
 				plat/ronaldo/fvp_topology.c			\
+				plat/ronaldo/sip_svc_setup.c			\
 				plat/ronaldo/aarch64/fvp_helpers.S		\
 				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/ronaldo/drivers/pwrc/fvp_pwrc.c
+				plat/ronaldo/drivers/pwrc/fvp_pwrc.c		\
+				plat/ronaldo/pm_service/pm_svc_main.c		\
+				plat/ronaldo/pm_service/pm_api_sys.c		\
+				plat/ronaldo/pm_service/pm_client.c
 
 # Flag used by the platform port to determine the version of ARM GIC
 # architecture to use for interrupt management in EL3.
