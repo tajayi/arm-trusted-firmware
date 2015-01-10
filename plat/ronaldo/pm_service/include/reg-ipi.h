@@ -1,0 +1,3381 @@
+/**
+ * (c) 2013 Xilinx Inc.
+ * XREGDB v0.76
+ * XREGCHDR v0.15
+ *
+ * Generated on: 2014-09-02
+ *
+ * @file: ipi.h
+ *
+ *
+ * This file contains confidential and proprietary information
+ * of Xilinx, Inc. and is protected under U.S. and
+ * international copyright and other intellectual property
+ * laws.
+ *
+ * DISCLAIMER
+ * This disclaimer is not a license and does not grant any
+ * rights to the materials distributed herewith. Except as
+ * otherwise provided in a valid license issued to you by
+ * Xilinx, and to the maximum extent permitted by applicable
+ * law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
+ * WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
+ * AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
+ * BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
+ * INFRINGEMENT, OR FITNESS FOR ANY PARTICULAR PURPOSE; and
+ * (2) Xilinx shall not be liable (whether in contract or tort,
+ * including negligence, or under any other theory of
+ * liability) for any loss or damage of any kind or nature
+ * related to, arising under or in connection with these
+ * materials, including for any direct, or any indirect,
+ * special, incidental, or consequential loss or damage
+ * (including loss of data, profits, goodwill, or any type of
+ * loss or damage suffered as a result of any action brought
+ * by a third party) even if such damage or loss was
+ * reasonably foreseeable or Xilinx had been advised of the
+ * possibility of the same.
+ *
+ * CRITICAL APPLICATIONS
+ * Xilinx products are not designed or intended to be fail-
+ * safe, or for use in any application requiring fail-safe
+ * performance, such as life-support or safety devices or
+ * systems, Class III medical devices, nuclear facilities,
+ * applications related to the deployment of airbags, or any
+ * other applications that could lead to death, personal
+ * injury, or severe property or environmental damage
+ * (individually and collectively, "Critical
+ * Applications"). Customer assumes the sole risk and
+ * liability of any use of Xilinx products in Critical
+ * Applications, subject only to applicable laws and
+ * regulations governing limitations on product liability.
+ *
+ * THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
+ * PART OF THIS FILE AT ALL TIMES.
+ *
+ * Naming Convention: <MODULE>_<REGISTER>[_<FIELD>[_<DESC>]]
+ *     <MODULE>       Module name (e.g. can or usb)
+ *     <REGISTER>     Register within the current module
+ *     [_<FIELD>]     Bit field within a register
+ *     [_<DESC>]      Type of bit field define:
+ *         SHIFT:     Least significant bit for the field
+ *         WIDTH:     Size of field in bites
+ *         MASK:      A masking over a range of bits or a bit to
+ *                    be used for setting or clearing
+ *
+ */
+
+#ifndef _IPI_H_
+#define _IPI_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * IPI Base Address
+ */
+#define IPI_BASEADDR      (0)
+
+/**
+ * Register: IPI_APU_TRIG
+ */
+#define IPI_APU_TRIG    ( ( IPI_BASEADDR ) + 0X00000000 )
+
+#define IPI_APU_TRIG_PL_3_SHIFT   27
+#define IPI_APU_TRIG_PL_3_WIDTH   1
+#define IPI_APU_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_APU_TRIG_PL_2_SHIFT   26
+#define IPI_APU_TRIG_PL_2_WIDTH   1
+#define IPI_APU_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_APU_TRIG_PL_1_SHIFT   25
+#define IPI_APU_TRIG_PL_1_WIDTH   1
+#define IPI_APU_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_APU_TRIG_PL_0_SHIFT   24
+#define IPI_APU_TRIG_PL_0_WIDTH   1
+#define IPI_APU_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_APU_TRIG_PMU_3_SHIFT   19
+#define IPI_APU_TRIG_PMU_3_WIDTH   1
+#define IPI_APU_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_APU_TRIG_PMU_2_SHIFT   18
+#define IPI_APU_TRIG_PMU_2_WIDTH   1
+#define IPI_APU_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_APU_TRIG_PMU_1_SHIFT   17
+#define IPI_APU_TRIG_PMU_1_WIDTH   1
+#define IPI_APU_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_APU_TRIG_PMU_0_SHIFT   16
+#define IPI_APU_TRIG_PMU_0_WIDTH   1
+#define IPI_APU_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_APU_TRIG_RPU_1_SHIFT   9
+#define IPI_APU_TRIG_RPU_1_WIDTH   1
+#define IPI_APU_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_APU_TRIG_RPU_0_SHIFT   8
+#define IPI_APU_TRIG_RPU_0_WIDTH   1
+#define IPI_APU_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_APU_TRIG_APU_SHIFT   0
+#define IPI_APU_TRIG_APU_WIDTH   1
+#define IPI_APU_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_APU_OBS
+ */
+#define IPI_APU_OBS    ( ( IPI_BASEADDR ) + 0X00000004 )
+
+#define IPI_APU_OBS_PL_3_SHIFT   27
+#define IPI_APU_OBS_PL_3_WIDTH   1
+#define IPI_APU_OBS_PL_3_MASK    0X08000000
+
+#define IPI_APU_OBS_PL_2_SHIFT   26
+#define IPI_APU_OBS_PL_2_WIDTH   1
+#define IPI_APU_OBS_PL_2_MASK    0X04000000
+
+#define IPI_APU_OBS_PL_1_SHIFT   25
+#define IPI_APU_OBS_PL_1_WIDTH   1
+#define IPI_APU_OBS_PL_1_MASK    0X02000000
+
+#define IPI_APU_OBS_PL_0_SHIFT   24
+#define IPI_APU_OBS_PL_0_WIDTH   1
+#define IPI_APU_OBS_PL_0_MASK    0X01000000
+
+#define IPI_APU_OBS_PMU_3_SHIFT   19
+#define IPI_APU_OBS_PMU_3_WIDTH   1
+#define IPI_APU_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_APU_OBS_PMU_2_SHIFT   18
+#define IPI_APU_OBS_PMU_2_WIDTH   1
+#define IPI_APU_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_APU_OBS_PMU_1_SHIFT   17
+#define IPI_APU_OBS_PMU_1_WIDTH   1
+#define IPI_APU_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_APU_OBS_PMU_0_SHIFT   16
+#define IPI_APU_OBS_PMU_0_WIDTH   1
+#define IPI_APU_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_APU_OBS_RPU_1_SHIFT   9
+#define IPI_APU_OBS_RPU_1_WIDTH   1
+#define IPI_APU_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_APU_OBS_RPU_0_SHIFT   8
+#define IPI_APU_OBS_RPU_0_WIDTH   1
+#define IPI_APU_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_APU_OBS_APU_SHIFT   0
+#define IPI_APU_OBS_APU_WIDTH   1
+#define IPI_APU_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_APU_ISR
+ */
+#define IPI_APU_ISR    ( ( IPI_BASEADDR ) + 0X00000010 )
+
+#define IPI_APU_ISR_PL_3_SHIFT   27
+#define IPI_APU_ISR_PL_3_WIDTH   1
+#define IPI_APU_ISR_PL_3_MASK    0X08000000
+
+#define IPI_APU_ISR_PL_2_SHIFT   26
+#define IPI_APU_ISR_PL_2_WIDTH   1
+#define IPI_APU_ISR_PL_2_MASK    0X04000000
+
+#define IPI_APU_ISR_PL_1_SHIFT   25
+#define IPI_APU_ISR_PL_1_WIDTH   1
+#define IPI_APU_ISR_PL_1_MASK    0X02000000
+
+#define IPI_APU_ISR_PL_0_SHIFT   24
+#define IPI_APU_ISR_PL_0_WIDTH   1
+#define IPI_APU_ISR_PL_0_MASK    0X01000000
+
+#define IPI_APU_ISR_PMU_3_SHIFT   19
+#define IPI_APU_ISR_PMU_3_WIDTH   1
+#define IPI_APU_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_APU_ISR_PMU_2_SHIFT   18
+#define IPI_APU_ISR_PMU_2_WIDTH   1
+#define IPI_APU_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_APU_ISR_PMU_1_SHIFT   17
+#define IPI_APU_ISR_PMU_1_WIDTH   1
+#define IPI_APU_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_APU_ISR_PMU_0_SHIFT   16
+#define IPI_APU_ISR_PMU_0_WIDTH   1
+#define IPI_APU_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_APU_ISR_RPU_1_SHIFT   9
+#define IPI_APU_ISR_RPU_1_WIDTH   1
+#define IPI_APU_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_APU_ISR_RPU_0_SHIFT   8
+#define IPI_APU_ISR_RPU_0_WIDTH   1
+#define IPI_APU_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_APU_ISR_APU_SHIFT   0
+#define IPI_APU_ISR_APU_WIDTH   1
+#define IPI_APU_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_APU_IMR
+ */
+#define IPI_APU_IMR    ( ( IPI_BASEADDR ) + 0X00000014 )
+
+#define IPI_APU_IMR_PL_3_SHIFT   27
+#define IPI_APU_IMR_PL_3_WIDTH   1
+#define IPI_APU_IMR_PL_3_MASK    0X08000000
+
+#define IPI_APU_IMR_PL_2_SHIFT   26
+#define IPI_APU_IMR_PL_2_WIDTH   1
+#define IPI_APU_IMR_PL_2_MASK    0X04000000
+
+#define IPI_APU_IMR_PL_1_SHIFT   25
+#define IPI_APU_IMR_PL_1_WIDTH   1
+#define IPI_APU_IMR_PL_1_MASK    0X02000000
+
+#define IPI_APU_IMR_PL_0_SHIFT   24
+#define IPI_APU_IMR_PL_0_WIDTH   1
+#define IPI_APU_IMR_PL_0_MASK    0X01000000
+
+#define IPI_APU_IMR_PMU_3_SHIFT   19
+#define IPI_APU_IMR_PMU_3_WIDTH   1
+#define IPI_APU_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_APU_IMR_PMU_2_SHIFT   18
+#define IPI_APU_IMR_PMU_2_WIDTH   1
+#define IPI_APU_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_APU_IMR_PMU_1_SHIFT   17
+#define IPI_APU_IMR_PMU_1_WIDTH   1
+#define IPI_APU_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_APU_IMR_PMU_0_SHIFT   16
+#define IPI_APU_IMR_PMU_0_WIDTH   1
+#define IPI_APU_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_APU_IMR_RPU_1_SHIFT   9
+#define IPI_APU_IMR_RPU_1_WIDTH   1
+#define IPI_APU_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_APU_IMR_RPU_0_SHIFT   8
+#define IPI_APU_IMR_RPU_0_WIDTH   1
+#define IPI_APU_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_APU_IMR_APU_SHIFT   0
+#define IPI_APU_IMR_APU_WIDTH   1
+#define IPI_APU_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_APU_IER
+ */
+#define IPI_APU_IER    ( ( IPI_BASEADDR ) + 0X00000018 )
+
+#define IPI_APU_IER_PL_3_SHIFT   27
+#define IPI_APU_IER_PL_3_WIDTH   1
+#define IPI_APU_IER_PL_3_MASK    0X08000000
+
+#define IPI_APU_IER_PL_2_SHIFT   26
+#define IPI_APU_IER_PL_2_WIDTH   1
+#define IPI_APU_IER_PL_2_MASK    0X04000000
+
+#define IPI_APU_IER_PL_1_SHIFT   25
+#define IPI_APU_IER_PL_1_WIDTH   1
+#define IPI_APU_IER_PL_1_MASK    0X02000000
+
+#define IPI_APU_IER_PL_0_SHIFT   24
+#define IPI_APU_IER_PL_0_WIDTH   1
+#define IPI_APU_IER_PL_0_MASK    0X01000000
+
+#define IPI_APU_IER_PMU_3_SHIFT   19
+#define IPI_APU_IER_PMU_3_WIDTH   1
+#define IPI_APU_IER_PMU_3_MASK    0X00080000
+
+#define IPI_APU_IER_PMU_2_SHIFT   18
+#define IPI_APU_IER_PMU_2_WIDTH   1
+#define IPI_APU_IER_PMU_2_MASK    0X00040000
+
+#define IPI_APU_IER_PMU_1_SHIFT   17
+#define IPI_APU_IER_PMU_1_WIDTH   1
+#define IPI_APU_IER_PMU_1_MASK    0X00020000
+
+#define IPI_APU_IER_PMU_0_SHIFT   16
+#define IPI_APU_IER_PMU_0_WIDTH   1
+#define IPI_APU_IER_PMU_0_MASK    0X00010000
+
+#define IPI_APU_IER_RPU_1_SHIFT   9
+#define IPI_APU_IER_RPU_1_WIDTH   1
+#define IPI_APU_IER_RPU_1_MASK    0X00000200
+
+#define IPI_APU_IER_RPU_0_SHIFT   8
+#define IPI_APU_IER_RPU_0_WIDTH   1
+#define IPI_APU_IER_RPU_0_MASK    0X00000100
+
+#define IPI_APU_IER_APU_SHIFT   0
+#define IPI_APU_IER_APU_WIDTH   1
+#define IPI_APU_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_APU_IDR
+ */
+#define IPI_APU_IDR    ( ( IPI_BASEADDR ) + 0X0000001C )
+
+#define IPI_APU_IDR_PL_3_SHIFT   27
+#define IPI_APU_IDR_PL_3_WIDTH   1
+#define IPI_APU_IDR_PL_3_MASK    0X08000000
+
+#define IPI_APU_IDR_PL_2_SHIFT   26
+#define IPI_APU_IDR_PL_2_WIDTH   1
+#define IPI_APU_IDR_PL_2_MASK    0X04000000
+
+#define IPI_APU_IDR_PL_1_SHIFT   25
+#define IPI_APU_IDR_PL_1_WIDTH   1
+#define IPI_APU_IDR_PL_1_MASK    0X02000000
+
+#define IPI_APU_IDR_PL_0_SHIFT   24
+#define IPI_APU_IDR_PL_0_WIDTH   1
+#define IPI_APU_IDR_PL_0_MASK    0X01000000
+
+#define IPI_APU_IDR_PMU_3_SHIFT   19
+#define IPI_APU_IDR_PMU_3_WIDTH   1
+#define IPI_APU_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_APU_IDR_PMU_2_SHIFT   18
+#define IPI_APU_IDR_PMU_2_WIDTH   1
+#define IPI_APU_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_APU_IDR_PMU_1_SHIFT   17
+#define IPI_APU_IDR_PMU_1_WIDTH   1
+#define IPI_APU_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_APU_IDR_PMU_0_SHIFT   16
+#define IPI_APU_IDR_PMU_0_WIDTH   1
+#define IPI_APU_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_APU_IDR_RPU_1_SHIFT   9
+#define IPI_APU_IDR_RPU_1_WIDTH   1
+#define IPI_APU_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_APU_IDR_RPU_0_SHIFT   8
+#define IPI_APU_IDR_RPU_0_WIDTH   1
+#define IPI_APU_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_APU_IDR_APU_SHIFT   0
+#define IPI_APU_IDR_APU_WIDTH   1
+#define IPI_APU_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_TRIG
+ */
+#define IPI_RPU_0_TRIG    ( ( IPI_BASEADDR ) + 0X00010000 )
+
+#define IPI_RPU_0_TRIG_PL_3_SHIFT   27
+#define IPI_RPU_0_TRIG_PL_3_WIDTH   1
+#define IPI_RPU_0_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_TRIG_PL_2_SHIFT   26
+#define IPI_RPU_0_TRIG_PL_2_WIDTH   1
+#define IPI_RPU_0_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_TRIG_PL_1_SHIFT   25
+#define IPI_RPU_0_TRIG_PL_1_WIDTH   1
+#define IPI_RPU_0_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_TRIG_PL_0_SHIFT   24
+#define IPI_RPU_0_TRIG_PL_0_WIDTH   1
+#define IPI_RPU_0_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_TRIG_PMU_3_SHIFT   19
+#define IPI_RPU_0_TRIG_PMU_3_WIDTH   1
+#define IPI_RPU_0_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_TRIG_PMU_2_SHIFT   18
+#define IPI_RPU_0_TRIG_PMU_2_WIDTH   1
+#define IPI_RPU_0_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_TRIG_PMU_1_SHIFT   17
+#define IPI_RPU_0_TRIG_PMU_1_WIDTH   1
+#define IPI_RPU_0_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_TRIG_PMU_0_SHIFT   16
+#define IPI_RPU_0_TRIG_PMU_0_WIDTH   1
+#define IPI_RPU_0_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_TRIG_RPU_1_SHIFT   9
+#define IPI_RPU_0_TRIG_RPU_1_WIDTH   1
+#define IPI_RPU_0_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_TRIG_RPU_0_SHIFT   8
+#define IPI_RPU_0_TRIG_RPU_0_WIDTH   1
+#define IPI_RPU_0_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_TRIG_APU_SHIFT   0
+#define IPI_RPU_0_TRIG_APU_WIDTH   1
+#define IPI_RPU_0_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_OBS
+ */
+#define IPI_RPU_0_OBS    ( ( IPI_BASEADDR ) + 0X00010004 )
+
+#define IPI_RPU_0_OBS_PL_3_SHIFT   27
+#define IPI_RPU_0_OBS_PL_3_WIDTH   1
+#define IPI_RPU_0_OBS_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_OBS_PL_2_SHIFT   26
+#define IPI_RPU_0_OBS_PL_2_WIDTH   1
+#define IPI_RPU_0_OBS_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_OBS_PL_1_SHIFT   25
+#define IPI_RPU_0_OBS_PL_1_WIDTH   1
+#define IPI_RPU_0_OBS_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_OBS_PL_0_SHIFT   24
+#define IPI_RPU_0_OBS_PL_0_WIDTH   1
+#define IPI_RPU_0_OBS_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_OBS_PMU_3_SHIFT   19
+#define IPI_RPU_0_OBS_PMU_3_WIDTH   1
+#define IPI_RPU_0_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_OBS_PMU_2_SHIFT   18
+#define IPI_RPU_0_OBS_PMU_2_WIDTH   1
+#define IPI_RPU_0_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_OBS_PMU_1_SHIFT   17
+#define IPI_RPU_0_OBS_PMU_1_WIDTH   1
+#define IPI_RPU_0_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_OBS_PMU_0_SHIFT   16
+#define IPI_RPU_0_OBS_PMU_0_WIDTH   1
+#define IPI_RPU_0_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_OBS_RPU_1_SHIFT   9
+#define IPI_RPU_0_OBS_RPU_1_WIDTH   1
+#define IPI_RPU_0_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_OBS_RPU_0_SHIFT   8
+#define IPI_RPU_0_OBS_RPU_0_WIDTH   1
+#define IPI_RPU_0_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_OBS_APU_SHIFT   0
+#define IPI_RPU_0_OBS_APU_WIDTH   1
+#define IPI_RPU_0_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_ISR
+ */
+#define IPI_RPU_0_ISR    ( ( IPI_BASEADDR ) + 0X00010010 )
+
+#define IPI_RPU_0_ISR_PL_3_SHIFT   27
+#define IPI_RPU_0_ISR_PL_3_WIDTH   1
+#define IPI_RPU_0_ISR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_ISR_PL_2_SHIFT   26
+#define IPI_RPU_0_ISR_PL_2_WIDTH   1
+#define IPI_RPU_0_ISR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_ISR_PL_1_SHIFT   25
+#define IPI_RPU_0_ISR_PL_1_WIDTH   1
+#define IPI_RPU_0_ISR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_ISR_PL_0_SHIFT   24
+#define IPI_RPU_0_ISR_PL_0_WIDTH   1
+#define IPI_RPU_0_ISR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_ISR_PMU_3_SHIFT   19
+#define IPI_RPU_0_ISR_PMU_3_WIDTH   1
+#define IPI_RPU_0_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_ISR_PMU_2_SHIFT   18
+#define IPI_RPU_0_ISR_PMU_2_WIDTH   1
+#define IPI_RPU_0_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_ISR_PMU_1_SHIFT   17
+#define IPI_RPU_0_ISR_PMU_1_WIDTH   1
+#define IPI_RPU_0_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_ISR_PMU_0_SHIFT   16
+#define IPI_RPU_0_ISR_PMU_0_WIDTH   1
+#define IPI_RPU_0_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_ISR_RPU_1_SHIFT   9
+#define IPI_RPU_0_ISR_RPU_1_WIDTH   1
+#define IPI_RPU_0_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_ISR_RPU_0_SHIFT   8
+#define IPI_RPU_0_ISR_RPU_0_WIDTH   1
+#define IPI_RPU_0_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_ISR_APU_SHIFT   0
+#define IPI_RPU_0_ISR_APU_WIDTH   1
+#define IPI_RPU_0_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_IMR
+ */
+#define IPI_RPU_0_IMR    ( ( IPI_BASEADDR ) + 0X00010014 )
+
+#define IPI_RPU_0_IMR_PL_3_SHIFT   27
+#define IPI_RPU_0_IMR_PL_3_WIDTH   1
+#define IPI_RPU_0_IMR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_IMR_PL_2_SHIFT   26
+#define IPI_RPU_0_IMR_PL_2_WIDTH   1
+#define IPI_RPU_0_IMR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_IMR_PL_1_SHIFT   25
+#define IPI_RPU_0_IMR_PL_1_WIDTH   1
+#define IPI_RPU_0_IMR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_IMR_PL_0_SHIFT   24
+#define IPI_RPU_0_IMR_PL_0_WIDTH   1
+#define IPI_RPU_0_IMR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_IMR_PMU_3_SHIFT   19
+#define IPI_RPU_0_IMR_PMU_3_WIDTH   1
+#define IPI_RPU_0_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_IMR_PMU_2_SHIFT   18
+#define IPI_RPU_0_IMR_PMU_2_WIDTH   1
+#define IPI_RPU_0_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_IMR_PMU_1_SHIFT   17
+#define IPI_RPU_0_IMR_PMU_1_WIDTH   1
+#define IPI_RPU_0_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_IMR_PMU_0_SHIFT   16
+#define IPI_RPU_0_IMR_PMU_0_WIDTH   1
+#define IPI_RPU_0_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_IMR_RPU_1_SHIFT   9
+#define IPI_RPU_0_IMR_RPU_1_WIDTH   1
+#define IPI_RPU_0_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_IMR_RPU_0_SHIFT   8
+#define IPI_RPU_0_IMR_RPU_0_WIDTH   1
+#define IPI_RPU_0_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_IMR_APU_SHIFT   0
+#define IPI_RPU_0_IMR_APU_WIDTH   1
+#define IPI_RPU_0_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_IER
+ */
+#define IPI_RPU_0_IER    ( ( IPI_BASEADDR ) + 0X00010018 )
+
+#define IPI_RPU_0_IER_PL_3_SHIFT   27
+#define IPI_RPU_0_IER_PL_3_WIDTH   1
+#define IPI_RPU_0_IER_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_IER_PL_2_SHIFT   26
+#define IPI_RPU_0_IER_PL_2_WIDTH   1
+#define IPI_RPU_0_IER_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_IER_PL_1_SHIFT   25
+#define IPI_RPU_0_IER_PL_1_WIDTH   1
+#define IPI_RPU_0_IER_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_IER_PL_0_SHIFT   24
+#define IPI_RPU_0_IER_PL_0_WIDTH   1
+#define IPI_RPU_0_IER_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_IER_PMU_3_SHIFT   19
+#define IPI_RPU_0_IER_PMU_3_WIDTH   1
+#define IPI_RPU_0_IER_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_IER_PMU_2_SHIFT   18
+#define IPI_RPU_0_IER_PMU_2_WIDTH   1
+#define IPI_RPU_0_IER_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_IER_PMU_1_SHIFT   17
+#define IPI_RPU_0_IER_PMU_1_WIDTH   1
+#define IPI_RPU_0_IER_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_IER_PMU_0_SHIFT   16
+#define IPI_RPU_0_IER_PMU_0_WIDTH   1
+#define IPI_RPU_0_IER_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_IER_RPU_1_SHIFT   9
+#define IPI_RPU_0_IER_RPU_1_WIDTH   1
+#define IPI_RPU_0_IER_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_IER_RPU_0_SHIFT   8
+#define IPI_RPU_0_IER_RPU_0_WIDTH   1
+#define IPI_RPU_0_IER_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_IER_APU_SHIFT   0
+#define IPI_RPU_0_IER_APU_WIDTH   1
+#define IPI_RPU_0_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_0_IDR
+ */
+#define IPI_RPU_0_IDR    ( ( IPI_BASEADDR ) + 0X0001001C )
+
+#define IPI_RPU_0_IDR_PL_3_SHIFT   27
+#define IPI_RPU_0_IDR_PL_3_WIDTH   1
+#define IPI_RPU_0_IDR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_0_IDR_PL_2_SHIFT   26
+#define IPI_RPU_0_IDR_PL_2_WIDTH   1
+#define IPI_RPU_0_IDR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_0_IDR_PL_1_SHIFT   25
+#define IPI_RPU_0_IDR_PL_1_WIDTH   1
+#define IPI_RPU_0_IDR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_0_IDR_PL_0_SHIFT   24
+#define IPI_RPU_0_IDR_PL_0_WIDTH   1
+#define IPI_RPU_0_IDR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_0_IDR_PMU_3_SHIFT   19
+#define IPI_RPU_0_IDR_PMU_3_WIDTH   1
+#define IPI_RPU_0_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_0_IDR_PMU_2_SHIFT   18
+#define IPI_RPU_0_IDR_PMU_2_WIDTH   1
+#define IPI_RPU_0_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_0_IDR_PMU_1_SHIFT   17
+#define IPI_RPU_0_IDR_PMU_1_WIDTH   1
+#define IPI_RPU_0_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_0_IDR_PMU_0_SHIFT   16
+#define IPI_RPU_0_IDR_PMU_0_WIDTH   1
+#define IPI_RPU_0_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_0_IDR_RPU_1_SHIFT   9
+#define IPI_RPU_0_IDR_RPU_1_WIDTH   1
+#define IPI_RPU_0_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_0_IDR_RPU_0_SHIFT   8
+#define IPI_RPU_0_IDR_RPU_0_WIDTH   1
+#define IPI_RPU_0_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_0_IDR_APU_SHIFT   0
+#define IPI_RPU_0_IDR_APU_WIDTH   1
+#define IPI_RPU_0_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_TRIG
+ */
+#define IPI_RPU_1_TRIG    ( ( IPI_BASEADDR ) + 0X00020000 )
+
+#define IPI_RPU_1_TRIG_PL_3_SHIFT   27
+#define IPI_RPU_1_TRIG_PL_3_WIDTH   1
+#define IPI_RPU_1_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_TRIG_PL_2_SHIFT   26
+#define IPI_RPU_1_TRIG_PL_2_WIDTH   1
+#define IPI_RPU_1_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_TRIG_PL_1_SHIFT   25
+#define IPI_RPU_1_TRIG_PL_1_WIDTH   1
+#define IPI_RPU_1_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_TRIG_PL_0_SHIFT   24
+#define IPI_RPU_1_TRIG_PL_0_WIDTH   1
+#define IPI_RPU_1_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_TRIG_PMU_3_SHIFT   19
+#define IPI_RPU_1_TRIG_PMU_3_WIDTH   1
+#define IPI_RPU_1_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_TRIG_PMU_2_SHIFT   18
+#define IPI_RPU_1_TRIG_PMU_2_WIDTH   1
+#define IPI_RPU_1_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_TRIG_PMU_1_SHIFT   17
+#define IPI_RPU_1_TRIG_PMU_1_WIDTH   1
+#define IPI_RPU_1_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_TRIG_PMU_0_SHIFT   16
+#define IPI_RPU_1_TRIG_PMU_0_WIDTH   1
+#define IPI_RPU_1_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_TRIG_RPU_1_SHIFT   9
+#define IPI_RPU_1_TRIG_RPU_1_WIDTH   1
+#define IPI_RPU_1_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_TRIG_RPU_0_SHIFT   8
+#define IPI_RPU_1_TRIG_RPU_0_WIDTH   1
+#define IPI_RPU_1_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_TRIG_APU_SHIFT   0
+#define IPI_RPU_1_TRIG_APU_WIDTH   1
+#define IPI_RPU_1_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_OBS
+ */
+#define IPI_RPU_1_OBS    ( ( IPI_BASEADDR ) + 0X00020004 )
+
+#define IPI_RPU_1_OBS_PL_3_SHIFT   27
+#define IPI_RPU_1_OBS_PL_3_WIDTH   1
+#define IPI_RPU_1_OBS_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_OBS_PL_2_SHIFT   26
+#define IPI_RPU_1_OBS_PL_2_WIDTH   1
+#define IPI_RPU_1_OBS_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_OBS_PL_1_SHIFT   25
+#define IPI_RPU_1_OBS_PL_1_WIDTH   1
+#define IPI_RPU_1_OBS_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_OBS_PL_0_SHIFT   24
+#define IPI_RPU_1_OBS_PL_0_WIDTH   1
+#define IPI_RPU_1_OBS_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_OBS_PMU_3_SHIFT   19
+#define IPI_RPU_1_OBS_PMU_3_WIDTH   1
+#define IPI_RPU_1_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_OBS_PMU_2_SHIFT   18
+#define IPI_RPU_1_OBS_PMU_2_WIDTH   1
+#define IPI_RPU_1_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_OBS_PMU_1_SHIFT   17
+#define IPI_RPU_1_OBS_PMU_1_WIDTH   1
+#define IPI_RPU_1_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_OBS_PMU_0_SHIFT   16
+#define IPI_RPU_1_OBS_PMU_0_WIDTH   1
+#define IPI_RPU_1_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_OBS_RPU_1_SHIFT   9
+#define IPI_RPU_1_OBS_RPU_1_WIDTH   1
+#define IPI_RPU_1_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_OBS_RPU_0_SHIFT   8
+#define IPI_RPU_1_OBS_RPU_0_WIDTH   1
+#define IPI_RPU_1_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_OBS_APU_SHIFT   0
+#define IPI_RPU_1_OBS_APU_WIDTH   1
+#define IPI_RPU_1_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_ISR
+ */
+#define IPI_RPU_1_ISR    ( ( IPI_BASEADDR ) + 0X00020010 )
+
+#define IPI_RPU_1_ISR_PL_3_SHIFT   27
+#define IPI_RPU_1_ISR_PL_3_WIDTH   1
+#define IPI_RPU_1_ISR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_ISR_PL_2_SHIFT   26
+#define IPI_RPU_1_ISR_PL_2_WIDTH   1
+#define IPI_RPU_1_ISR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_ISR_PL_1_SHIFT   25
+#define IPI_RPU_1_ISR_PL_1_WIDTH   1
+#define IPI_RPU_1_ISR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_ISR_PL_0_SHIFT   24
+#define IPI_RPU_1_ISR_PL_0_WIDTH   1
+#define IPI_RPU_1_ISR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_ISR_PMU_3_SHIFT   19
+#define IPI_RPU_1_ISR_PMU_3_WIDTH   1
+#define IPI_RPU_1_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_ISR_PMU_2_SHIFT   18
+#define IPI_RPU_1_ISR_PMU_2_WIDTH   1
+#define IPI_RPU_1_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_ISR_PMU_1_SHIFT   17
+#define IPI_RPU_1_ISR_PMU_1_WIDTH   1
+#define IPI_RPU_1_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_ISR_PMU_0_SHIFT   16
+#define IPI_RPU_1_ISR_PMU_0_WIDTH   1
+#define IPI_RPU_1_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_ISR_RPU_1_SHIFT   9
+#define IPI_RPU_1_ISR_RPU_1_WIDTH   1
+#define IPI_RPU_1_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_ISR_RPU_0_SHIFT   8
+#define IPI_RPU_1_ISR_RPU_0_WIDTH   1
+#define IPI_RPU_1_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_ISR_APU_SHIFT   0
+#define IPI_RPU_1_ISR_APU_WIDTH   1
+#define IPI_RPU_1_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_IMR
+ */
+#define IPI_RPU_1_IMR    ( ( IPI_BASEADDR ) + 0X00020014 )
+
+#define IPI_RPU_1_IMR_PL_3_SHIFT   27
+#define IPI_RPU_1_IMR_PL_3_WIDTH   1
+#define IPI_RPU_1_IMR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_IMR_PL_2_SHIFT   26
+#define IPI_RPU_1_IMR_PL_2_WIDTH   1
+#define IPI_RPU_1_IMR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_IMR_PL_1_SHIFT   25
+#define IPI_RPU_1_IMR_PL_1_WIDTH   1
+#define IPI_RPU_1_IMR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_IMR_PL_0_SHIFT   24
+#define IPI_RPU_1_IMR_PL_0_WIDTH   1
+#define IPI_RPU_1_IMR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_IMR_PMU_3_SHIFT   19
+#define IPI_RPU_1_IMR_PMU_3_WIDTH   1
+#define IPI_RPU_1_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_IMR_PMU_2_SHIFT   18
+#define IPI_RPU_1_IMR_PMU_2_WIDTH   1
+#define IPI_RPU_1_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_IMR_PMU_1_SHIFT   17
+#define IPI_RPU_1_IMR_PMU_1_WIDTH   1
+#define IPI_RPU_1_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_IMR_PMU_0_SHIFT   16
+#define IPI_RPU_1_IMR_PMU_0_WIDTH   1
+#define IPI_RPU_1_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_IMR_RPU_1_SHIFT   9
+#define IPI_RPU_1_IMR_RPU_1_WIDTH   1
+#define IPI_RPU_1_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_IMR_RPU_0_SHIFT   8
+#define IPI_RPU_1_IMR_RPU_0_WIDTH   1
+#define IPI_RPU_1_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_IMR_APU_SHIFT   0
+#define IPI_RPU_1_IMR_APU_WIDTH   1
+#define IPI_RPU_1_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_IER
+ */
+#define IPI_RPU_1_IER    ( ( IPI_BASEADDR ) + 0X00020018 )
+
+#define IPI_RPU_1_IER_PL_3_SHIFT   27
+#define IPI_RPU_1_IER_PL_3_WIDTH   1
+#define IPI_RPU_1_IER_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_IER_PL_2_SHIFT   26
+#define IPI_RPU_1_IER_PL_2_WIDTH   1
+#define IPI_RPU_1_IER_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_IER_PL_1_SHIFT   25
+#define IPI_RPU_1_IER_PL_1_WIDTH   1
+#define IPI_RPU_1_IER_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_IER_PL_0_SHIFT   24
+#define IPI_RPU_1_IER_PL_0_WIDTH   1
+#define IPI_RPU_1_IER_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_IER_PMU_3_SHIFT   19
+#define IPI_RPU_1_IER_PMU_3_WIDTH   1
+#define IPI_RPU_1_IER_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_IER_PMU_2_SHIFT   18
+#define IPI_RPU_1_IER_PMU_2_WIDTH   1
+#define IPI_RPU_1_IER_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_IER_PMU_1_SHIFT   17
+#define IPI_RPU_1_IER_PMU_1_WIDTH   1
+#define IPI_RPU_1_IER_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_IER_PMU_0_SHIFT   16
+#define IPI_RPU_1_IER_PMU_0_WIDTH   1
+#define IPI_RPU_1_IER_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_IER_RPU_1_SHIFT   9
+#define IPI_RPU_1_IER_RPU_1_WIDTH   1
+#define IPI_RPU_1_IER_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_IER_RPU_0_SHIFT   8
+#define IPI_RPU_1_IER_RPU_0_WIDTH   1
+#define IPI_RPU_1_IER_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_IER_APU_SHIFT   0
+#define IPI_RPU_1_IER_APU_WIDTH   1
+#define IPI_RPU_1_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_RPU_1_IDR
+ */
+#define IPI_RPU_1_IDR    ( ( IPI_BASEADDR ) + 0X0002001C )
+
+#define IPI_RPU_1_IDR_PL_3_SHIFT   27
+#define IPI_RPU_1_IDR_PL_3_WIDTH   1
+#define IPI_RPU_1_IDR_PL_3_MASK    0X08000000
+
+#define IPI_RPU_1_IDR_PL_2_SHIFT   26
+#define IPI_RPU_1_IDR_PL_2_WIDTH   1
+#define IPI_RPU_1_IDR_PL_2_MASK    0X04000000
+
+#define IPI_RPU_1_IDR_PL_1_SHIFT   25
+#define IPI_RPU_1_IDR_PL_1_WIDTH   1
+#define IPI_RPU_1_IDR_PL_1_MASK    0X02000000
+
+#define IPI_RPU_1_IDR_PL_0_SHIFT   24
+#define IPI_RPU_1_IDR_PL_0_WIDTH   1
+#define IPI_RPU_1_IDR_PL_0_MASK    0X01000000
+
+#define IPI_RPU_1_IDR_PMU_3_SHIFT   19
+#define IPI_RPU_1_IDR_PMU_3_WIDTH   1
+#define IPI_RPU_1_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_RPU_1_IDR_PMU_2_SHIFT   18
+#define IPI_RPU_1_IDR_PMU_2_WIDTH   1
+#define IPI_RPU_1_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_RPU_1_IDR_PMU_1_SHIFT   17
+#define IPI_RPU_1_IDR_PMU_1_WIDTH   1
+#define IPI_RPU_1_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_RPU_1_IDR_PMU_0_SHIFT   16
+#define IPI_RPU_1_IDR_PMU_0_WIDTH   1
+#define IPI_RPU_1_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_RPU_1_IDR_RPU_1_SHIFT   9
+#define IPI_RPU_1_IDR_RPU_1_WIDTH   1
+#define IPI_RPU_1_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_RPU_1_IDR_RPU_0_SHIFT   8
+#define IPI_RPU_1_IDR_RPU_0_WIDTH   1
+#define IPI_RPU_1_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_RPU_1_IDR_APU_SHIFT   0
+#define IPI_RPU_1_IDR_APU_WIDTH   1
+#define IPI_RPU_1_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_TRIG
+ */
+#define IPI_PMU_0_TRIG    ( ( IPI_BASEADDR ) + 0X00030000 )
+
+#define IPI_PMU_0_TRIG_PL_3_SHIFT   27
+#define IPI_PMU_0_TRIG_PL_3_WIDTH   1
+#define IPI_PMU_0_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_TRIG_PL_2_SHIFT   26
+#define IPI_PMU_0_TRIG_PL_2_WIDTH   1
+#define IPI_PMU_0_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_TRIG_PL_1_SHIFT   25
+#define IPI_PMU_0_TRIG_PL_1_WIDTH   1
+#define IPI_PMU_0_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_TRIG_PL_0_SHIFT   24
+#define IPI_PMU_0_TRIG_PL_0_WIDTH   1
+#define IPI_PMU_0_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_TRIG_PMU_3_SHIFT   19
+#define IPI_PMU_0_TRIG_PMU_3_WIDTH   1
+#define IPI_PMU_0_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_TRIG_PMU_2_SHIFT   18
+#define IPI_PMU_0_TRIG_PMU_2_WIDTH   1
+#define IPI_PMU_0_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_TRIG_PMU_1_SHIFT   17
+#define IPI_PMU_0_TRIG_PMU_1_WIDTH   1
+#define IPI_PMU_0_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_TRIG_PMU_0_SHIFT   16
+#define IPI_PMU_0_TRIG_PMU_0_WIDTH   1
+#define IPI_PMU_0_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_TRIG_RPU_1_SHIFT   9
+#define IPI_PMU_0_TRIG_RPU_1_WIDTH   1
+#define IPI_PMU_0_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_TRIG_RPU_0_SHIFT   8
+#define IPI_PMU_0_TRIG_RPU_0_WIDTH   1
+#define IPI_PMU_0_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_TRIG_APU_SHIFT   0
+#define IPI_PMU_0_TRIG_APU_WIDTH   1
+#define IPI_PMU_0_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_OBS
+ */
+#define IPI_PMU_0_OBS    ( ( IPI_BASEADDR ) + 0X00030004 )
+
+#define IPI_PMU_0_OBS_PL_3_SHIFT   27
+#define IPI_PMU_0_OBS_PL_3_WIDTH   1
+#define IPI_PMU_0_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_OBS_PL_2_SHIFT   26
+#define IPI_PMU_0_OBS_PL_2_WIDTH   1
+#define IPI_PMU_0_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_OBS_PL_1_SHIFT   25
+#define IPI_PMU_0_OBS_PL_1_WIDTH   1
+#define IPI_PMU_0_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_OBS_PL_0_SHIFT   24
+#define IPI_PMU_0_OBS_PL_0_WIDTH   1
+#define IPI_PMU_0_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_OBS_PMU_3_SHIFT   19
+#define IPI_PMU_0_OBS_PMU_3_WIDTH   1
+#define IPI_PMU_0_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_OBS_PMU_2_SHIFT   18
+#define IPI_PMU_0_OBS_PMU_2_WIDTH   1
+#define IPI_PMU_0_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_OBS_PMU_1_SHIFT   17
+#define IPI_PMU_0_OBS_PMU_1_WIDTH   1
+#define IPI_PMU_0_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_OBS_PMU_0_SHIFT   16
+#define IPI_PMU_0_OBS_PMU_0_WIDTH   1
+#define IPI_PMU_0_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_OBS_RPU_1_SHIFT   9
+#define IPI_PMU_0_OBS_RPU_1_WIDTH   1
+#define IPI_PMU_0_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_OBS_RPU_0_SHIFT   8
+#define IPI_PMU_0_OBS_RPU_0_WIDTH   1
+#define IPI_PMU_0_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_OBS_APU_SHIFT   0
+#define IPI_PMU_0_OBS_APU_WIDTH   1
+#define IPI_PMU_0_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_ISR
+ */
+#define IPI_PMU_0_ISR    ( ( IPI_BASEADDR ) + 0X00030010 )
+
+#define IPI_PMU_0_ISR_PL_3_SHIFT   27
+#define IPI_PMU_0_ISR_PL_3_WIDTH   1
+#define IPI_PMU_0_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_ISR_PL_2_SHIFT   26
+#define IPI_PMU_0_ISR_PL_2_WIDTH   1
+#define IPI_PMU_0_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_ISR_PL_1_SHIFT   25
+#define IPI_PMU_0_ISR_PL_1_WIDTH   1
+#define IPI_PMU_0_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_ISR_PL_0_SHIFT   24
+#define IPI_PMU_0_ISR_PL_0_WIDTH   1
+#define IPI_PMU_0_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_ISR_PMU_3_SHIFT   19
+#define IPI_PMU_0_ISR_PMU_3_WIDTH   1
+#define IPI_PMU_0_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_ISR_PMU_2_SHIFT   18
+#define IPI_PMU_0_ISR_PMU_2_WIDTH   1
+#define IPI_PMU_0_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_ISR_PMU_1_SHIFT   17
+#define IPI_PMU_0_ISR_PMU_1_WIDTH   1
+#define IPI_PMU_0_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_ISR_PMU_0_SHIFT   16
+#define IPI_PMU_0_ISR_PMU_0_WIDTH   1
+#define IPI_PMU_0_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_ISR_RPU_1_SHIFT   9
+#define IPI_PMU_0_ISR_RPU_1_WIDTH   1
+#define IPI_PMU_0_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_ISR_RPU_0_SHIFT   8
+#define IPI_PMU_0_ISR_RPU_0_WIDTH   1
+#define IPI_PMU_0_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_ISR_APU_SHIFT   0
+#define IPI_PMU_0_ISR_APU_WIDTH   1
+#define IPI_PMU_0_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_IMR
+ */
+#define IPI_PMU_0_IMR    ( ( IPI_BASEADDR ) + 0X00030014 )
+
+#define IPI_PMU_0_IMR_PL_3_SHIFT   27
+#define IPI_PMU_0_IMR_PL_3_WIDTH   1
+#define IPI_PMU_0_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_IMR_PL_2_SHIFT   26
+#define IPI_PMU_0_IMR_PL_2_WIDTH   1
+#define IPI_PMU_0_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_IMR_PL_1_SHIFT   25
+#define IPI_PMU_0_IMR_PL_1_WIDTH   1
+#define IPI_PMU_0_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_IMR_PL_0_SHIFT   24
+#define IPI_PMU_0_IMR_PL_0_WIDTH   1
+#define IPI_PMU_0_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_IMR_PMU_3_SHIFT   19
+#define IPI_PMU_0_IMR_PMU_3_WIDTH   1
+#define IPI_PMU_0_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_IMR_PMU_2_SHIFT   18
+#define IPI_PMU_0_IMR_PMU_2_WIDTH   1
+#define IPI_PMU_0_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_IMR_PMU_1_SHIFT   17
+#define IPI_PMU_0_IMR_PMU_1_WIDTH   1
+#define IPI_PMU_0_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_IMR_PMU_0_SHIFT   16
+#define IPI_PMU_0_IMR_PMU_0_WIDTH   1
+#define IPI_PMU_0_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_IMR_RPU_1_SHIFT   9
+#define IPI_PMU_0_IMR_RPU_1_WIDTH   1
+#define IPI_PMU_0_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_IMR_RPU_0_SHIFT   8
+#define IPI_PMU_0_IMR_RPU_0_WIDTH   1
+#define IPI_PMU_0_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_IMR_APU_SHIFT   0
+#define IPI_PMU_0_IMR_APU_WIDTH   1
+#define IPI_PMU_0_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_IER
+ */
+#define IPI_PMU_0_IER    ( ( IPI_BASEADDR ) + 0X00030018 )
+
+#define IPI_PMU_0_IER_PL_3_SHIFT   27
+#define IPI_PMU_0_IER_PL_3_WIDTH   1
+#define IPI_PMU_0_IER_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_IER_PL_2_SHIFT   26
+#define IPI_PMU_0_IER_PL_2_WIDTH   1
+#define IPI_PMU_0_IER_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_IER_PL_1_SHIFT   25
+#define IPI_PMU_0_IER_PL_1_WIDTH   1
+#define IPI_PMU_0_IER_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_IER_PL_0_SHIFT   24
+#define IPI_PMU_0_IER_PL_0_WIDTH   1
+#define IPI_PMU_0_IER_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_IER_PMU_3_SHIFT   19
+#define IPI_PMU_0_IER_PMU_3_WIDTH   1
+#define IPI_PMU_0_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_IER_PMU_2_SHIFT   18
+#define IPI_PMU_0_IER_PMU_2_WIDTH   1
+#define IPI_PMU_0_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_IER_PMU_1_SHIFT   17
+#define IPI_PMU_0_IER_PMU_1_WIDTH   1
+#define IPI_PMU_0_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_IER_PMU_0_SHIFT   16
+#define IPI_PMU_0_IER_PMU_0_WIDTH   1
+#define IPI_PMU_0_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_IER_RPU_1_SHIFT   9
+#define IPI_PMU_0_IER_RPU_1_WIDTH   1
+#define IPI_PMU_0_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_IER_RPU_0_SHIFT   8
+#define IPI_PMU_0_IER_RPU_0_WIDTH   1
+#define IPI_PMU_0_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_IER_APU_SHIFT   0
+#define IPI_PMU_0_IER_APU_WIDTH   1
+#define IPI_PMU_0_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_0_IDR
+ */
+#define IPI_PMU_0_IDR    ( ( IPI_BASEADDR ) + 0X0003001C )
+
+#define IPI_PMU_0_IDR_PL_3_SHIFT   27
+#define IPI_PMU_0_IDR_PL_3_WIDTH   1
+#define IPI_PMU_0_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_0_IDR_PL_2_SHIFT   26
+#define IPI_PMU_0_IDR_PL_2_WIDTH   1
+#define IPI_PMU_0_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_0_IDR_PL_1_SHIFT   25
+#define IPI_PMU_0_IDR_PL_1_WIDTH   1
+#define IPI_PMU_0_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_0_IDR_PL_0_SHIFT   24
+#define IPI_PMU_0_IDR_PL_0_WIDTH   1
+#define IPI_PMU_0_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_0_IDR_PMU_3_SHIFT   19
+#define IPI_PMU_0_IDR_PMU_3_WIDTH   1
+#define IPI_PMU_0_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_0_IDR_PMU_2_SHIFT   18
+#define IPI_PMU_0_IDR_PMU_2_WIDTH   1
+#define IPI_PMU_0_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_0_IDR_PMU_1_SHIFT   17
+#define IPI_PMU_0_IDR_PMU_1_WIDTH   1
+#define IPI_PMU_0_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_0_IDR_PMU_0_SHIFT   16
+#define IPI_PMU_0_IDR_PMU_0_WIDTH   1
+#define IPI_PMU_0_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_0_IDR_RPU_1_SHIFT   9
+#define IPI_PMU_0_IDR_RPU_1_WIDTH   1
+#define IPI_PMU_0_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_0_IDR_RPU_0_SHIFT   8
+#define IPI_PMU_0_IDR_RPU_0_WIDTH   1
+#define IPI_PMU_0_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_0_IDR_APU_SHIFT   0
+#define IPI_PMU_0_IDR_APU_WIDTH   1
+#define IPI_PMU_0_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_TRIG
+ */
+#define IPI_PMU_1_TRIG    ( ( IPI_BASEADDR ) + 0X00031000 )
+
+#define IPI_PMU_1_TRIG_PL_3_SHIFT   27
+#define IPI_PMU_1_TRIG_PL_3_WIDTH   1
+#define IPI_PMU_1_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_TRIG_PL_2_SHIFT   26
+#define IPI_PMU_1_TRIG_PL_2_WIDTH   1
+#define IPI_PMU_1_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_TRIG_PL_1_SHIFT   25
+#define IPI_PMU_1_TRIG_PL_1_WIDTH   1
+#define IPI_PMU_1_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_TRIG_PL_0_SHIFT   24
+#define IPI_PMU_1_TRIG_PL_0_WIDTH   1
+#define IPI_PMU_1_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_TRIG_PMU_3_SHIFT   19
+#define IPI_PMU_1_TRIG_PMU_3_WIDTH   1
+#define IPI_PMU_1_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_TRIG_PMU_2_SHIFT   18
+#define IPI_PMU_1_TRIG_PMU_2_WIDTH   1
+#define IPI_PMU_1_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_TRIG_PMU_1_SHIFT   17
+#define IPI_PMU_1_TRIG_PMU_1_WIDTH   1
+#define IPI_PMU_1_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_TRIG_PMU_0_SHIFT   16
+#define IPI_PMU_1_TRIG_PMU_0_WIDTH   1
+#define IPI_PMU_1_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_TRIG_RPU_1_SHIFT   9
+#define IPI_PMU_1_TRIG_RPU_1_WIDTH   1
+#define IPI_PMU_1_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_TRIG_RPU_0_SHIFT   8
+#define IPI_PMU_1_TRIG_RPU_0_WIDTH   1
+#define IPI_PMU_1_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_TRIG_APU_SHIFT   0
+#define IPI_PMU_1_TRIG_APU_WIDTH   1
+#define IPI_PMU_1_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_OBS
+ */
+#define IPI_PMU_1_OBS    ( ( IPI_BASEADDR ) + 0X00031004 )
+
+#define IPI_PMU_1_OBS_PL_3_SHIFT   27
+#define IPI_PMU_1_OBS_PL_3_WIDTH   1
+#define IPI_PMU_1_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_OBS_PL_2_SHIFT   26
+#define IPI_PMU_1_OBS_PL_2_WIDTH   1
+#define IPI_PMU_1_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_OBS_PL_1_SHIFT   25
+#define IPI_PMU_1_OBS_PL_1_WIDTH   1
+#define IPI_PMU_1_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_OBS_PL_0_SHIFT   24
+#define IPI_PMU_1_OBS_PL_0_WIDTH   1
+#define IPI_PMU_1_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_OBS_PMU_3_SHIFT   19
+#define IPI_PMU_1_OBS_PMU_3_WIDTH   1
+#define IPI_PMU_1_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_OBS_PMU_2_SHIFT   18
+#define IPI_PMU_1_OBS_PMU_2_WIDTH   1
+#define IPI_PMU_1_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_OBS_PMU_1_SHIFT   17
+#define IPI_PMU_1_OBS_PMU_1_WIDTH   1
+#define IPI_PMU_1_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_OBS_PMU_0_SHIFT   16
+#define IPI_PMU_1_OBS_PMU_0_WIDTH   1
+#define IPI_PMU_1_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_OBS_RPU_1_SHIFT   9
+#define IPI_PMU_1_OBS_RPU_1_WIDTH   1
+#define IPI_PMU_1_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_OBS_RPU_0_SHIFT   8
+#define IPI_PMU_1_OBS_RPU_0_WIDTH   1
+#define IPI_PMU_1_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_OBS_APU_SHIFT   0
+#define IPI_PMU_1_OBS_APU_WIDTH   1
+#define IPI_PMU_1_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_ISR
+ */
+#define IPI_PMU_1_ISR    ( ( IPI_BASEADDR ) + 0X00031010 )
+
+#define IPI_PMU_1_ISR_PL_3_SHIFT   27
+#define IPI_PMU_1_ISR_PL_3_WIDTH   1
+#define IPI_PMU_1_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_ISR_PL_2_SHIFT   26
+#define IPI_PMU_1_ISR_PL_2_WIDTH   1
+#define IPI_PMU_1_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_ISR_PL_1_SHIFT   25
+#define IPI_PMU_1_ISR_PL_1_WIDTH   1
+#define IPI_PMU_1_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_ISR_PL_0_SHIFT   24
+#define IPI_PMU_1_ISR_PL_0_WIDTH   1
+#define IPI_PMU_1_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_ISR_PMU_3_SHIFT   19
+#define IPI_PMU_1_ISR_PMU_3_WIDTH   1
+#define IPI_PMU_1_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_ISR_PMU_2_SHIFT   18
+#define IPI_PMU_1_ISR_PMU_2_WIDTH   1
+#define IPI_PMU_1_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_ISR_PMU_1_SHIFT   17
+#define IPI_PMU_1_ISR_PMU_1_WIDTH   1
+#define IPI_PMU_1_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_ISR_PMU_0_SHIFT   16
+#define IPI_PMU_1_ISR_PMU_0_WIDTH   1
+#define IPI_PMU_1_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_ISR_RPU_1_SHIFT   9
+#define IPI_PMU_1_ISR_RPU_1_WIDTH   1
+#define IPI_PMU_1_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_ISR_RPU_0_SHIFT   8
+#define IPI_PMU_1_ISR_RPU_0_WIDTH   1
+#define IPI_PMU_1_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_ISR_APU_SHIFT   0
+#define IPI_PMU_1_ISR_APU_WIDTH   1
+#define IPI_PMU_1_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_IMR
+ */
+#define IPI_PMU_1_IMR    ( ( IPI_BASEADDR ) + 0X00031014 )
+
+#define IPI_PMU_1_IMR_PL_3_SHIFT   27
+#define IPI_PMU_1_IMR_PL_3_WIDTH   1
+#define IPI_PMU_1_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_IMR_PL_2_SHIFT   26
+#define IPI_PMU_1_IMR_PL_2_WIDTH   1
+#define IPI_PMU_1_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_IMR_PL_1_SHIFT   25
+#define IPI_PMU_1_IMR_PL_1_WIDTH   1
+#define IPI_PMU_1_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_IMR_PL_0_SHIFT   24
+#define IPI_PMU_1_IMR_PL_0_WIDTH   1
+#define IPI_PMU_1_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_IMR_PMU_3_SHIFT   19
+#define IPI_PMU_1_IMR_PMU_3_WIDTH   1
+#define IPI_PMU_1_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_IMR_PMU_2_SHIFT   18
+#define IPI_PMU_1_IMR_PMU_2_WIDTH   1
+#define IPI_PMU_1_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_IMR_PMU_1_SHIFT   17
+#define IPI_PMU_1_IMR_PMU_1_WIDTH   1
+#define IPI_PMU_1_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_IMR_PMU_0_SHIFT   16
+#define IPI_PMU_1_IMR_PMU_0_WIDTH   1
+#define IPI_PMU_1_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_IMR_RPU_1_SHIFT   9
+#define IPI_PMU_1_IMR_RPU_1_WIDTH   1
+#define IPI_PMU_1_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_IMR_RPU_0_SHIFT   8
+#define IPI_PMU_1_IMR_RPU_0_WIDTH   1
+#define IPI_PMU_1_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_IMR_APU_SHIFT   0
+#define IPI_PMU_1_IMR_APU_WIDTH   1
+#define IPI_PMU_1_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_IER
+ */
+#define IPI_PMU_1_IER    ( ( IPI_BASEADDR ) + 0X00031018 )
+
+#define IPI_PMU_1_IER_PL_3_SHIFT   27
+#define IPI_PMU_1_IER_PL_3_WIDTH   1
+#define IPI_PMU_1_IER_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_IER_PL_2_SHIFT   26
+#define IPI_PMU_1_IER_PL_2_WIDTH   1
+#define IPI_PMU_1_IER_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_IER_PL_1_SHIFT   25
+#define IPI_PMU_1_IER_PL_1_WIDTH   1
+#define IPI_PMU_1_IER_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_IER_PL_0_SHIFT   24
+#define IPI_PMU_1_IER_PL_0_WIDTH   1
+#define IPI_PMU_1_IER_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_IER_PMU_3_SHIFT   19
+#define IPI_PMU_1_IER_PMU_3_WIDTH   1
+#define IPI_PMU_1_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_IER_PMU_2_SHIFT   18
+#define IPI_PMU_1_IER_PMU_2_WIDTH   1
+#define IPI_PMU_1_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_IER_PMU_1_SHIFT   17
+#define IPI_PMU_1_IER_PMU_1_WIDTH   1
+#define IPI_PMU_1_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_IER_PMU_0_SHIFT   16
+#define IPI_PMU_1_IER_PMU_0_WIDTH   1
+#define IPI_PMU_1_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_IER_RPU_1_SHIFT   9
+#define IPI_PMU_1_IER_RPU_1_WIDTH   1
+#define IPI_PMU_1_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_IER_RPU_0_SHIFT   8
+#define IPI_PMU_1_IER_RPU_0_WIDTH   1
+#define IPI_PMU_1_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_IER_APU_SHIFT   0
+#define IPI_PMU_1_IER_APU_WIDTH   1
+#define IPI_PMU_1_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_1_IDR
+ */
+#define IPI_PMU_1_IDR    ( ( IPI_BASEADDR ) + 0X0003101C )
+
+#define IPI_PMU_1_IDR_PL_3_SHIFT   27
+#define IPI_PMU_1_IDR_PL_3_WIDTH   1
+#define IPI_PMU_1_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_1_IDR_PL_2_SHIFT   26
+#define IPI_PMU_1_IDR_PL_2_WIDTH   1
+#define IPI_PMU_1_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_1_IDR_PL_1_SHIFT   25
+#define IPI_PMU_1_IDR_PL_1_WIDTH   1
+#define IPI_PMU_1_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_1_IDR_PL_0_SHIFT   24
+#define IPI_PMU_1_IDR_PL_0_WIDTH   1
+#define IPI_PMU_1_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_1_IDR_PMU_3_SHIFT   19
+#define IPI_PMU_1_IDR_PMU_3_WIDTH   1
+#define IPI_PMU_1_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_1_IDR_PMU_2_SHIFT   18
+#define IPI_PMU_1_IDR_PMU_2_WIDTH   1
+#define IPI_PMU_1_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_1_IDR_PMU_1_SHIFT   17
+#define IPI_PMU_1_IDR_PMU_1_WIDTH   1
+#define IPI_PMU_1_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_1_IDR_PMU_0_SHIFT   16
+#define IPI_PMU_1_IDR_PMU_0_WIDTH   1
+#define IPI_PMU_1_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_1_IDR_RPU_1_SHIFT   9
+#define IPI_PMU_1_IDR_RPU_1_WIDTH   1
+#define IPI_PMU_1_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_1_IDR_RPU_0_SHIFT   8
+#define IPI_PMU_1_IDR_RPU_0_WIDTH   1
+#define IPI_PMU_1_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_1_IDR_APU_SHIFT   0
+#define IPI_PMU_1_IDR_APU_WIDTH   1
+#define IPI_PMU_1_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_TRIG
+ */
+#define IPI_PMU_2_TRIG    ( ( IPI_BASEADDR ) + 0X00032000 )
+
+#define IPI_PMU_2_TRIG_PL_3_SHIFT   27
+#define IPI_PMU_2_TRIG_PL_3_WIDTH   1
+#define IPI_PMU_2_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_TRIG_PL_2_SHIFT   26
+#define IPI_PMU_2_TRIG_PL_2_WIDTH   1
+#define IPI_PMU_2_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_TRIG_PL_1_SHIFT   25
+#define IPI_PMU_2_TRIG_PL_1_WIDTH   1
+#define IPI_PMU_2_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_TRIG_PL_0_SHIFT   24
+#define IPI_PMU_2_TRIG_PL_0_WIDTH   1
+#define IPI_PMU_2_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_TRIG_PMU_3_SHIFT   19
+#define IPI_PMU_2_TRIG_PMU_3_WIDTH   1
+#define IPI_PMU_2_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_TRIG_PMU_2_SHIFT   18
+#define IPI_PMU_2_TRIG_PMU_2_WIDTH   1
+#define IPI_PMU_2_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_TRIG_PMU_1_SHIFT   17
+#define IPI_PMU_2_TRIG_PMU_1_WIDTH   1
+#define IPI_PMU_2_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_TRIG_PMU_0_SHIFT   16
+#define IPI_PMU_2_TRIG_PMU_0_WIDTH   1
+#define IPI_PMU_2_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_TRIG_RPU_1_SHIFT   9
+#define IPI_PMU_2_TRIG_RPU_1_WIDTH   1
+#define IPI_PMU_2_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_TRIG_RPU_0_SHIFT   8
+#define IPI_PMU_2_TRIG_RPU_0_WIDTH   1
+#define IPI_PMU_2_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_TRIG_APU_SHIFT   0
+#define IPI_PMU_2_TRIG_APU_WIDTH   1
+#define IPI_PMU_2_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_OBS
+ */
+#define IPI_PMU_2_OBS    ( ( IPI_BASEADDR ) + 0X00032004 )
+
+#define IPI_PMU_2_OBS_PL_3_SHIFT   27
+#define IPI_PMU_2_OBS_PL_3_WIDTH   1
+#define IPI_PMU_2_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_OBS_PL_2_SHIFT   26
+#define IPI_PMU_2_OBS_PL_2_WIDTH   1
+#define IPI_PMU_2_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_OBS_PL_1_SHIFT   25
+#define IPI_PMU_2_OBS_PL_1_WIDTH   1
+#define IPI_PMU_2_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_OBS_PL_0_SHIFT   24
+#define IPI_PMU_2_OBS_PL_0_WIDTH   1
+#define IPI_PMU_2_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_OBS_PMU_3_SHIFT   19
+#define IPI_PMU_2_OBS_PMU_3_WIDTH   1
+#define IPI_PMU_2_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_OBS_PMU_2_SHIFT   18
+#define IPI_PMU_2_OBS_PMU_2_WIDTH   1
+#define IPI_PMU_2_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_OBS_PMU_1_SHIFT   17
+#define IPI_PMU_2_OBS_PMU_1_WIDTH   1
+#define IPI_PMU_2_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_OBS_PMU_0_SHIFT   16
+#define IPI_PMU_2_OBS_PMU_0_WIDTH   1
+#define IPI_PMU_2_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_OBS_RPU_1_SHIFT   9
+#define IPI_PMU_2_OBS_RPU_1_WIDTH   1
+#define IPI_PMU_2_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_OBS_RPU_0_SHIFT   8
+#define IPI_PMU_2_OBS_RPU_0_WIDTH   1
+#define IPI_PMU_2_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_OBS_APU_SHIFT   0
+#define IPI_PMU_2_OBS_APU_WIDTH   1
+#define IPI_PMU_2_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_ISR
+ */
+#define IPI_PMU_2_ISR    ( ( IPI_BASEADDR ) + 0X00032010 )
+
+#define IPI_PMU_2_ISR_PL_3_SHIFT   27
+#define IPI_PMU_2_ISR_PL_3_WIDTH   1
+#define IPI_PMU_2_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_ISR_PL_2_SHIFT   26
+#define IPI_PMU_2_ISR_PL_2_WIDTH   1
+#define IPI_PMU_2_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_ISR_PL_1_SHIFT   25
+#define IPI_PMU_2_ISR_PL_1_WIDTH   1
+#define IPI_PMU_2_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_ISR_PL_0_SHIFT   24
+#define IPI_PMU_2_ISR_PL_0_WIDTH   1
+#define IPI_PMU_2_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_ISR_PMU_3_SHIFT   19
+#define IPI_PMU_2_ISR_PMU_3_WIDTH   1
+#define IPI_PMU_2_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_ISR_PMU_2_SHIFT   18
+#define IPI_PMU_2_ISR_PMU_2_WIDTH   1
+#define IPI_PMU_2_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_ISR_PMU_1_SHIFT   17
+#define IPI_PMU_2_ISR_PMU_1_WIDTH   1
+#define IPI_PMU_2_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_ISR_PMU_0_SHIFT   16
+#define IPI_PMU_2_ISR_PMU_0_WIDTH   1
+#define IPI_PMU_2_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_ISR_RPU_1_SHIFT   9
+#define IPI_PMU_2_ISR_RPU_1_WIDTH   1
+#define IPI_PMU_2_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_ISR_RPU_0_SHIFT   8
+#define IPI_PMU_2_ISR_RPU_0_WIDTH   1
+#define IPI_PMU_2_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_ISR_APU_SHIFT   0
+#define IPI_PMU_2_ISR_APU_WIDTH   1
+#define IPI_PMU_2_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_IMR
+ */
+#define IPI_PMU_2_IMR    ( ( IPI_BASEADDR ) + 0X00032014 )
+
+#define IPI_PMU_2_IMR_PL_3_SHIFT   27
+#define IPI_PMU_2_IMR_PL_3_WIDTH   1
+#define IPI_PMU_2_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_IMR_PL_2_SHIFT   26
+#define IPI_PMU_2_IMR_PL_2_WIDTH   1
+#define IPI_PMU_2_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_IMR_PL_1_SHIFT   25
+#define IPI_PMU_2_IMR_PL_1_WIDTH   1
+#define IPI_PMU_2_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_IMR_PL_0_SHIFT   24
+#define IPI_PMU_2_IMR_PL_0_WIDTH   1
+#define IPI_PMU_2_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_IMR_PMU_3_SHIFT   19
+#define IPI_PMU_2_IMR_PMU_3_WIDTH   1
+#define IPI_PMU_2_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_IMR_PMU_2_SHIFT   18
+#define IPI_PMU_2_IMR_PMU_2_WIDTH   1
+#define IPI_PMU_2_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_IMR_PMU_1_SHIFT   17
+#define IPI_PMU_2_IMR_PMU_1_WIDTH   1
+#define IPI_PMU_2_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_IMR_PMU_0_SHIFT   16
+#define IPI_PMU_2_IMR_PMU_0_WIDTH   1
+#define IPI_PMU_2_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_IMR_RPU_1_SHIFT   9
+#define IPI_PMU_2_IMR_RPU_1_WIDTH   1
+#define IPI_PMU_2_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_IMR_RPU_0_SHIFT   8
+#define IPI_PMU_2_IMR_RPU_0_WIDTH   1
+#define IPI_PMU_2_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_IMR_APU_SHIFT   0
+#define IPI_PMU_2_IMR_APU_WIDTH   1
+#define IPI_PMU_2_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_IER
+ */
+#define IPI_PMU_2_IER    ( ( IPI_BASEADDR ) + 0X00032018 )
+
+#define IPI_PMU_2_IER_PL_3_SHIFT   27
+#define IPI_PMU_2_IER_PL_3_WIDTH   1
+#define IPI_PMU_2_IER_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_IER_PL_2_SHIFT   26
+#define IPI_PMU_2_IER_PL_2_WIDTH   1
+#define IPI_PMU_2_IER_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_IER_PL_1_SHIFT   25
+#define IPI_PMU_2_IER_PL_1_WIDTH   1
+#define IPI_PMU_2_IER_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_IER_PL_0_SHIFT   24
+#define IPI_PMU_2_IER_PL_0_WIDTH   1
+#define IPI_PMU_2_IER_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_IER_PMU_3_SHIFT   19
+#define IPI_PMU_2_IER_PMU_3_WIDTH   1
+#define IPI_PMU_2_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_IER_PMU_2_SHIFT   18
+#define IPI_PMU_2_IER_PMU_2_WIDTH   1
+#define IPI_PMU_2_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_IER_PMU_1_SHIFT   17
+#define IPI_PMU_2_IER_PMU_1_WIDTH   1
+#define IPI_PMU_2_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_IER_PMU_0_SHIFT   16
+#define IPI_PMU_2_IER_PMU_0_WIDTH   1
+#define IPI_PMU_2_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_IER_RPU_1_SHIFT   9
+#define IPI_PMU_2_IER_RPU_1_WIDTH   1
+#define IPI_PMU_2_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_IER_RPU_0_SHIFT   8
+#define IPI_PMU_2_IER_RPU_0_WIDTH   1
+#define IPI_PMU_2_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_IER_APU_SHIFT   0
+#define IPI_PMU_2_IER_APU_WIDTH   1
+#define IPI_PMU_2_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_2_IDR
+ */
+#define IPI_PMU_2_IDR    ( ( IPI_BASEADDR ) + 0X0003201C )
+
+#define IPI_PMU_2_IDR_PL_3_SHIFT   27
+#define IPI_PMU_2_IDR_PL_3_WIDTH   1
+#define IPI_PMU_2_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_2_IDR_PL_2_SHIFT   26
+#define IPI_PMU_2_IDR_PL_2_WIDTH   1
+#define IPI_PMU_2_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_2_IDR_PL_1_SHIFT   25
+#define IPI_PMU_2_IDR_PL_1_WIDTH   1
+#define IPI_PMU_2_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_2_IDR_PL_0_SHIFT   24
+#define IPI_PMU_2_IDR_PL_0_WIDTH   1
+#define IPI_PMU_2_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_2_IDR_PMU_3_SHIFT   19
+#define IPI_PMU_2_IDR_PMU_3_WIDTH   1
+#define IPI_PMU_2_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_2_IDR_PMU_2_SHIFT   18
+#define IPI_PMU_2_IDR_PMU_2_WIDTH   1
+#define IPI_PMU_2_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_2_IDR_PMU_1_SHIFT   17
+#define IPI_PMU_2_IDR_PMU_1_WIDTH   1
+#define IPI_PMU_2_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_2_IDR_PMU_0_SHIFT   16
+#define IPI_PMU_2_IDR_PMU_0_WIDTH   1
+#define IPI_PMU_2_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_2_IDR_RPU_1_SHIFT   9
+#define IPI_PMU_2_IDR_RPU_1_WIDTH   1
+#define IPI_PMU_2_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_2_IDR_RPU_0_SHIFT   8
+#define IPI_PMU_2_IDR_RPU_0_WIDTH   1
+#define IPI_PMU_2_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_2_IDR_APU_SHIFT   0
+#define IPI_PMU_2_IDR_APU_WIDTH   1
+#define IPI_PMU_2_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_TRIG
+ */
+#define IPI_PMU_3_TRIG    ( ( IPI_BASEADDR ) + 0X00033000 )
+
+#define IPI_PMU_3_TRIG_PL_3_SHIFT   27
+#define IPI_PMU_3_TRIG_PL_3_WIDTH   1
+#define IPI_PMU_3_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_TRIG_PL_2_SHIFT   26
+#define IPI_PMU_3_TRIG_PL_2_WIDTH   1
+#define IPI_PMU_3_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_TRIG_PL_1_SHIFT   25
+#define IPI_PMU_3_TRIG_PL_1_WIDTH   1
+#define IPI_PMU_3_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_TRIG_PL_0_SHIFT   24
+#define IPI_PMU_3_TRIG_PL_0_WIDTH   1
+#define IPI_PMU_3_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_TRIG_PMU_3_SHIFT   19
+#define IPI_PMU_3_TRIG_PMU_3_WIDTH   1
+#define IPI_PMU_3_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_TRIG_PMU_2_SHIFT   18
+#define IPI_PMU_3_TRIG_PMU_2_WIDTH   1
+#define IPI_PMU_3_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_TRIG_PMU_1_SHIFT   17
+#define IPI_PMU_3_TRIG_PMU_1_WIDTH   1
+#define IPI_PMU_3_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_TRIG_PMU_0_SHIFT   16
+#define IPI_PMU_3_TRIG_PMU_0_WIDTH   1
+#define IPI_PMU_3_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_TRIG_RPU_1_SHIFT   9
+#define IPI_PMU_3_TRIG_RPU_1_WIDTH   1
+#define IPI_PMU_3_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_TRIG_RPU_0_SHIFT   8
+#define IPI_PMU_3_TRIG_RPU_0_WIDTH   1
+#define IPI_PMU_3_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_TRIG_APU_SHIFT   0
+#define IPI_PMU_3_TRIG_APU_WIDTH   1
+#define IPI_PMU_3_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_OBS
+ */
+#define IPI_PMU_3_OBS    ( ( IPI_BASEADDR ) + 0X00033004 )
+
+#define IPI_PMU_3_OBS_PL_3_SHIFT   27
+#define IPI_PMU_3_OBS_PL_3_WIDTH   1
+#define IPI_PMU_3_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_OBS_PL_2_SHIFT   26
+#define IPI_PMU_3_OBS_PL_2_WIDTH   1
+#define IPI_PMU_3_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_OBS_PL_1_SHIFT   25
+#define IPI_PMU_3_OBS_PL_1_WIDTH   1
+#define IPI_PMU_3_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_OBS_PL_0_SHIFT   24
+#define IPI_PMU_3_OBS_PL_0_WIDTH   1
+#define IPI_PMU_3_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_OBS_PMU_3_SHIFT   19
+#define IPI_PMU_3_OBS_PMU_3_WIDTH   1
+#define IPI_PMU_3_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_OBS_PMU_2_SHIFT   18
+#define IPI_PMU_3_OBS_PMU_2_WIDTH   1
+#define IPI_PMU_3_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_OBS_PMU_1_SHIFT   17
+#define IPI_PMU_3_OBS_PMU_1_WIDTH   1
+#define IPI_PMU_3_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_OBS_PMU_0_SHIFT   16
+#define IPI_PMU_3_OBS_PMU_0_WIDTH   1
+#define IPI_PMU_3_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_OBS_RPU_1_SHIFT   9
+#define IPI_PMU_3_OBS_RPU_1_WIDTH   1
+#define IPI_PMU_3_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_OBS_RPU_0_SHIFT   8
+#define IPI_PMU_3_OBS_RPU_0_WIDTH   1
+#define IPI_PMU_3_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_OBS_APU_SHIFT   0
+#define IPI_PMU_3_OBS_APU_WIDTH   1
+#define IPI_PMU_3_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_ISR
+ */
+#define IPI_PMU_3_ISR    ( ( IPI_BASEADDR ) + 0X00033010 )
+
+#define IPI_PMU_3_ISR_PL_3_SHIFT   27
+#define IPI_PMU_3_ISR_PL_3_WIDTH   1
+#define IPI_PMU_3_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_ISR_PL_2_SHIFT   26
+#define IPI_PMU_3_ISR_PL_2_WIDTH   1
+#define IPI_PMU_3_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_ISR_PL_1_SHIFT   25
+#define IPI_PMU_3_ISR_PL_1_WIDTH   1
+#define IPI_PMU_3_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_ISR_PL_0_SHIFT   24
+#define IPI_PMU_3_ISR_PL_0_WIDTH   1
+#define IPI_PMU_3_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_ISR_PMU_3_SHIFT   19
+#define IPI_PMU_3_ISR_PMU_3_WIDTH   1
+#define IPI_PMU_3_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_ISR_PMU_2_SHIFT   18
+#define IPI_PMU_3_ISR_PMU_2_WIDTH   1
+#define IPI_PMU_3_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_ISR_PMU_1_SHIFT   17
+#define IPI_PMU_3_ISR_PMU_1_WIDTH   1
+#define IPI_PMU_3_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_ISR_PMU_0_SHIFT   16
+#define IPI_PMU_3_ISR_PMU_0_WIDTH   1
+#define IPI_PMU_3_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_ISR_RPU_1_SHIFT   9
+#define IPI_PMU_3_ISR_RPU_1_WIDTH   1
+#define IPI_PMU_3_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_ISR_RPU_0_SHIFT   8
+#define IPI_PMU_3_ISR_RPU_0_WIDTH   1
+#define IPI_PMU_3_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_ISR_APU_SHIFT   0
+#define IPI_PMU_3_ISR_APU_WIDTH   1
+#define IPI_PMU_3_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_IMR
+ */
+#define IPI_PMU_3_IMR    ( ( IPI_BASEADDR ) + 0X00033014 )
+
+#define IPI_PMU_3_IMR_PL_3_SHIFT   27
+#define IPI_PMU_3_IMR_PL_3_WIDTH   1
+#define IPI_PMU_3_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_IMR_PL_2_SHIFT   26
+#define IPI_PMU_3_IMR_PL_2_WIDTH   1
+#define IPI_PMU_3_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_IMR_PL_1_SHIFT   25
+#define IPI_PMU_3_IMR_PL_1_WIDTH   1
+#define IPI_PMU_3_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_IMR_PL_0_SHIFT   24
+#define IPI_PMU_3_IMR_PL_0_WIDTH   1
+#define IPI_PMU_3_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_IMR_PMU_3_SHIFT   19
+#define IPI_PMU_3_IMR_PMU_3_WIDTH   1
+#define IPI_PMU_3_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_IMR_PMU_2_SHIFT   18
+#define IPI_PMU_3_IMR_PMU_2_WIDTH   1
+#define IPI_PMU_3_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_IMR_PMU_1_SHIFT   17
+#define IPI_PMU_3_IMR_PMU_1_WIDTH   1
+#define IPI_PMU_3_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_IMR_PMU_0_SHIFT   16
+#define IPI_PMU_3_IMR_PMU_0_WIDTH   1
+#define IPI_PMU_3_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_IMR_RPU_1_SHIFT   9
+#define IPI_PMU_3_IMR_RPU_1_WIDTH   1
+#define IPI_PMU_3_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_IMR_RPU_0_SHIFT   8
+#define IPI_PMU_3_IMR_RPU_0_WIDTH   1
+#define IPI_PMU_3_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_IMR_APU_SHIFT   0
+#define IPI_PMU_3_IMR_APU_WIDTH   1
+#define IPI_PMU_3_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_IER
+ */
+#define IPI_PMU_3_IER    ( ( IPI_BASEADDR ) + 0X00033018 )
+
+#define IPI_PMU_3_IER_PL_3_SHIFT   27
+#define IPI_PMU_3_IER_PL_3_WIDTH   1
+#define IPI_PMU_3_IER_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_IER_PL_2_SHIFT   26
+#define IPI_PMU_3_IER_PL_2_WIDTH   1
+#define IPI_PMU_3_IER_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_IER_PL_1_SHIFT   25
+#define IPI_PMU_3_IER_PL_1_WIDTH   1
+#define IPI_PMU_3_IER_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_IER_PL_0_SHIFT   24
+#define IPI_PMU_3_IER_PL_0_WIDTH   1
+#define IPI_PMU_3_IER_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_IER_PMU_3_SHIFT   19
+#define IPI_PMU_3_IER_PMU_3_WIDTH   1
+#define IPI_PMU_3_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_IER_PMU_2_SHIFT   18
+#define IPI_PMU_3_IER_PMU_2_WIDTH   1
+#define IPI_PMU_3_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_IER_PMU_1_SHIFT   17
+#define IPI_PMU_3_IER_PMU_1_WIDTH   1
+#define IPI_PMU_3_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_IER_PMU_0_SHIFT   16
+#define IPI_PMU_3_IER_PMU_0_WIDTH   1
+#define IPI_PMU_3_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_IER_RPU_1_SHIFT   9
+#define IPI_PMU_3_IER_RPU_1_WIDTH   1
+#define IPI_PMU_3_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_IER_RPU_0_SHIFT   8
+#define IPI_PMU_3_IER_RPU_0_WIDTH   1
+#define IPI_PMU_3_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_IER_APU_SHIFT   0
+#define IPI_PMU_3_IER_APU_WIDTH   1
+#define IPI_PMU_3_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PMU_3_IDR
+ */
+#define IPI_PMU_3_IDR    ( ( IPI_BASEADDR ) + 0X0003301C )
+
+#define IPI_PMU_3_IDR_PL_3_SHIFT   27
+#define IPI_PMU_3_IDR_PL_3_WIDTH   1
+#define IPI_PMU_3_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PMU_3_IDR_PL_2_SHIFT   26
+#define IPI_PMU_3_IDR_PL_2_WIDTH   1
+#define IPI_PMU_3_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PMU_3_IDR_PL_1_SHIFT   25
+#define IPI_PMU_3_IDR_PL_1_WIDTH   1
+#define IPI_PMU_3_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PMU_3_IDR_PL_0_SHIFT   24
+#define IPI_PMU_3_IDR_PL_0_WIDTH   1
+#define IPI_PMU_3_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PMU_3_IDR_PMU_3_SHIFT   19
+#define IPI_PMU_3_IDR_PMU_3_WIDTH   1
+#define IPI_PMU_3_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PMU_3_IDR_PMU_2_SHIFT   18
+#define IPI_PMU_3_IDR_PMU_2_WIDTH   1
+#define IPI_PMU_3_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PMU_3_IDR_PMU_1_SHIFT   17
+#define IPI_PMU_3_IDR_PMU_1_WIDTH   1
+#define IPI_PMU_3_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PMU_3_IDR_PMU_0_SHIFT   16
+#define IPI_PMU_3_IDR_PMU_0_WIDTH   1
+#define IPI_PMU_3_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PMU_3_IDR_RPU_1_SHIFT   9
+#define IPI_PMU_3_IDR_RPU_1_WIDTH   1
+#define IPI_PMU_3_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PMU_3_IDR_RPU_0_SHIFT   8
+#define IPI_PMU_3_IDR_RPU_0_WIDTH   1
+#define IPI_PMU_3_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PMU_3_IDR_APU_SHIFT   0
+#define IPI_PMU_3_IDR_APU_WIDTH   1
+#define IPI_PMU_3_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_TRIG
+ */
+#define IPI_PL_0_TRIG    ( ( IPI_BASEADDR ) + 0X00040000 )
+
+#define IPI_PL_0_TRIG_PL_3_SHIFT   27
+#define IPI_PL_0_TRIG_PL_3_WIDTH   1
+#define IPI_PL_0_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_TRIG_PL_2_SHIFT   26
+#define IPI_PL_0_TRIG_PL_2_WIDTH   1
+#define IPI_PL_0_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_TRIG_PL_1_SHIFT   25
+#define IPI_PL_0_TRIG_PL_1_WIDTH   1
+#define IPI_PL_0_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_TRIG_PL_0_SHIFT   24
+#define IPI_PL_0_TRIG_PL_0_WIDTH   1
+#define IPI_PL_0_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_TRIG_PMU_3_SHIFT   19
+#define IPI_PL_0_TRIG_PMU_3_WIDTH   1
+#define IPI_PL_0_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_TRIG_PMU_2_SHIFT   18
+#define IPI_PL_0_TRIG_PMU_2_WIDTH   1
+#define IPI_PL_0_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_TRIG_PMU_1_SHIFT   17
+#define IPI_PL_0_TRIG_PMU_1_WIDTH   1
+#define IPI_PL_0_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_TRIG_PMU_0_SHIFT   16
+#define IPI_PL_0_TRIG_PMU_0_WIDTH   1
+#define IPI_PL_0_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_TRIG_RPU_1_SHIFT   9
+#define IPI_PL_0_TRIG_RPU_1_WIDTH   1
+#define IPI_PL_0_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_TRIG_RPU_0_SHIFT   8
+#define IPI_PL_0_TRIG_RPU_0_WIDTH   1
+#define IPI_PL_0_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_TRIG_APU_SHIFT   0
+#define IPI_PL_0_TRIG_APU_WIDTH   1
+#define IPI_PL_0_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_OBS
+ */
+#define IPI_PL_0_OBS    ( ( IPI_BASEADDR ) + 0X00040004 )
+
+#define IPI_PL_0_OBS_PL_3_SHIFT   27
+#define IPI_PL_0_OBS_PL_3_WIDTH   1
+#define IPI_PL_0_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_OBS_PL_2_SHIFT   26
+#define IPI_PL_0_OBS_PL_2_WIDTH   1
+#define IPI_PL_0_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_OBS_PL_1_SHIFT   25
+#define IPI_PL_0_OBS_PL_1_WIDTH   1
+#define IPI_PL_0_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_OBS_PL_0_SHIFT   24
+#define IPI_PL_0_OBS_PL_0_WIDTH   1
+#define IPI_PL_0_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_OBS_PMU_3_SHIFT   19
+#define IPI_PL_0_OBS_PMU_3_WIDTH   1
+#define IPI_PL_0_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_OBS_PMU_2_SHIFT   18
+#define IPI_PL_0_OBS_PMU_2_WIDTH   1
+#define IPI_PL_0_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_OBS_PMU_1_SHIFT   17
+#define IPI_PL_0_OBS_PMU_1_WIDTH   1
+#define IPI_PL_0_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_OBS_PMU_0_SHIFT   16
+#define IPI_PL_0_OBS_PMU_0_WIDTH   1
+#define IPI_PL_0_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_OBS_RPU_1_SHIFT   9
+#define IPI_PL_0_OBS_RPU_1_WIDTH   1
+#define IPI_PL_0_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_OBS_RPU_0_SHIFT   8
+#define IPI_PL_0_OBS_RPU_0_WIDTH   1
+#define IPI_PL_0_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_OBS_APU_SHIFT   0
+#define IPI_PL_0_OBS_APU_WIDTH   1
+#define IPI_PL_0_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_ISR
+ */
+#define IPI_PL_0_ISR    ( ( IPI_BASEADDR ) + 0X00040010 )
+
+#define IPI_PL_0_ISR_PL_3_SHIFT   27
+#define IPI_PL_0_ISR_PL_3_WIDTH   1
+#define IPI_PL_0_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_ISR_PL_2_SHIFT   26
+#define IPI_PL_0_ISR_PL_2_WIDTH   1
+#define IPI_PL_0_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_ISR_PL_1_SHIFT   25
+#define IPI_PL_0_ISR_PL_1_WIDTH   1
+#define IPI_PL_0_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_ISR_PL_0_SHIFT   24
+#define IPI_PL_0_ISR_PL_0_WIDTH   1
+#define IPI_PL_0_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_ISR_PMU_3_SHIFT   19
+#define IPI_PL_0_ISR_PMU_3_WIDTH   1
+#define IPI_PL_0_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_ISR_PMU_2_SHIFT   18
+#define IPI_PL_0_ISR_PMU_2_WIDTH   1
+#define IPI_PL_0_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_ISR_PMU_1_SHIFT   17
+#define IPI_PL_0_ISR_PMU_1_WIDTH   1
+#define IPI_PL_0_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_ISR_PMU_0_SHIFT   16
+#define IPI_PL_0_ISR_PMU_0_WIDTH   1
+#define IPI_PL_0_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_ISR_RPU_1_SHIFT   9
+#define IPI_PL_0_ISR_RPU_1_WIDTH   1
+#define IPI_PL_0_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_ISR_RPU_0_SHIFT   8
+#define IPI_PL_0_ISR_RPU_0_WIDTH   1
+#define IPI_PL_0_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_ISR_APU_SHIFT   0
+#define IPI_PL_0_ISR_APU_WIDTH   1
+#define IPI_PL_0_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_IMR
+ */
+#define IPI_PL_0_IMR    ( ( IPI_BASEADDR ) + 0X00040014 )
+
+#define IPI_PL_0_IMR_PL_3_SHIFT   27
+#define IPI_PL_0_IMR_PL_3_WIDTH   1
+#define IPI_PL_0_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_IMR_PL_2_SHIFT   26
+#define IPI_PL_0_IMR_PL_2_WIDTH   1
+#define IPI_PL_0_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_IMR_PL_1_SHIFT   25
+#define IPI_PL_0_IMR_PL_1_WIDTH   1
+#define IPI_PL_0_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_IMR_PL_0_SHIFT   24
+#define IPI_PL_0_IMR_PL_0_WIDTH   1
+#define IPI_PL_0_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_IMR_PMU_3_SHIFT   19
+#define IPI_PL_0_IMR_PMU_3_WIDTH   1
+#define IPI_PL_0_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_IMR_PMU_2_SHIFT   18
+#define IPI_PL_0_IMR_PMU_2_WIDTH   1
+#define IPI_PL_0_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_IMR_PMU_1_SHIFT   17
+#define IPI_PL_0_IMR_PMU_1_WIDTH   1
+#define IPI_PL_0_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_IMR_PMU_0_SHIFT   16
+#define IPI_PL_0_IMR_PMU_0_WIDTH   1
+#define IPI_PL_0_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_IMR_RPU_1_SHIFT   9
+#define IPI_PL_0_IMR_RPU_1_WIDTH   1
+#define IPI_PL_0_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_IMR_RPU_0_SHIFT   8
+#define IPI_PL_0_IMR_RPU_0_WIDTH   1
+#define IPI_PL_0_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_IMR_APU_SHIFT   0
+#define IPI_PL_0_IMR_APU_WIDTH   1
+#define IPI_PL_0_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_IER
+ */
+#define IPI_PL_0_IER    ( ( IPI_BASEADDR ) + 0X00040018 )
+
+#define IPI_PL_0_IER_PL_3_SHIFT   27
+#define IPI_PL_0_IER_PL_3_WIDTH   1
+#define IPI_PL_0_IER_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_IER_PL_2_SHIFT   26
+#define IPI_PL_0_IER_PL_2_WIDTH   1
+#define IPI_PL_0_IER_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_IER_PL_1_SHIFT   25
+#define IPI_PL_0_IER_PL_1_WIDTH   1
+#define IPI_PL_0_IER_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_IER_PL_0_SHIFT   24
+#define IPI_PL_0_IER_PL_0_WIDTH   1
+#define IPI_PL_0_IER_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_IER_PMU_3_SHIFT   19
+#define IPI_PL_0_IER_PMU_3_WIDTH   1
+#define IPI_PL_0_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_IER_PMU_2_SHIFT   18
+#define IPI_PL_0_IER_PMU_2_WIDTH   1
+#define IPI_PL_0_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_IER_PMU_1_SHIFT   17
+#define IPI_PL_0_IER_PMU_1_WIDTH   1
+#define IPI_PL_0_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_IER_PMU_0_SHIFT   16
+#define IPI_PL_0_IER_PMU_0_WIDTH   1
+#define IPI_PL_0_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_IER_RPU_1_SHIFT   9
+#define IPI_PL_0_IER_RPU_1_WIDTH   1
+#define IPI_PL_0_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_IER_RPU_0_SHIFT   8
+#define IPI_PL_0_IER_RPU_0_WIDTH   1
+#define IPI_PL_0_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_IER_APU_SHIFT   0
+#define IPI_PL_0_IER_APU_WIDTH   1
+#define IPI_PL_0_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_0_IDR
+ */
+#define IPI_PL_0_IDR    ( ( IPI_BASEADDR ) + 0X0004001C )
+
+#define IPI_PL_0_IDR_PL_3_SHIFT   27
+#define IPI_PL_0_IDR_PL_3_WIDTH   1
+#define IPI_PL_0_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PL_0_IDR_PL_2_SHIFT   26
+#define IPI_PL_0_IDR_PL_2_WIDTH   1
+#define IPI_PL_0_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PL_0_IDR_PL_1_SHIFT   25
+#define IPI_PL_0_IDR_PL_1_WIDTH   1
+#define IPI_PL_0_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PL_0_IDR_PL_0_SHIFT   24
+#define IPI_PL_0_IDR_PL_0_WIDTH   1
+#define IPI_PL_0_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PL_0_IDR_PMU_3_SHIFT   19
+#define IPI_PL_0_IDR_PMU_3_WIDTH   1
+#define IPI_PL_0_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_0_IDR_PMU_2_SHIFT   18
+#define IPI_PL_0_IDR_PMU_2_WIDTH   1
+#define IPI_PL_0_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_0_IDR_PMU_1_SHIFT   17
+#define IPI_PL_0_IDR_PMU_1_WIDTH   1
+#define IPI_PL_0_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_0_IDR_PMU_0_SHIFT   16
+#define IPI_PL_0_IDR_PMU_0_WIDTH   1
+#define IPI_PL_0_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_0_IDR_RPU_1_SHIFT   9
+#define IPI_PL_0_IDR_RPU_1_WIDTH   1
+#define IPI_PL_0_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_0_IDR_RPU_0_SHIFT   8
+#define IPI_PL_0_IDR_RPU_0_WIDTH   1
+#define IPI_PL_0_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_0_IDR_APU_SHIFT   0
+#define IPI_PL_0_IDR_APU_WIDTH   1
+#define IPI_PL_0_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_TRIG
+ */
+#define IPI_PL_1_TRIG    ( ( IPI_BASEADDR ) + 0X00050000 )
+
+#define IPI_PL_1_TRIG_PL_3_SHIFT   27
+#define IPI_PL_1_TRIG_PL_3_WIDTH   1
+#define IPI_PL_1_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_TRIG_PL_2_SHIFT   26
+#define IPI_PL_1_TRIG_PL_2_WIDTH   1
+#define IPI_PL_1_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_TRIG_PL_1_SHIFT   25
+#define IPI_PL_1_TRIG_PL_1_WIDTH   1
+#define IPI_PL_1_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_TRIG_PL_0_SHIFT   24
+#define IPI_PL_1_TRIG_PL_0_WIDTH   1
+#define IPI_PL_1_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_TRIG_PMU_3_SHIFT   19
+#define IPI_PL_1_TRIG_PMU_3_WIDTH   1
+#define IPI_PL_1_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_TRIG_PMU_2_SHIFT   18
+#define IPI_PL_1_TRIG_PMU_2_WIDTH   1
+#define IPI_PL_1_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_TRIG_PMU_1_SHIFT   17
+#define IPI_PL_1_TRIG_PMU_1_WIDTH   1
+#define IPI_PL_1_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_TRIG_PMU_0_SHIFT   16
+#define IPI_PL_1_TRIG_PMU_0_WIDTH   1
+#define IPI_PL_1_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_TRIG_RPU_1_SHIFT   9
+#define IPI_PL_1_TRIG_RPU_1_WIDTH   1
+#define IPI_PL_1_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_TRIG_RPU_0_SHIFT   8
+#define IPI_PL_1_TRIG_RPU_0_WIDTH   1
+#define IPI_PL_1_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_TRIG_APU_SHIFT   0
+#define IPI_PL_1_TRIG_APU_WIDTH   1
+#define IPI_PL_1_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_OBS
+ */
+#define IPI_PL_1_OBS    ( ( IPI_BASEADDR ) + 0X00050004 )
+
+#define IPI_PL_1_OBS_PL_3_SHIFT   27
+#define IPI_PL_1_OBS_PL_3_WIDTH   1
+#define IPI_PL_1_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_OBS_PL_2_SHIFT   26
+#define IPI_PL_1_OBS_PL_2_WIDTH   1
+#define IPI_PL_1_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_OBS_PL_1_SHIFT   25
+#define IPI_PL_1_OBS_PL_1_WIDTH   1
+#define IPI_PL_1_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_OBS_PL_0_SHIFT   24
+#define IPI_PL_1_OBS_PL_0_WIDTH   1
+#define IPI_PL_1_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_OBS_PMU_3_SHIFT   19
+#define IPI_PL_1_OBS_PMU_3_WIDTH   1
+#define IPI_PL_1_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_OBS_PMU_2_SHIFT   18
+#define IPI_PL_1_OBS_PMU_2_WIDTH   1
+#define IPI_PL_1_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_OBS_PMU_1_SHIFT   17
+#define IPI_PL_1_OBS_PMU_1_WIDTH   1
+#define IPI_PL_1_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_OBS_PMU_0_SHIFT   16
+#define IPI_PL_1_OBS_PMU_0_WIDTH   1
+#define IPI_PL_1_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_OBS_RPU_1_SHIFT   9
+#define IPI_PL_1_OBS_RPU_1_WIDTH   1
+#define IPI_PL_1_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_OBS_RPU_0_SHIFT   8
+#define IPI_PL_1_OBS_RPU_0_WIDTH   1
+#define IPI_PL_1_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_OBS_APU_SHIFT   0
+#define IPI_PL_1_OBS_APU_WIDTH   1
+#define IPI_PL_1_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_ISR
+ */
+#define IPI_PL_1_ISR    ( ( IPI_BASEADDR ) + 0X00050010 )
+
+#define IPI_PL_1_ISR_PL_3_SHIFT   27
+#define IPI_PL_1_ISR_PL_3_WIDTH   1
+#define IPI_PL_1_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_ISR_PL_2_SHIFT   26
+#define IPI_PL_1_ISR_PL_2_WIDTH   1
+#define IPI_PL_1_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_ISR_PL_1_SHIFT   25
+#define IPI_PL_1_ISR_PL_1_WIDTH   1
+#define IPI_PL_1_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_ISR_PL_0_SHIFT   24
+#define IPI_PL_1_ISR_PL_0_WIDTH   1
+#define IPI_PL_1_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_ISR_PMU_3_SHIFT   19
+#define IPI_PL_1_ISR_PMU_3_WIDTH   1
+#define IPI_PL_1_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_ISR_PMU_2_SHIFT   18
+#define IPI_PL_1_ISR_PMU_2_WIDTH   1
+#define IPI_PL_1_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_ISR_PMU_1_SHIFT   17
+#define IPI_PL_1_ISR_PMU_1_WIDTH   1
+#define IPI_PL_1_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_ISR_PMU_0_SHIFT   16
+#define IPI_PL_1_ISR_PMU_0_WIDTH   1
+#define IPI_PL_1_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_ISR_RPU_1_SHIFT   9
+#define IPI_PL_1_ISR_RPU_1_WIDTH   1
+#define IPI_PL_1_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_ISR_RPU_0_SHIFT   8
+#define IPI_PL_1_ISR_RPU_0_WIDTH   1
+#define IPI_PL_1_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_ISR_APU_SHIFT   0
+#define IPI_PL_1_ISR_APU_WIDTH   1
+#define IPI_PL_1_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_IMR
+ */
+#define IPI_PL_1_IMR    ( ( IPI_BASEADDR ) + 0X00050014 )
+
+#define IPI_PL_1_IMR_PL_3_SHIFT   27
+#define IPI_PL_1_IMR_PL_3_WIDTH   1
+#define IPI_PL_1_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_IMR_PL_2_SHIFT   26
+#define IPI_PL_1_IMR_PL_2_WIDTH   1
+#define IPI_PL_1_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_IMR_PL_1_SHIFT   25
+#define IPI_PL_1_IMR_PL_1_WIDTH   1
+#define IPI_PL_1_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_IMR_PL_0_SHIFT   24
+#define IPI_PL_1_IMR_PL_0_WIDTH   1
+#define IPI_PL_1_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_IMR_PMU_3_SHIFT   19
+#define IPI_PL_1_IMR_PMU_3_WIDTH   1
+#define IPI_PL_1_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_IMR_PMU_2_SHIFT   18
+#define IPI_PL_1_IMR_PMU_2_WIDTH   1
+#define IPI_PL_1_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_IMR_PMU_1_SHIFT   17
+#define IPI_PL_1_IMR_PMU_1_WIDTH   1
+#define IPI_PL_1_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_IMR_PMU_0_SHIFT   16
+#define IPI_PL_1_IMR_PMU_0_WIDTH   1
+#define IPI_PL_1_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_IMR_RPU_1_SHIFT   9
+#define IPI_PL_1_IMR_RPU_1_WIDTH   1
+#define IPI_PL_1_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_IMR_RPU_0_SHIFT   8
+#define IPI_PL_1_IMR_RPU_0_WIDTH   1
+#define IPI_PL_1_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_IMR_APU_SHIFT   0
+#define IPI_PL_1_IMR_APU_WIDTH   1
+#define IPI_PL_1_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_IER
+ */
+#define IPI_PL_1_IER    ( ( IPI_BASEADDR ) + 0X00050018 )
+
+#define IPI_PL_1_IER_PL_3_SHIFT   27
+#define IPI_PL_1_IER_PL_3_WIDTH   1
+#define IPI_PL_1_IER_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_IER_PL_2_SHIFT   26
+#define IPI_PL_1_IER_PL_2_WIDTH   1
+#define IPI_PL_1_IER_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_IER_PL_1_SHIFT   25
+#define IPI_PL_1_IER_PL_1_WIDTH   1
+#define IPI_PL_1_IER_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_IER_PL_0_SHIFT   24
+#define IPI_PL_1_IER_PL_0_WIDTH   1
+#define IPI_PL_1_IER_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_IER_PMU_3_SHIFT   19
+#define IPI_PL_1_IER_PMU_3_WIDTH   1
+#define IPI_PL_1_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_IER_PMU_2_SHIFT   18
+#define IPI_PL_1_IER_PMU_2_WIDTH   1
+#define IPI_PL_1_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_IER_PMU_1_SHIFT   17
+#define IPI_PL_1_IER_PMU_1_WIDTH   1
+#define IPI_PL_1_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_IER_PMU_0_SHIFT   16
+#define IPI_PL_1_IER_PMU_0_WIDTH   1
+#define IPI_PL_1_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_IER_RPU_1_SHIFT   9
+#define IPI_PL_1_IER_RPU_1_WIDTH   1
+#define IPI_PL_1_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_IER_RPU_0_SHIFT   8
+#define IPI_PL_1_IER_RPU_0_WIDTH   1
+#define IPI_PL_1_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_IER_APU_SHIFT   0
+#define IPI_PL_1_IER_APU_WIDTH   1
+#define IPI_PL_1_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_1_IDR
+ */
+#define IPI_PL_1_IDR    ( ( IPI_BASEADDR ) + 0X0005001C )
+
+#define IPI_PL_1_IDR_PL_3_SHIFT   27
+#define IPI_PL_1_IDR_PL_3_WIDTH   1
+#define IPI_PL_1_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PL_1_IDR_PL_2_SHIFT   26
+#define IPI_PL_1_IDR_PL_2_WIDTH   1
+#define IPI_PL_1_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PL_1_IDR_PL_1_SHIFT   25
+#define IPI_PL_1_IDR_PL_1_WIDTH   1
+#define IPI_PL_1_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PL_1_IDR_PL_0_SHIFT   24
+#define IPI_PL_1_IDR_PL_0_WIDTH   1
+#define IPI_PL_1_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PL_1_IDR_PMU_3_SHIFT   19
+#define IPI_PL_1_IDR_PMU_3_WIDTH   1
+#define IPI_PL_1_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_1_IDR_PMU_2_SHIFT   18
+#define IPI_PL_1_IDR_PMU_2_WIDTH   1
+#define IPI_PL_1_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_1_IDR_PMU_1_SHIFT   17
+#define IPI_PL_1_IDR_PMU_1_WIDTH   1
+#define IPI_PL_1_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_1_IDR_PMU_0_SHIFT   16
+#define IPI_PL_1_IDR_PMU_0_WIDTH   1
+#define IPI_PL_1_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_1_IDR_RPU_1_SHIFT   9
+#define IPI_PL_1_IDR_RPU_1_WIDTH   1
+#define IPI_PL_1_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_1_IDR_RPU_0_SHIFT   8
+#define IPI_PL_1_IDR_RPU_0_WIDTH   1
+#define IPI_PL_1_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_1_IDR_APU_SHIFT   0
+#define IPI_PL_1_IDR_APU_WIDTH   1
+#define IPI_PL_1_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_TRIG
+ */
+#define IPI_PL_2_TRIG    ( ( IPI_BASEADDR ) + 0X00060000 )
+
+#define IPI_PL_2_TRIG_PL_3_SHIFT   27
+#define IPI_PL_2_TRIG_PL_3_WIDTH   1
+#define IPI_PL_2_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_TRIG_PL_2_SHIFT   26
+#define IPI_PL_2_TRIG_PL_2_WIDTH   1
+#define IPI_PL_2_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_TRIG_PL_1_SHIFT   25
+#define IPI_PL_2_TRIG_PL_1_WIDTH   1
+#define IPI_PL_2_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_TRIG_PL_0_SHIFT   24
+#define IPI_PL_2_TRIG_PL_0_WIDTH   1
+#define IPI_PL_2_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_TRIG_PMU_3_SHIFT   19
+#define IPI_PL_2_TRIG_PMU_3_WIDTH   1
+#define IPI_PL_2_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_TRIG_PMU_2_SHIFT   18
+#define IPI_PL_2_TRIG_PMU_2_WIDTH   1
+#define IPI_PL_2_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_TRIG_PMU_1_SHIFT   17
+#define IPI_PL_2_TRIG_PMU_1_WIDTH   1
+#define IPI_PL_2_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_TRIG_PMU_0_SHIFT   16
+#define IPI_PL_2_TRIG_PMU_0_WIDTH   1
+#define IPI_PL_2_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_TRIG_RPU_1_SHIFT   9
+#define IPI_PL_2_TRIG_RPU_1_WIDTH   1
+#define IPI_PL_2_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_TRIG_RPU_0_SHIFT   8
+#define IPI_PL_2_TRIG_RPU_0_WIDTH   1
+#define IPI_PL_2_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_TRIG_APU_SHIFT   0
+#define IPI_PL_2_TRIG_APU_WIDTH   1
+#define IPI_PL_2_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_OBS
+ */
+#define IPI_PL_2_OBS    ( ( IPI_BASEADDR ) + 0X00060004 )
+
+#define IPI_PL_2_OBS_PL_3_SHIFT   27
+#define IPI_PL_2_OBS_PL_3_WIDTH   1
+#define IPI_PL_2_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_OBS_PL_2_SHIFT   26
+#define IPI_PL_2_OBS_PL_2_WIDTH   1
+#define IPI_PL_2_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_OBS_PL_1_SHIFT   25
+#define IPI_PL_2_OBS_PL_1_WIDTH   1
+#define IPI_PL_2_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_OBS_PL_0_SHIFT   24
+#define IPI_PL_2_OBS_PL_0_WIDTH   1
+#define IPI_PL_2_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_OBS_PMU_3_SHIFT   19
+#define IPI_PL_2_OBS_PMU_3_WIDTH   1
+#define IPI_PL_2_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_OBS_PMU_2_SHIFT   18
+#define IPI_PL_2_OBS_PMU_2_WIDTH   1
+#define IPI_PL_2_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_OBS_PMU_1_SHIFT   17
+#define IPI_PL_2_OBS_PMU_1_WIDTH   1
+#define IPI_PL_2_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_OBS_PMU_0_SHIFT   16
+#define IPI_PL_2_OBS_PMU_0_WIDTH   1
+#define IPI_PL_2_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_OBS_RPU_1_SHIFT   9
+#define IPI_PL_2_OBS_RPU_1_WIDTH   1
+#define IPI_PL_2_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_OBS_RPU_0_SHIFT   8
+#define IPI_PL_2_OBS_RPU_0_WIDTH   1
+#define IPI_PL_2_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_OBS_APU_SHIFT   0
+#define IPI_PL_2_OBS_APU_WIDTH   1
+#define IPI_PL_2_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_ISR
+ */
+#define IPI_PL_2_ISR    ( ( IPI_BASEADDR ) + 0X00060010 )
+
+#define IPI_PL_2_ISR_PL_3_SHIFT   27
+#define IPI_PL_2_ISR_PL_3_WIDTH   1
+#define IPI_PL_2_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_ISR_PL_2_SHIFT   26
+#define IPI_PL_2_ISR_PL_2_WIDTH   1
+#define IPI_PL_2_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_ISR_PL_1_SHIFT   25
+#define IPI_PL_2_ISR_PL_1_WIDTH   1
+#define IPI_PL_2_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_ISR_PL_0_SHIFT   24
+#define IPI_PL_2_ISR_PL_0_WIDTH   1
+#define IPI_PL_2_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_ISR_PMU_3_SHIFT   19
+#define IPI_PL_2_ISR_PMU_3_WIDTH   1
+#define IPI_PL_2_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_ISR_PMU_2_SHIFT   18
+#define IPI_PL_2_ISR_PMU_2_WIDTH   1
+#define IPI_PL_2_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_ISR_PMU_1_SHIFT   17
+#define IPI_PL_2_ISR_PMU_1_WIDTH   1
+#define IPI_PL_2_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_ISR_PMU_0_SHIFT   16
+#define IPI_PL_2_ISR_PMU_0_WIDTH   1
+#define IPI_PL_2_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_ISR_RPU_1_SHIFT   9
+#define IPI_PL_2_ISR_RPU_1_WIDTH   1
+#define IPI_PL_2_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_ISR_RPU_0_SHIFT   8
+#define IPI_PL_2_ISR_RPU_0_WIDTH   1
+#define IPI_PL_2_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_ISR_APU_SHIFT   0
+#define IPI_PL_2_ISR_APU_WIDTH   1
+#define IPI_PL_2_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_IMR
+ */
+#define IPI_PL_2_IMR    ( ( IPI_BASEADDR ) + 0X00060014 )
+
+#define IPI_PL_2_IMR_PL_3_SHIFT   27
+#define IPI_PL_2_IMR_PL_3_WIDTH   1
+#define IPI_PL_2_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_IMR_PL_2_SHIFT   26
+#define IPI_PL_2_IMR_PL_2_WIDTH   1
+#define IPI_PL_2_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_IMR_PL_1_SHIFT   25
+#define IPI_PL_2_IMR_PL_1_WIDTH   1
+#define IPI_PL_2_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_IMR_PL_0_SHIFT   24
+#define IPI_PL_2_IMR_PL_0_WIDTH   1
+#define IPI_PL_2_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_IMR_PMU_3_SHIFT   19
+#define IPI_PL_2_IMR_PMU_3_WIDTH   1
+#define IPI_PL_2_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_IMR_PMU_2_SHIFT   18
+#define IPI_PL_2_IMR_PMU_2_WIDTH   1
+#define IPI_PL_2_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_IMR_PMU_1_SHIFT   17
+#define IPI_PL_2_IMR_PMU_1_WIDTH   1
+#define IPI_PL_2_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_IMR_PMU_0_SHIFT   16
+#define IPI_PL_2_IMR_PMU_0_WIDTH   1
+#define IPI_PL_2_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_IMR_RPU_1_SHIFT   9
+#define IPI_PL_2_IMR_RPU_1_WIDTH   1
+#define IPI_PL_2_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_IMR_RPU_0_SHIFT   8
+#define IPI_PL_2_IMR_RPU_0_WIDTH   1
+#define IPI_PL_2_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_IMR_APU_SHIFT   0
+#define IPI_PL_2_IMR_APU_WIDTH   1
+#define IPI_PL_2_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_IER
+ */
+#define IPI_PL_2_IER    ( ( IPI_BASEADDR ) + 0X00060018 )
+
+#define IPI_PL_2_IER_PL_3_SHIFT   27
+#define IPI_PL_2_IER_PL_3_WIDTH   1
+#define IPI_PL_2_IER_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_IER_PL_2_SHIFT   26
+#define IPI_PL_2_IER_PL_2_WIDTH   1
+#define IPI_PL_2_IER_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_IER_PL_1_SHIFT   25
+#define IPI_PL_2_IER_PL_1_WIDTH   1
+#define IPI_PL_2_IER_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_IER_PL_0_SHIFT   24
+#define IPI_PL_2_IER_PL_0_WIDTH   1
+#define IPI_PL_2_IER_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_IER_PMU_3_SHIFT   19
+#define IPI_PL_2_IER_PMU_3_WIDTH   1
+#define IPI_PL_2_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_IER_PMU_2_SHIFT   18
+#define IPI_PL_2_IER_PMU_2_WIDTH   1
+#define IPI_PL_2_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_IER_PMU_1_SHIFT   17
+#define IPI_PL_2_IER_PMU_1_WIDTH   1
+#define IPI_PL_2_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_IER_PMU_0_SHIFT   16
+#define IPI_PL_2_IER_PMU_0_WIDTH   1
+#define IPI_PL_2_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_IER_RPU_1_SHIFT   9
+#define IPI_PL_2_IER_RPU_1_WIDTH   1
+#define IPI_PL_2_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_IER_RPU_0_SHIFT   8
+#define IPI_PL_2_IER_RPU_0_WIDTH   1
+#define IPI_PL_2_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_IER_APU_SHIFT   0
+#define IPI_PL_2_IER_APU_WIDTH   1
+#define IPI_PL_2_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_2_IDR
+ */
+#define IPI_PL_2_IDR    ( ( IPI_BASEADDR ) + 0X0006001C )
+
+#define IPI_PL_2_IDR_PL_3_SHIFT   27
+#define IPI_PL_2_IDR_PL_3_WIDTH   1
+#define IPI_PL_2_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PL_2_IDR_PL_2_SHIFT   26
+#define IPI_PL_2_IDR_PL_2_WIDTH   1
+#define IPI_PL_2_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PL_2_IDR_PL_1_SHIFT   25
+#define IPI_PL_2_IDR_PL_1_WIDTH   1
+#define IPI_PL_2_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PL_2_IDR_PL_0_SHIFT   24
+#define IPI_PL_2_IDR_PL_0_WIDTH   1
+#define IPI_PL_2_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PL_2_IDR_PMU_3_SHIFT   19
+#define IPI_PL_2_IDR_PMU_3_WIDTH   1
+#define IPI_PL_2_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_2_IDR_PMU_2_SHIFT   18
+#define IPI_PL_2_IDR_PMU_2_WIDTH   1
+#define IPI_PL_2_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_2_IDR_PMU_1_SHIFT   17
+#define IPI_PL_2_IDR_PMU_1_WIDTH   1
+#define IPI_PL_2_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_2_IDR_PMU_0_SHIFT   16
+#define IPI_PL_2_IDR_PMU_0_WIDTH   1
+#define IPI_PL_2_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_2_IDR_RPU_1_SHIFT   9
+#define IPI_PL_2_IDR_RPU_1_WIDTH   1
+#define IPI_PL_2_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_2_IDR_RPU_0_SHIFT   8
+#define IPI_PL_2_IDR_RPU_0_WIDTH   1
+#define IPI_PL_2_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_2_IDR_APU_SHIFT   0
+#define IPI_PL_2_IDR_APU_WIDTH   1
+#define IPI_PL_2_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_TRIG
+ */
+#define IPI_PL_3_TRIG    ( ( IPI_BASEADDR ) + 0X00070000 )
+
+#define IPI_PL_3_TRIG_PL_3_SHIFT   27
+#define IPI_PL_3_TRIG_PL_3_WIDTH   1
+#define IPI_PL_3_TRIG_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_TRIG_PL_2_SHIFT   26
+#define IPI_PL_3_TRIG_PL_2_WIDTH   1
+#define IPI_PL_3_TRIG_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_TRIG_PL_1_SHIFT   25
+#define IPI_PL_3_TRIG_PL_1_WIDTH   1
+#define IPI_PL_3_TRIG_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_TRIG_PL_0_SHIFT   24
+#define IPI_PL_3_TRIG_PL_0_WIDTH   1
+#define IPI_PL_3_TRIG_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_TRIG_PMU_3_SHIFT   19
+#define IPI_PL_3_TRIG_PMU_3_WIDTH   1
+#define IPI_PL_3_TRIG_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_TRIG_PMU_2_SHIFT   18
+#define IPI_PL_3_TRIG_PMU_2_WIDTH   1
+#define IPI_PL_3_TRIG_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_TRIG_PMU_1_SHIFT   17
+#define IPI_PL_3_TRIG_PMU_1_WIDTH   1
+#define IPI_PL_3_TRIG_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_TRIG_PMU_0_SHIFT   16
+#define IPI_PL_3_TRIG_PMU_0_WIDTH   1
+#define IPI_PL_3_TRIG_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_TRIG_RPU_1_SHIFT   9
+#define IPI_PL_3_TRIG_RPU_1_WIDTH   1
+#define IPI_PL_3_TRIG_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_TRIG_RPU_0_SHIFT   8
+#define IPI_PL_3_TRIG_RPU_0_WIDTH   1
+#define IPI_PL_3_TRIG_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_TRIG_APU_SHIFT   0
+#define IPI_PL_3_TRIG_APU_WIDTH   1
+#define IPI_PL_3_TRIG_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_OBS
+ */
+#define IPI_PL_3_OBS    ( ( IPI_BASEADDR ) + 0X00070004 )
+
+#define IPI_PL_3_OBS_PL_3_SHIFT   27
+#define IPI_PL_3_OBS_PL_3_WIDTH   1
+#define IPI_PL_3_OBS_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_OBS_PL_2_SHIFT   26
+#define IPI_PL_3_OBS_PL_2_WIDTH   1
+#define IPI_PL_3_OBS_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_OBS_PL_1_SHIFT   25
+#define IPI_PL_3_OBS_PL_1_WIDTH   1
+#define IPI_PL_3_OBS_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_OBS_PL_0_SHIFT   24
+#define IPI_PL_3_OBS_PL_0_WIDTH   1
+#define IPI_PL_3_OBS_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_OBS_PMU_3_SHIFT   19
+#define IPI_PL_3_OBS_PMU_3_WIDTH   1
+#define IPI_PL_3_OBS_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_OBS_PMU_2_SHIFT   18
+#define IPI_PL_3_OBS_PMU_2_WIDTH   1
+#define IPI_PL_3_OBS_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_OBS_PMU_1_SHIFT   17
+#define IPI_PL_3_OBS_PMU_1_WIDTH   1
+#define IPI_PL_3_OBS_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_OBS_PMU_0_SHIFT   16
+#define IPI_PL_3_OBS_PMU_0_WIDTH   1
+#define IPI_PL_3_OBS_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_OBS_RPU_1_SHIFT   9
+#define IPI_PL_3_OBS_RPU_1_WIDTH   1
+#define IPI_PL_3_OBS_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_OBS_RPU_0_SHIFT   8
+#define IPI_PL_3_OBS_RPU_0_WIDTH   1
+#define IPI_PL_3_OBS_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_OBS_APU_SHIFT   0
+#define IPI_PL_3_OBS_APU_WIDTH   1
+#define IPI_PL_3_OBS_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_ISR
+ */
+#define IPI_PL_3_ISR    ( ( IPI_BASEADDR ) + 0X00070010 )
+
+#define IPI_PL_3_ISR_PL_3_SHIFT   27
+#define IPI_PL_3_ISR_PL_3_WIDTH   1
+#define IPI_PL_3_ISR_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_ISR_PL_2_SHIFT   26
+#define IPI_PL_3_ISR_PL_2_WIDTH   1
+#define IPI_PL_3_ISR_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_ISR_PL_1_SHIFT   25
+#define IPI_PL_3_ISR_PL_1_WIDTH   1
+#define IPI_PL_3_ISR_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_ISR_PL_0_SHIFT   24
+#define IPI_PL_3_ISR_PL_0_WIDTH   1
+#define IPI_PL_3_ISR_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_ISR_PMU_3_SHIFT   19
+#define IPI_PL_3_ISR_PMU_3_WIDTH   1
+#define IPI_PL_3_ISR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_ISR_PMU_2_SHIFT   18
+#define IPI_PL_3_ISR_PMU_2_WIDTH   1
+#define IPI_PL_3_ISR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_ISR_PMU_1_SHIFT   17
+#define IPI_PL_3_ISR_PMU_1_WIDTH   1
+#define IPI_PL_3_ISR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_ISR_PMU_0_SHIFT   16
+#define IPI_PL_3_ISR_PMU_0_WIDTH   1
+#define IPI_PL_3_ISR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_ISR_RPU_1_SHIFT   9
+#define IPI_PL_3_ISR_RPU_1_WIDTH   1
+#define IPI_PL_3_ISR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_ISR_RPU_0_SHIFT   8
+#define IPI_PL_3_ISR_RPU_0_WIDTH   1
+#define IPI_PL_3_ISR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_ISR_APU_SHIFT   0
+#define IPI_PL_3_ISR_APU_WIDTH   1
+#define IPI_PL_3_ISR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_IMR
+ */
+#define IPI_PL_3_IMR    ( ( IPI_BASEADDR ) + 0X00070014 )
+
+#define IPI_PL_3_IMR_PL_3_SHIFT   27
+#define IPI_PL_3_IMR_PL_3_WIDTH   1
+#define IPI_PL_3_IMR_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_IMR_PL_2_SHIFT   26
+#define IPI_PL_3_IMR_PL_2_WIDTH   1
+#define IPI_PL_3_IMR_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_IMR_PL_1_SHIFT   25
+#define IPI_PL_3_IMR_PL_1_WIDTH   1
+#define IPI_PL_3_IMR_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_IMR_PL_0_SHIFT   24
+#define IPI_PL_3_IMR_PL_0_WIDTH   1
+#define IPI_PL_3_IMR_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_IMR_PMU_3_SHIFT   19
+#define IPI_PL_3_IMR_PMU_3_WIDTH   1
+#define IPI_PL_3_IMR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_IMR_PMU_2_SHIFT   18
+#define IPI_PL_3_IMR_PMU_2_WIDTH   1
+#define IPI_PL_3_IMR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_IMR_PMU_1_SHIFT   17
+#define IPI_PL_3_IMR_PMU_1_WIDTH   1
+#define IPI_PL_3_IMR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_IMR_PMU_0_SHIFT   16
+#define IPI_PL_3_IMR_PMU_0_WIDTH   1
+#define IPI_PL_3_IMR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_IMR_RPU_1_SHIFT   9
+#define IPI_PL_3_IMR_RPU_1_WIDTH   1
+#define IPI_PL_3_IMR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_IMR_RPU_0_SHIFT   8
+#define IPI_PL_3_IMR_RPU_0_WIDTH   1
+#define IPI_PL_3_IMR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_IMR_APU_SHIFT   0
+#define IPI_PL_3_IMR_APU_WIDTH   1
+#define IPI_PL_3_IMR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_IER
+ */
+#define IPI_PL_3_IER    ( ( IPI_BASEADDR ) + 0X00070018 )
+
+#define IPI_PL_3_IER_PL_3_SHIFT   27
+#define IPI_PL_3_IER_PL_3_WIDTH   1
+#define IPI_PL_3_IER_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_IER_PL_2_SHIFT   26
+#define IPI_PL_3_IER_PL_2_WIDTH   1
+#define IPI_PL_3_IER_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_IER_PL_1_SHIFT   25
+#define IPI_PL_3_IER_PL_1_WIDTH   1
+#define IPI_PL_3_IER_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_IER_PL_0_SHIFT   24
+#define IPI_PL_3_IER_PL_0_WIDTH   1
+#define IPI_PL_3_IER_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_IER_PMU_3_SHIFT   19
+#define IPI_PL_3_IER_PMU_3_WIDTH   1
+#define IPI_PL_3_IER_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_IER_PMU_2_SHIFT   18
+#define IPI_PL_3_IER_PMU_2_WIDTH   1
+#define IPI_PL_3_IER_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_IER_PMU_1_SHIFT   17
+#define IPI_PL_3_IER_PMU_1_WIDTH   1
+#define IPI_PL_3_IER_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_IER_PMU_0_SHIFT   16
+#define IPI_PL_3_IER_PMU_0_WIDTH   1
+#define IPI_PL_3_IER_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_IER_RPU_1_SHIFT   9
+#define IPI_PL_3_IER_RPU_1_WIDTH   1
+#define IPI_PL_3_IER_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_IER_RPU_0_SHIFT   8
+#define IPI_PL_3_IER_RPU_0_WIDTH   1
+#define IPI_PL_3_IER_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_IER_APU_SHIFT   0
+#define IPI_PL_3_IER_APU_WIDTH   1
+#define IPI_PL_3_IER_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_PL_3_IDR
+ */
+#define IPI_PL_3_IDR    ( ( IPI_BASEADDR ) + 0X0007001C )
+
+#define IPI_PL_3_IDR_PL_3_SHIFT   27
+#define IPI_PL_3_IDR_PL_3_WIDTH   1
+#define IPI_PL_3_IDR_PL_3_MASK    0X08000000
+
+#define IPI_PL_3_IDR_PL_2_SHIFT   26
+#define IPI_PL_3_IDR_PL_2_WIDTH   1
+#define IPI_PL_3_IDR_PL_2_MASK    0X04000000
+
+#define IPI_PL_3_IDR_PL_1_SHIFT   25
+#define IPI_PL_3_IDR_PL_1_WIDTH   1
+#define IPI_PL_3_IDR_PL_1_MASK    0X02000000
+
+#define IPI_PL_3_IDR_PL_0_SHIFT   24
+#define IPI_PL_3_IDR_PL_0_WIDTH   1
+#define IPI_PL_3_IDR_PL_0_MASK    0X01000000
+
+#define IPI_PL_3_IDR_PMU_3_SHIFT   19
+#define IPI_PL_3_IDR_PMU_3_WIDTH   1
+#define IPI_PL_3_IDR_PMU_3_MASK    0X00080000
+
+#define IPI_PL_3_IDR_PMU_2_SHIFT   18
+#define IPI_PL_3_IDR_PMU_2_WIDTH   1
+#define IPI_PL_3_IDR_PMU_2_MASK    0X00040000
+
+#define IPI_PL_3_IDR_PMU_1_SHIFT   17
+#define IPI_PL_3_IDR_PMU_1_WIDTH   1
+#define IPI_PL_3_IDR_PMU_1_MASK    0X00020000
+
+#define IPI_PL_3_IDR_PMU_0_SHIFT   16
+#define IPI_PL_3_IDR_PMU_0_WIDTH   1
+#define IPI_PL_3_IDR_PMU_0_MASK    0X00010000
+
+#define IPI_PL_3_IDR_RPU_1_SHIFT   9
+#define IPI_PL_3_IDR_RPU_1_WIDTH   1
+#define IPI_PL_3_IDR_RPU_1_MASK    0X00000200
+
+#define IPI_PL_3_IDR_RPU_0_SHIFT   8
+#define IPI_PL_3_IDR_RPU_0_WIDTH   1
+#define IPI_PL_3_IDR_RPU_0_MASK    0X00000100
+
+#define IPI_PL_3_IDR_APU_SHIFT   0
+#define IPI_PL_3_IDR_APU_WIDTH   1
+#define IPI_PL_3_IDR_APU_MASK    0X00000001
+
+/**
+ * Register: IPI_IPI_CTRL
+ */
+#define IPI_IPI_CTRL    ( ( IPI_BASEADDR ) + 0X00080000 )
+
+#define IPI_IPI_CTRL_SLVERR_ENABLE_SHIFT   0
+#define IPI_IPI_CTRL_SLVERR_ENABLE_WIDTH   1
+#define IPI_IPI_CTRL_SLVERR_ENABLE_MASK    0X00000001
+
+/**
+ * Register: IPI_IPI_ISR
+ */
+#define IPI_IPI_ISR    ( ( IPI_BASEADDR ) + 0X00080010 )
+
+#define IPI_IPI_ISR_ADDR_DECODE_ERR_SHIFT   0
+#define IPI_IPI_ISR_ADDR_DECODE_ERR_WIDTH   1
+#define IPI_IPI_ISR_ADDR_DECODE_ERR_MASK    0X00000001
+
+/**
+ * Register: IPI_IPI_IMR
+ */
+#define IPI_IPI_IMR    ( ( IPI_BASEADDR ) + 0X00080014 )
+
+#define IPI_IPI_IMR_ADDR_DECODE_ERR_SHIFT   0
+#define IPI_IPI_IMR_ADDR_DECODE_ERR_WIDTH   1
+#define IPI_IPI_IMR_ADDR_DECODE_ERR_MASK    0X00000001
+
+/**
+ * Register: IPI_IPI_IER
+ */
+#define IPI_IPI_IER    ( ( IPI_BASEADDR ) + 0X00080018 )
+
+#define IPI_IPI_IER_ADDR_DECODE_ERR_SHIFT   0
+#define IPI_IPI_IER_ADDR_DECODE_ERR_WIDTH   1
+#define IPI_IPI_IER_ADDR_DECODE_ERR_MASK    0X00000001
+
+/**
+ * Register: IPI_IPI_ECO
+ */
+#define IPI_IPI_ECO    ( ( IPI_BASEADDR ) + 0X00080020 )
+
+#define IPI_IPI_ECO_ECO_SHIFT   0
+#define IPI_IPI_ECO_ECO_WIDTH   32
+#define IPI_IPI_ECO_ECO_MASK    0XFFFFFFFF
+
+/**
+ * Register: IPI_SAFETY_CHK
+ */
+#define IPI_SAFETY_CHK    ( ( IPI_BASEADDR ) + 0X00080030 )
+
+#define IPI_SAFETY_CHK_DATA_SHIFT   0
+#define IPI_SAFETY_CHK_DATA_WIDTH   32
+#define IPI_SAFETY_CHK_DATA_MASK    0XFFFFFFFF
+
+/**
+ * Register: IPI_IPI_IDR
+ */
+#define IPI_IPI_IDR    ( ( IPI_BASEADDR ) + 0X000C001C )
+
+#define IPI_IPI_IDR_ADDR_DECODE_ERR_SHIFT   0
+#define IPI_IPI_IDR_ADDR_DECODE_ERR_WIDTH   1
+#define IPI_IPI_IDR_ADDR_DECODE_ERR_MASK    0X00000001
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif /* _IPI_H_ */
