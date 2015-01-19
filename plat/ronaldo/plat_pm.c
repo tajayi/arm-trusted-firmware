@@ -56,19 +56,6 @@ static void ronaldo_program_mailbox(uint64_t mpidr, uint64_t address)
 }
 
 /*******************************************************************************
- * Function which implements the common Ronaldo specific operations to power down a
- * cpu in response to a CPU_OFF or CPU_SUSPEND request.
- ******************************************************************************/
-static void ronaldo_cpu_pwrdwn_common(void)
-{
-	/* Prevent interrupts from spuriously waking up this cpu */
-	arm_gic_cpuif_deactivate();
-
-	/* Program the power controller to power off this cpu. */
-	fvp_pwrc_write_ppoffr(read_mpidr_el1());
-}
-
-/*******************************************************************************
  * Private Ronaldo function which is used to determine if any platform actions
  * should be performed for the specified affinity instance given its
  * state. Nothing needs to be done if the 'state' is not off or if this is not
@@ -161,7 +148,12 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 	 * suspended. Perform at least the cpu specific actions followed the
 	 * cluster specific operations if applicable.
 	 */
-	ronaldo_cpu_pwrdwn_common();
+	/* Prevent interrupts from spuriously waking up this cpu */
+	arm_gic_cpuif_deactivate();
+
+	/* Program the power controller to power off this cpu. */
+	fvp_pwrc_write_ppoffr(read_mpidr_el1());
+
 
 	return PSCI_E_SUCCESS;
 }
@@ -195,7 +187,11 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	fvp_pwrc_set_wen(mpidr);
 
 	/* Perform the common cpu specific operations */
-	ronaldo_cpu_pwrdwn_common();
+	/* Prevent interrupts from spuriously waking up this cpu */
+	arm_gic_cpuif_deactivate();
+
+	/* Program the power controller to power off this cpu. */
+	fvp_pwrc_write_ppoffr(read_mpidr_el1());
 
 	return PSCI_E_SUCCESS;
 }
