@@ -31,16 +31,12 @@
 #include <arch_helpers.h>
 #include <arm_gic.h>
 #include <assert.h>
-#include <bakery_lock.h>
 #include <debug.h>
 #include <mmio.h>
 #include <platform.h>
-#include <plat_config.h>
-#include <platform_def.h>
 #include <psci.h>
 #include <errno.h>
 #include "drivers/pwrc/fvp_pwrc.h"
-#include "fvp_def.h"
 #include "fvp_private.h"
 
 /*******************************************************************************
