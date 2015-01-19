@@ -81,7 +81,6 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/ronaldo/sip_svc_setup.c			\
 				plat/ronaldo/aarch64/fvp_helpers.S		\
 				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/ronaldo/drivers/pwrc/fvp_pwrc.c		\
 				plat/ronaldo/pm_service/pm_svc_main.c		\
 				plat/ronaldo/pm_service/pm_api_sys.c		\
 				plat/ronaldo/pm_service/pm_client.c

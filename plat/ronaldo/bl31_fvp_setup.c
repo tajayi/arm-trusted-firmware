@@ -38,7 +38,6 @@
 #include <mmio.h>
 #include <platform.h>
 #include <stddef.h>
-#include "drivers/pwrc/fvp_pwrc.h"
 #include "fvp_def.h"
 #include "fvp_private.h"
 
@@ -193,8 +192,6 @@ void bl31_platform_setup(void)
 	/* Initialize the gic cpu and distributor interfaces */
 	fvp_gic_init();
 	arm_gic_setup();
-
-	fvp_pwrc_setup();
 
 	/* Topologies are best known to the platform. */
 	plat_setup_topology();

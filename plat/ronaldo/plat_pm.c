@@ -36,7 +36,6 @@
 #include <platform.h>
 #include <psci.h>
 #include <errno.h>
-#include "drivers/pwrc/fvp_pwrc.h"
 #include "fvp_private.h"
 
 /*******************************************************************************
@@ -93,7 +92,6 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
-	uint32_t psysr;
 	uint32_t r;
 
 	/*
@@ -102,17 +100,6 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	 */
 	if (afflvl != MPIDR_AFFLVL0)
 		return PSCI_E_SUCCESS;
-
-	/*
-	 * Ensure that we do not cancel an inflight power off request
-	 * for the target cpu. That would leave it in a zombie wfi.
-	 * Wait for it to power off, program the jump address for the
-	 * target cpu and then program the power controller to turn
-	 * that cpu on
-	 */
-	do {
-		psysr = fvp_pwrc_read_psysr(mpidr);
-	} while (psysr & PSYSR_AFF_L0);
 
 	ronaldo_program_mailbox(mpidr, sec_entrypoint);
 
@@ -191,9 +178,6 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	/* Program the jump address for the target cpu */
 	ronaldo_program_mailbox(read_mpidr_el1(), sec_entrypoint);
 
-	/* Program the power controller to enable wakeup interrupts. */
-	fvp_pwrc_set_wen(mpidr);
-
 	/* Perform the common cpu specific operations */
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
@@ -220,12 +204,6 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
-
-	/*
-	 * Clear PWKUPR.WEN bit to ensure interrupts do not interfere
-	 * with a cpu power down unless the bit is set again
-	 */
-	fvp_pwrc_clr_wen(mpidr);
 
 	/* Zero the jump address in the mailbox for this cpu */
 	ronaldo_program_mailbox(read_mpidr_el1(), 0);

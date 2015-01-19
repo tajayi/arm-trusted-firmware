@@ -33,7 +33,6 @@
 #include <bl_common.h>
 #include <gic_v2.h>
 #include <platform_def.h>
-#include "../drivers/pwrc/fvp_pwrc.h"
 
 	.globl	platform_get_entrypoint
 	.globl	plat_secondary_cold_boot_setup
@@ -64,8 +63,6 @@ func plat_secondary_cold_boot_setup
 	 * ---------------------------------------------
 	 */
 	mrs	x0, mpidr_el1
-	ldr	x1, =PWRC_BASE
-	str	w0, [x1, #PPOFFR_OFF]
 
 	/* ---------------------------------------------
 	 * Deactivate the gic cpu interface as well
@@ -110,15 +107,6 @@ cb_panic:
 	 */
 func platform_get_entrypoint
 	mov	x9, x30 // lr
-	mov	x2, x0
-	ldr	x1, =PWRC_BASE
-	str	w2, [x1, #PSYSR_OFF]
-	ldr	w2, [x1, #PSYSR_OFF]
-	ubfx	w2, w2, #PSYSR_WK_SHIFT, #PSYSR_WK_MASK
-	cmp	w2, #WKUP_PPONR
-	beq	warm_reset
-	cmp	w2, #WKUP_GICREQ
-	beq	warm_reset
 	mov	x0, #0
 	b	exit
 warm_reset:
