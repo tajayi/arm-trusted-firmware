@@ -291,7 +291,7 @@ static const plat_pm_ops_t ronaldo_ops = {
 };
 
 /*******************************************************************************
- * Export the platform specific power ops & initialize the fvp power controller
+ * Export the platform specific power ops.
  ******************************************************************************/
 int32_t platform_setup_pm(const plat_pm_ops_t **plat_ops)
 {
