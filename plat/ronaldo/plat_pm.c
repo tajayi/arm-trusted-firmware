@@ -94,6 +94,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 				  uint32_t state)
 {
 	uint32_t psysr;
+	uint32_t r;
 
 	/*
 	 * It's possible to turn on only affinity level 0 i.e. a cpu
@@ -119,7 +120,9 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, sec_entrypoint >> 32);
 	dsb();
 
-	fvp_pwrc_write_pponr(mpidr);
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r &= ~(1 << mpidr);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 
 	return PSCI_E_SUCCESS;
 }
@@ -139,6 +142,8 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 				   uint32_t afflvl,
 				   uint32_t state)
 {
+	uint32_t r;
+
 	/* Determine if any platform actions need to be executed */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
@@ -152,8 +157,9 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 	arm_gic_cpuif_deactivate();
 
 	/* Program the power controller to power off this cpu. */
-	fvp_pwrc_write_ppoffr(read_mpidr_el1());
-
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r |= 1 << (mpidr & 0xf);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 
 	return PSCI_E_SUCCESS;
 }
@@ -176,6 +182,8 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 				       uint32_t afflvl,
 				       uint32_t state)
 {
+	uint32_t r;
+
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
@@ -191,7 +199,9 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	arm_gic_cpuif_deactivate();
 
 	/* Program the power controller to power off this cpu. */
-	fvp_pwrc_write_ppoffr(read_mpidr_el1());
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r |= 1 << (mpidr & 0xf);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 
 	return PSCI_E_SUCCESS;
 }
