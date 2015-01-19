@@ -143,8 +143,8 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 /*******************************************************************************
  * Ronaldo handler called when an affinity instance is about to be turned off. The
  * level and mpidr determine the affinity instance. The 'state' arg. allows the
- * platform to decide whether the cluster is being turned off and take apt
- * actions.
+ * platform to decide whether the cluster is being turned off and take
+ * appropriate actions.
  *
  * CAUTION: There is no guarantee that caches will remain turned on across calls
  * to this function as each affinity level is dealt with. So do not write & read
@@ -173,7 +173,8 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
  * Ronaldo handler called when an affinity instance is about to be suspended. The
  * level and mpidr determine the affinity instance. The 'state' arg. allows the
  * platform to decide whether the cluster is being turned off and take apt
- * actions.
+ * actions. The 'sec_entrypoint' determines the address in BL3-1 from where
+ * execution should resume.
  *
  * CAUTION: There is no guarantee that caches will remain turned on across calls
  * to this function as each affinity level is dealt with. So do not write & read
