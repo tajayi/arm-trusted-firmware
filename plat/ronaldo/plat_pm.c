@@ -109,7 +109,6 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
-	int32_t rc = PSCI_E_SUCCESS;
 	uint32_t psysr;
 
 	/*
@@ -117,7 +116,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	 * on the Ronaldo. Ignore any other affinity level.
 	 */
 	if (afflvl != MPIDR_AFFLVL0)
-		return rc;
+		return PSCI_E_SUCCESS;
 
 	/*
 	 * Ensure that we do not cancel an inflight power off request
@@ -138,7 +137,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 
 	fvp_pwrc_write_pponr(mpidr);
 
-	return rc;
+	return PSCI_E_SUCCESS;
 }
 
 /*******************************************************************************
@@ -214,8 +213,6 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 					 uint32_t afflvl,
 					 uint32_t state)
 {
-	int32_t rc = PSCI_E_SUCCESS;
-
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
@@ -235,7 +232,7 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 	/* TODO: This setup is needed only after a cold boot */
 	arm_gic_pcpu_distif_setup();
 
-	return rc;
+	return PSCI_E_SUCCESS;
 }
 
 /*******************************************************************************
