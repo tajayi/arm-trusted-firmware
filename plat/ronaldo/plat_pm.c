@@ -117,33 +117,6 @@ static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance is about to enter standby.
- ******************************************************************************/
-static int32_t ronaldo_affinst_standby(unsigned int power_state)
-{
-	uint32_t target_afflvl;
-
-	/* Sanity check the requested state */
-	target_afflvl = psci_get_pstate_afflvl(power_state);
-
-	/*
-	 * It's possible to enter standby only on affinity level 0 i.e. a cpu
-	 * on the Ronaldo. Ignore any other affinity level.
-	 */
-	if (target_afflvl != MPIDR_AFFLVL0)
-		return PSCI_E_INVALID_PARAMS;
-
-	/*
-	 * Enter standby state
-	 * dsb is good practice before using wfi to enter low power states
-	 */
-	dsb();
-	wfi();
-
-	return PSCI_E_SUCCESS;
-}
-
-/*******************************************************************************
  * Ronaldo handler called when an affinity instance is about to be turned on. The
  * level and mpidr determine the affinity instance.
  ******************************************************************************/
@@ -352,7 +325,6 @@ static void __dead2 ronaldo_system_reset(void)
  * Export the platform handlers to enable psci to invoke them
  ******************************************************************************/
 static const plat_pm_ops_t ronaldo_ops = {
-	.affinst_standby	= ronaldo_affinst_standby,
 	.affinst_on		= ronaldo_affinst_on,
 	.affinst_off		= ronaldo_affinst_off,
 	.affinst_suspend	= ronaldo_affinst_suspend,
