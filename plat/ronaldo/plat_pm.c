@@ -64,7 +64,7 @@ static void ronaldo_program_mailbox(uint64_t mpidr, uint64_t address)
  * Function which implements the common Ronaldo specific operations to power down a
  * cpu in response to a CPU_OFF or CPU_SUSPEND request.
  ******************************************************************************/
-static void ronaldo_cpu_pwrdwn_common()
+static void ronaldo_cpu_pwrdwn_common(void)
 {
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
@@ -77,7 +77,7 @@ static void ronaldo_cpu_pwrdwn_common()
  * Function which implements the common Ronaldo specific operations to power down a
  * cluster in response to a CPU_OFF or CPU_SUSPEND request.
  ******************************************************************************/
-static void ronaldo_cluster_pwrdwn_common()
+static void ronaldo_cluster_pwrdwn_common(void)
 {
 	uint64_t mpidr = read_mpidr_el1();
 
@@ -95,9 +95,9 @@ static void ronaldo_cluster_pwrdwn_common()
  * state. Nothing needs to be done if the 'state' is not off or if this is not
  * the highest affinity level which will enter the 'state'.
  ******************************************************************************/
-static int32_t ronaldo_do_plat_actions(unsigned int afflvl, unsigned int state)
+static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
 {
-	unsigned int max_phys_off_afflvl;
+	uint32_t max_phys_off_afflvl;
 
 	assert(afflvl <= MPIDR_AFFLVL1);
 
@@ -119,9 +119,9 @@ static int32_t ronaldo_do_plat_actions(unsigned int afflvl, unsigned int state)
 /*******************************************************************************
  * Ronaldo handler called when an affinity instance is about to enter standby.
  ******************************************************************************/
-int ronaldo_affinst_standby(unsigned int power_state)
+static int32_t ronaldo_affinst_standby(unsigned int power_state)
 {
-	unsigned int target_afflvl;
+	uint32_t target_afflvl;
 
 	/* Sanity check the requested state */
 	target_afflvl = psci_get_pstate_afflvl(power_state);
@@ -147,14 +147,14 @@ int ronaldo_affinst_standby(unsigned int power_state)
  * Ronaldo handler called when an affinity instance is about to be turned on. The
  * level and mpidr determine the affinity instance.
  ******************************************************************************/
-int ronaldo_affinst_on(unsigned long mpidr,
-		   unsigned long sec_entrypoint,
-		   unsigned long ns_entrypoint,
-		   unsigned int afflvl,
-		   unsigned int state)
+static int32_t ronaldo_affinst_on(uint64_t mpidr,
+				  uint64_t sec_entrypoint,
+				  uint64_t ns_entrypoint,
+				  uint32_t afflvl,
+				  uint32_t state)
 {
-	int rc = PSCI_E_SUCCESS;
-	unsigned int psysr;
+	int32_t rc = PSCI_E_SUCCESS;
+	uint32_t psysr;
 
 	/*
 	 * It's possible to turn on only affinity level 0 i.e. a cpu
@@ -196,9 +196,9 @@ int ronaldo_affinst_on(unsigned long mpidr,
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-int ronaldo_affinst_off(unsigned long mpidr,
-		    unsigned int afflvl,
-		    unsigned int state)
+static int32_t ronaldo_affinst_off(uint64_t mpidr,
+				   uint32_t afflvl,
+				   uint32_t state)
 {
 	/* Determine if any platform actions need to be executed */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -228,11 +228,11 @@ int ronaldo_affinst_off(unsigned long mpidr,
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-int ronaldo_affinst_suspend(unsigned long mpidr,
-			unsigned long sec_entrypoint,
-			unsigned long ns_entrypoint,
-			unsigned int afflvl,
-			unsigned int state)
+static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
+				       uint64_t sec_entrypoint,
+				       uint64_t ns_entrypoint,
+				       uint32_t afflvl,
+				       uint32_t state)
 {
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -261,11 +261,11 @@ int ronaldo_affinst_suspend(unsigned long mpidr,
  * was turned off prior to wakeup and do what's necessary to setup it up
  * correctly.
  ******************************************************************************/
-int ronaldo_affinst_on_finish(unsigned long mpidr,
-			  unsigned int afflvl,
-			  unsigned int state)
+static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
+					 uint32_t afflvl,
+					 uint32_t state)
 {
-	int rc = PSCI_E_SUCCESS;
+	int32_t rc = PSCI_E_SUCCESS;
 
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -313,9 +313,9 @@ int ronaldo_affinst_on_finish(unsigned long mpidr,
  * TODO: At the moment we reuse the on finisher and reinitialize the secure
  * context. Need to implement a separate suspend finisher.
  ******************************************************************************/
-int ronaldo_affinst_suspend_finish(unsigned long mpidr,
-			       unsigned int afflvl,
-			       unsigned int state)
+static int32_t ronaldo_affinst_suspend_finish(uint64_t mpidr,
+					      uint32_t afflvl,
+					      uint32_t state)
 {
 	return ronaldo_affinst_on_finish(mpidr, afflvl, state);
 }
@@ -365,7 +365,7 @@ static const plat_pm_ops_t ronaldo_ops = {
 /*******************************************************************************
  * Export the platform specific power ops & initialize the fvp power controller
  ******************************************************************************/
-int platform_setup_pm(const plat_pm_ops_t **plat_ops)
+int32_t platform_setup_pm(const plat_pm_ops_t **plat_ops)
 {
 	*plat_ops = &ronaldo_ops;
 	return 0;
