@@ -89,6 +89,7 @@ static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
 	 */
 	max_phys_off_afflvl = psci_get_max_phys_off_afflvl();
 	assert(max_phys_off_afflvl != PSCI_INVALID_DATA);
+	assert(psci_get_suspend_afflvl() >= max_phys_off_afflvl);
 	if (afflvl != max_phys_off_afflvl)
 		return -EAGAIN;
 
