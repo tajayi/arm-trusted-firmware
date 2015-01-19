@@ -32,7 +32,6 @@
 #include <arm_gic.h>
 #include <assert.h>
 #include <bakery_lock.h>
-#include <cci400.h>
 #include <debug.h>
 #include <mmio.h>
 #include <platform.h>
@@ -71,22 +70,6 @@ static void ronaldo_cpu_pwrdwn_common(void)
 
 	/* Program the power controller to power off this cpu. */
 	fvp_pwrc_write_ppoffr(read_mpidr_el1());
-}
-
-/*******************************************************************************
- * Function which implements the common Ronaldo specific operations to power down a
- * cluster in response to a CPU_OFF or CPU_SUSPEND request.
- ******************************************************************************/
-static void ronaldo_cluster_pwrdwn_common(void)
-{
-	uint64_t mpidr = read_mpidr_el1();
-
-	/* Disable coherency if this cluster is to be turned off */
-	if (get_plat_config()->flags & CONFIG_HAS_CCI)
-		cci_disable_cluster_coherency(mpidr);
-
-	/* Program the power controller to turn the cluster off */
-	fvp_pwrc_write_pcoffr(mpidr);
 }
 
 /*******************************************************************************
@@ -184,9 +167,6 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 	 */
 	ronaldo_cpu_pwrdwn_common();
 
-	if (afflvl != MPIDR_AFFLVL0)
-		ronaldo_cluster_pwrdwn_common();
-
 	return PSCI_E_SUCCESS;
 }
 
@@ -220,10 +200,6 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	/* Perform the common cpu specific operations */
 	ronaldo_cpu_pwrdwn_common();
 
-	/* Perform the common cluster specific operations */
-	if (afflvl != MPIDR_AFFLVL0)
-		ronaldo_cluster_pwrdwn_common();
-
 	return PSCI_E_SUCCESS;
 }
 
@@ -243,23 +219,6 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
-
-	/* Perform the common cluster specific operations */
-	if (afflvl != MPIDR_AFFLVL0) {
-		/*
-		 * This CPU might have woken up whilst the cluster was
-		 * attempting to power down. In this case the Ronaldo power
-		 * controller will have a pending cluster power off request
-		 * which needs to be cleared by writing to the PPONR register.
-		 * This prevents the power controller from interpreting a
-		 * subsequent entry of this cpu into a simple wfi as a power
-		 * down request.
-		 */
-		fvp_pwrc_write_pponr(mpidr);
-
-		/* Enable coherency if this cluster was off */
-		fvp_cci_enable();
-	}
 
 	/*
 	 * Clear PWKUPR.WEN bit to ensure interrupts do not interfere
