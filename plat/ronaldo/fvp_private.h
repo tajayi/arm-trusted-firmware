@@ -82,8 +82,8 @@ void fvp_cci_enable(void);
 
 void fvp_gic_init(void);
 
-/* Declarations for fvp_topology.c */
-int fvp_setup_topology(void);
+/* Declarations for plat_topology.c */
+int plat_setup_topology(void);
 
 /* Declarations for fvp_io_storage.c */
 void fvp_io_setup(void);

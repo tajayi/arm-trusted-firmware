@@ -197,7 +197,7 @@ void bl31_platform_setup(void)
 	fvp_pwrc_setup();
 
 	/* Topologies are best known to the platform. */
-	fvp_setup_topology();
+	plat_setup_topology();
 }
 
 /*******************************************************************************
