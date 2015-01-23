@@ -48,10 +48,6 @@
 /* Size of cacheable stacks */
 #if DEBUG_XLAT_TABLE
 #define PLATFORM_STACK_SIZE 0x800
-#elif IMAGE_BL1
-#define PLATFORM_STACK_SIZE 0x440
-#elif IMAGE_BL2
-#define PLATFORM_STACK_SIZE 0x400
 #elif IMAGE_BL31
 #define PLATFORM_STACK_SIZE 0x400
 #elif IMAGE_BL32
@@ -59,9 +55,6 @@
 #endif
 
 #define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
-
-/* Trusted Boot Firmware BL2 */
-#define BL2_IMAGE_NAME			"bl2.bin"
 
 /* EL3 Runtime Firmware BL31 */
 #define BL31_IMAGE_NAME			"bl31.bin"
@@ -83,32 +76,6 @@
 #define MAX_IO_HANDLES			4
 
 /*******************************************************************************
- * BL1 specific defines.
- * BL1 RW data is relocated from ROM to RAM at runtime so we need 2 sets of
- * addresses.
- ******************************************************************************/
-#define BL1_RO_BASE			FVP_TRUSTED_ROM_BASE
-#define BL1_RO_LIMIT			(FVP_TRUSTED_ROM_BASE \
-					+ FVP_TRUSTED_ROM_SIZE)
-/*
- * Put BL1 RW at the top of the Trusted SRAM (just below the shared memory, if
- * present). BL1_RW_BASE is calculated using the current BL1 RW debug size plus
- * a little space for growth.
- */
-#define BL1_RW_BASE			(FVP_TRUSTED_SRAM_LIMIT - 0x6000)
-#define BL1_RW_LIMIT			FVP_TRUSTED_SRAM_LIMIT
-
-/*******************************************************************************
- * BL2 specific defines.
- ******************************************************************************/
-/*
- * Put BL2 just below BL3-1. BL2_BASE is calculated using the current BL2 debug
- * size plus a little space for growth.
- */
-#define BL2_BASE			(BL31_BASE - 0xC000)
-#define BL2_LIMIT			BL31_BASE
-
-/*******************************************************************************
  * BL31 specific defines.
  ******************************************************************************/
 /*
@@ -117,7 +84,7 @@
  * little space for growth.
  */
 #define BL31_BASE			(FVP_TRUSTED_SRAM_LIMIT - 0x1D000)
-#define BL31_PROGBITS_LIMIT		BL1_RW_BASE
+#define BL31_PROGBITS_LIMIT		(FVP_TRUSTED_SRAM_LIMIT - 0x6000)
 #define BL31_LIMIT			FVP_TRUSTED_SRAM_LIMIT
 
 /*******************************************************************************
@@ -129,7 +96,7 @@
 #if FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_SRAM
 # define TSP_SEC_MEM_BASE		FVP_TRUSTED_SRAM_BASE
 # define TSP_SEC_MEM_SIZE		FVP_TRUSTED_SRAM_SIZE
-# define TSP_PROGBITS_LIMIT		BL2_BASE
+# define TSP_PROGBITS_LIMIT		BL31_BASE
 # define BL32_BASE			FVP_TRUSTED_SRAM_BASE
 # define BL32_LIMIT			BL31_BASE
 #elif FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_DRAM

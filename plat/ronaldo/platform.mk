@@ -52,18 +52,6 @@ PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				lib/aarch64/xlat_tables.c			\
 				plat/common/aarch64/plat_common.c		\
 
-BL1_SOURCES		+=	drivers/arm/cci400/cci400.c			\
-				plat/common/aarch64/platform_up_stack.S		\
-				plat/ronaldo/bl1_fvp_setup.c			\
-				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/ronaldo/aarch64/fvp_helpers.S
-
-BL2_SOURCES		+=	drivers/arm/tzc400/tzc400.c			\
-				plat/common/aarch64/platform_up_stack.S		\
-				plat/ronaldo/bl2_fvp_setup.c			\
-				plat/ronaldo/fvp_security.c			\
-				plat/ronaldo/aarch64/fvp_common.c
-
 BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				drivers/arm/gic/arm_gic.c			\
 				drivers/arm/gic/gic_v2.c			\

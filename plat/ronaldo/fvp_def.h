@@ -43,9 +43,6 @@
  * FVP memory map related constants
  ******************************************************************************/
 
-#define FVP_TRUSTED_ROM_BASE	0x00000000
-#define FVP_TRUSTED_ROM_SIZE	0x04000000
-
 #define FVP_TRUSTED_SRAM_BASE	0xFFFC0000
 #define FVP_TRUSTED_SRAM_SIZE	0x00040000
 
