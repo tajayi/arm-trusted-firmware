@@ -24,3 +24,6 @@ qemu-system-aarch64 -M arm-generic-fdt \
 You should see the following:
 BL31 Built : 13:03:55, Jul 24 2014
 ASSERT: bl31_prepare_next_image_entry <150> : next_image_info
+
+To build bl32 TSP you have to rebuild bl31 too:
+make DEBUG=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=ronaldo SPD=tspd bl31 bl32
