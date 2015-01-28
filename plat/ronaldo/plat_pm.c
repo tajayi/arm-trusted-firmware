@@ -97,12 +97,15 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/*
-	 * It's possible to turn on only affinity level 0 i.e. a cpu
-	 * on the Ronaldo. Ignore any other affinity level.
+	 * PMU takes care of powering up higher affinity levels so we
+	 * only need to care about level 0
 	 */
 	if (afflvl != MPIDR_AFFLVL0)
 		return PSCI_E_SUCCESS;
 
+	/*
+	 * Setup mailbox with address for CPU entrypoint when it next powers up
+	 */
 	ronaldo_program_mailbox(mpidr, sec_entrypoint);
 
 	mmio_write_32(R_RVBAR_L_0 + mpidr * 8, sec_entrypoint);
@@ -145,11 +148,6 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
 
-	/*
-	 * If execution reaches this stage then this affinity level will be
-	 * suspended. Perform at least the cpu specific actions followed the
-	 * cluster specific operations if applicable.
-	 */
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
 
@@ -207,7 +205,6 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	 */
 	ronaldo_program_mailbox(mpidr, sec_entrypoint);
 
-	/* Perform the common cpu specific operations */
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
 
@@ -252,7 +249,7 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 	/* Enable the gic cpu interface */
 	arm_gic_cpuif_setup();
 
-	/* TODO: This setup is needed only after a cold boot */
+	/* TODO: Is this setup only needed after a cold boot? */
 	arm_gic_pcpu_distif_setup();
 
 	/* Clear the mailbox for this cpu. */
