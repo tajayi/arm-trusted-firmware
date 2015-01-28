@@ -175,8 +175,10 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
 
-	/* Program the jump address for the target cpu */
-	ronaldo_program_mailbox(read_mpidr_el1(), sec_entrypoint);
+	/*
+	 * Setup mailbox with address for CPU entrypoint when it next powers up.
+	 */
+	ronaldo_program_mailbox(mpidr, sec_entrypoint);
 
 	/* Perform the common cpu specific operations */
 	/* Prevent interrupts from spuriously waking up this cpu */
@@ -205,14 +207,14 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
 		return PSCI_E_SUCCESS;
 
-	/* Zero the jump address in the mailbox for this cpu */
-	ronaldo_program_mailbox(read_mpidr_el1(), 0);
-
 	/* Enable the gic cpu interface */
 	arm_gic_cpuif_setup();
 
 	/* TODO: This setup is needed only after a cold boot */
 	arm_gic_pcpu_distif_setup();
+
+	/* Clear the mailbox for this cpu. */
+	ronaldo_program_mailbox(mpidr, 0);
 
 	return PSCI_E_SUCCESS;
 }
