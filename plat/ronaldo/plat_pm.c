@@ -37,6 +37,7 @@
 #include <psci.h>
 #include <errno.h>
 #include "fvp_private.h"
+#include "pm_api_sys.h"
 
 /*******************************************************************************
  * Private Ronaldo function to program the mailbox for a cpu before it is released
@@ -93,6 +94,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 				  uint32_t state)
 {
 	uint32_t r;
+	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/*
 	 * It's possible to turn on only affinity level 0 i.e. a cpu
@@ -107,9 +109,16 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, sec_entrypoint >> 32);
 	dsb();
 
-	r = mmio_read_32(CRF_APB_RST_FPD_APU);
-	r &= ~(1 << mpidr);
-	mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	if (!zynqmp_is_pmu_up()) {
+		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		r &= ~(1 << mpidr);
+		mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	} else {
+		/*
+		 * Sent request to PMU to wake up selected APU CPU core
+		 */
+		pm_req_wakeup((enum pm_node_id)node_id, REQ_ACK_NO/*REQ_ACK_STANDARD*/);
+	}
 
 	return PSCI_E_SUCCESS;
 }
@@ -130,6 +139,7 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 				   uint32_t state)
 {
 	uint32_t r;
+	uint32_t node_id = platform_get_core_pos(read_mpidr_el1()) + 2;
 
 	/* Determine if any platform actions need to be executed */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -143,10 +153,26 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
 
-	/* Program the power controller to power off this cpu. */
-	r = mmio_read_32(CRF_APB_RST_FPD_APU);
-	r |= 1 << (mpidr & 0xf);
-	mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	if (!zynqmp_is_pmu_up()) {
+		/* Program the power controller to power off this cpu. */
+		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		r |= 1 << (mpidr & 0xf);
+		mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	} else {
+		if (afflvl > MPIDR_AFFLVL0) {
+			/*
+			 * Send request to PMU to suspend APU subsystem
+			 */
+			NOTICE("call pm_self_suspend(NODE_APU)\n");
+			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
+		}
+
+		/*
+		 * Send request to PMU to power down the appropriate APU CPU core
+		 */
+		NOTICE("call pm_self_suspend(node_id)\n");
+		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
+	}
 
 	return PSCI_E_SUCCESS;
 }
@@ -170,6 +196,7 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 				       uint32_t state)
 {
 	uint32_t r;
+	uint32_t node_id = platform_get_core_pos(read_mpidr_el1()) + 2;
 
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -184,10 +211,25 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
 
-	/* Program the power controller to power off this cpu. */
-	r = mmio_read_32(CRF_APB_RST_FPD_APU);
-	r |= 1 << (mpidr & 0xf);
-	mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	if (!zynqmp_is_pmu_up()) {
+		/* Program the power controller to power off this cpu. */
+		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		r |= 1 << (mpidr & 0xf);
+		mmio_write_32(CRF_APB_RST_FPD_APU, r);
+	} else {
+		/* APU is to be turned off */
+		if (afflvl > MPIDR_AFFLVL0) {
+			/*
+			 * Send request to PMU to suspend the APU CPU
+			 */
+			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
+		}
+
+		/*
+		 * Send request to PMU to suspend the appropriate APU CPU core
+		 */
+		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
+	}
 
 	return PSCI_E_SUCCESS;
 }
@@ -245,6 +287,14 @@ static void __dead2 ronaldo_system_off(void)
 		CFGCTRL_START | CFGCTRL_RW | CFGCTRL_FUNC(FUNC_SHUTDOWN));
 	wfi();
 #endif
+
+	if (zynqmp_is_pmu_up()) {
+		/* Send the power down request to the PMU */
+		pm_system_shutdown(0);
+
+		wfi();
+	}
+
 	ERROR("Ronaldo System Off: operation not handled.\n");
 	panic();
 }
@@ -257,6 +307,14 @@ static void __dead2 ronaldo_system_reset(void)
 		CFGCTRL_START | CFGCTRL_RW | CFGCTRL_FUNC(FUNC_REBOOT));
 	wfi();
 #endif
+
+	if (zynqmp_is_pmu_up()) {
+		/* Send the system reset request to the PMU */
+		pm_system_shutdown(1);
+
+		wfi();
+	}
+
 	ERROR("Ronaldo System Reset: operation not handled.\n");
 	panic();
 }
