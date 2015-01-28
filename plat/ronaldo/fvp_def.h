@@ -64,7 +64,7 @@
 
 /* Aggregate of all devices in the first GB */
 #define DEVICE0_BASE		0xFF000000
-#define DEVICE0_SIZE		0x00D00000
+#define DEVICE0_SIZE		0x00E00000
 #define DEVICE1_BASE		0xF9000000
 #define DEVICE1_SIZE		0x01000000
 

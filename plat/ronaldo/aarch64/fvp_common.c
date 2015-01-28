@@ -196,6 +196,24 @@ static void zynqmp_print_platform_name(void)
 	NOTICE("ATF running on QEMU/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
 }
 
+#define PMU_GLOBAL_CNTRL	0xFFD80000
+#define FW_IS_PRESENT		(1 << 4)
+
+/*
+ * zynqmp_is_pmu_up - Find if PMU firmware is up and running
+ *
+ * Return 0 if firmware is not available, non 0 otherwise
+ */
+uint32_t zynqmp_is_pmu_up(void)
+{
+	uint32_t ver;
+
+	ver = mmio_read_32(PMU_GLOBAL_CNTRL);
+	ver &= FW_IS_PRESENT;
+
+	return ver;
+}
+
 /*******************************************************************************
  * A single boot loader stack is expected to work on both the Foundation FVP
  * models and the two flavours of the Base FVP models (AEMv8 & Cortex). The
