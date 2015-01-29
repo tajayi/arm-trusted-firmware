@@ -482,6 +482,11 @@ cscope:
 	${Q}find ${CURDIR} -name "*.[chsS]" > cscope.files
 	${Q}cscope -b -q -k
 
+.PHONY: tags
+tags:
+	@echo "  CTAGS"
+	${Q}ctags -R ${CURDIR}
+
 help:
 	@echo "usage: ${MAKE} PLAT=<${HELP_PLATFORMS}> <all|bl1|bl2|bl31|distclean|clean|checkcodebase|checkpatch>"
 	@echo ""
@@ -500,6 +505,7 @@ help:
 	@echo "  cscope         Generate cscope index"
 	@echo "  distclean      Remove all build artifacts for all platforms"
 	@echo "  fiptool        Build the Firmware Image Package(FIP) creation tool"
+	@echo "  tags           Generate ctags index"
 	@echo ""
 	@echo "note: most build targets require PLAT to be set to a specific platform."
 	@echo ""
