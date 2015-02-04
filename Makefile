@@ -619,7 +619,7 @@ ${BUILD_PLAT}/${FIP_NAME}: ${FIP_DEPS} ${FIPTOOL} check_bl30 check_bl33
 
 cscope:
 	@echo "  CSCOPE"
-	${Q}find ${CURDIR} -name "*.[chsS]" > cscope.files
+	${Q}find ${CURDIR} -type f -name "*.[chsS]" > cscope.files
 	${Q}cscope -b -q -k
 
 .PHONY: tags
