@@ -114,7 +114,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 
 	if (!zynqmp_is_pmu_up()) {
 		r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r &= ~(1 << mpidr);
+		r &= ~(0x401 << mpidr);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		/*
