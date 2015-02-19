@@ -159,7 +159,7 @@ uint32_t zynqmp_get_uart_clk(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		return  96000;
+		return 96000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 25000000;
 	}
@@ -189,10 +189,12 @@ static void zynqmp_print_platform_name(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		NOTICE("ATF running on VELOCE/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
+		NOTICE("ATF running on VELOCE/RTL%d.%d\n",
+		       (rtl & 0xf0) >> 4, rtl & 0xf);
 		return;
 	case ZYNQMP_CSU_VERSION_EP108:
-		NOTICE("ATF running on EP108/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
+		NOTICE("ATF running on EP108/RTL%d.%d\n",
+		       (rtl & 0xf0) >> 4, rtl & 0xf);
 		return;
 	}
 
