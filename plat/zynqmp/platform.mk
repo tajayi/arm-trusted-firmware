@@ -60,9 +60,9 @@ endif
 $(eval $(call add_define,FVP_SHARED_DATA_LOCATION_ID))
 $(eval $(call add_define,FVP_TSP_RAM_LOCATION_ID))
 
-PLAT_INCLUDES		:=	-Iplat/ronaldo/include/				\
-				-Iplat/ronaldo/pm_service/			\
-				-Iplat/ronaldo/pm_service/include
+PLAT_INCLUDES		:=	-Iplat/zynqmp/include/				\
+				-Iplat/zynqmp/pm_service/			\
+				-Iplat/zynqmp/pm_service/include
 
 PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				drivers/cadence/uart/cdns_common.c		\
@@ -79,16 +79,16 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
-				plat/ronaldo/bl31_fvp_setup.c			\
-				plat/ronaldo/fvp_security.c			\
-				plat/ronaldo/plat_pm.c				\
-				plat/ronaldo/plat_topology.c			\
-				plat/ronaldo/sip_svc_setup.c			\
-				plat/ronaldo/aarch64/fvp_helpers.S		\
-				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/ronaldo/pm_service/pm_svc_main.c		\
-				plat/ronaldo/pm_service/pm_api_sys.c		\
-				plat/ronaldo/pm_service/pm_client.c
+				plat/zynqmp/bl31_fvp_setup.c			\
+				plat/zynqmp/fvp_security.c			\
+				plat/zynqmp/plat_pm.c				\
+				plat/zynqmp/plat_topology.c			\
+				plat/zynqmp/sip_svc_setup.c			\
+				plat/zynqmp/aarch64/fvp_helpers.S		\
+				plat/zynqmp/aarch64/fvp_common.c		\
+				plat/zynqmp/pm_service/pm_svc_main.c		\
+				plat/zynqmp/pm_service/pm_api_sys.c		\
+				plat/zynqmp/pm_service/pm_client.c
 
 # Flag used by the platform port to determine the version of ARM GIC
 # architecture to use for interrupt management in EL3.

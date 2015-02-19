@@ -40,10 +40,10 @@
 #include "pm_api_sys.h"
 
 /*******************************************************************************
- * Private Ronaldo function to program the mailbox for a cpu before it is released
+ * Private ZynqMP function to program the mailbox for a cpu before it is released
  * from reset.
  ******************************************************************************/
-static void ronaldo_program_mailbox(uint64_t mpidr, uint64_t address)
+static void zynqmp_program_mailbox(uint64_t mpidr, uint64_t address)
 {
 	uint64_t linear_id;
 	mailbox_t *fvp_mboxes;
@@ -56,12 +56,12 @@ static void ronaldo_program_mailbox(uint64_t mpidr, uint64_t address)
 }
 
 /*******************************************************************************
- * Private Ronaldo function which is used to determine if any platform actions
+ * Private ZynqMP function which is used to determine if any platform actions
  * should be performed for the specified affinity instance given its
  * state. Nothing needs to be done if the 'state' is not off or if this is not
  * the highest affinity level which will enter the 'state'.
  ******************************************************************************/
-static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
+static int32_t zynqmp_do_plat_actions(uint32_t afflvl, uint32_t state)
 {
 	uint32_t max_phys_off_afflvl;
 
@@ -84,10 +84,10 @@ static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance is about to be turned on. The
+ * ZynqMP handler called when an affinity instance is about to be turned on. The
  * level and mpidr determine the affinity instance.
  ******************************************************************************/
-static int32_t ronaldo_affinst_on(uint64_t mpidr,
+static int32_t zynqmp_affinst_on(uint64_t mpidr,
 				  uint64_t sec_entrypoint,
 				  uint32_t afflvl,
 				  uint32_t state)
@@ -105,7 +105,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 	/*
 	 * Setup mailbox with address for CPU entrypoint when it next powers up
 	 */
-	ronaldo_program_mailbox(mpidr, sec_entrypoint);
+	zynqmp_program_mailbox(mpidr, sec_entrypoint);
 
 	mmio_write_32(R_RVBAR_L_0 + mpidr * 8, sec_entrypoint);
 	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, sec_entrypoint >> 32);
@@ -126,7 +126,7 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance is about to be turned off. The
+ * ZynqMP handler called when an affinity instance is about to be turned off. The
  * level and mpidr determine the affinity instance. The 'state' arg. allows the
  * platform to decide whether the cluster is being turned off and take
  * appropriate actions.
@@ -136,14 +136,14 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-static void ronaldo_affinst_off(uint32_t afflvl, uint32_t state)
+static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 {
 	uint32_t r;
 	uint64_t mpidr = read_mpidr_el1();
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/* Determine if any platform actions need to be executed */
-	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
+	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
 		return;
 
 	/* Prevent interrupts from spuriously waking up this cpu */
@@ -172,7 +172,7 @@ static void ronaldo_affinst_off(uint32_t afflvl, uint32_t state)
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance is about to be suspended. The
+ * ZynqMP handler called when an affinity instance is about to be suspended. The
  * level and mpidr determine the affinity instance. The 'state' arg. allows the
  * platform to decide whether the cluster is being turned off and take apt
  * actions. The 'sec_entrypoint' determines the address in BL3-1 from where
@@ -183,7 +183,7 @@ static void ronaldo_affinst_off(uint32_t afflvl, uint32_t state)
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-static void ronaldo_affinst_suspend(uint64_t sec_entrypoint,
+static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 				       uint32_t afflvl,
 				       uint32_t state)
 {
@@ -192,13 +192,13 @@ static void ronaldo_affinst_suspend(uint64_t sec_entrypoint,
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/* Determine if any platform actions need to be executed. */
-	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
+	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
 		return;
 
 	/*
 	 * Setup mailbox with address for CPU entrypoint when it next powers up.
 	 */
-	ronaldo_program_mailbox(mpidr, sec_entrypoint);
+	zynqmp_program_mailbox(mpidr, sec_entrypoint);
 
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
@@ -225,18 +225,18 @@ static void ronaldo_affinst_suspend(uint64_t sec_entrypoint,
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance has just been powered on after
+ * ZynqMP handler called when an affinity instance has just been powered on after
  * being turned off earlier. The level and mpidr determine the affinity
  * instance. The 'state' arg. allows the platform to decide whether the cluster
  * was turned off prior to wakeup and do what's necessary to setup it up
  * correctly.
  ******************************************************************************/
-static void ronaldo_affinst_on_finish(uint32_t afflvl, uint32_t state)
+static void zynqmp_affinst_on_finish(uint32_t afflvl, uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
 
 	/* Determine if any platform actions need to be executed. */
-	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
+	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
 		return;
 
 	/* Enable the gic cpu interface */
@@ -246,26 +246,26 @@ static void ronaldo_affinst_on_finish(uint32_t afflvl, uint32_t state)
 	arm_gic_pcpu_distif_setup();
 
 	/* Clear the mailbox for this cpu. */
-	ronaldo_program_mailbox(mpidr, 0);
+	zynqmp_program_mailbox(mpidr, 0);
 }
 
 /*******************************************************************************
- * Ronaldo handler called when an affinity instance has just been powered on after
+ * ZynqMP handler called when an affinity instance has just been powered on after
  * having been suspended earlier. The level and mpidr determine the affinity
  * instance.
  * TODO: At the moment we reuse the on finisher and reinitialize the secure
  * context. Need to implement a separate suspend finisher.
  ******************************************************************************/
-static void ronaldo_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
+static void zynqmp_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
 {
-	ronaldo_affinst_on_finish(afflvl, state);
+	zynqmp_affinst_on_finish(afflvl, state);
 }
 
 
 /*******************************************************************************
- * Ronaldo handlers to shutdown/reboot the system
+ * ZynqMP handlers to shutdown/reboot the system
  ******************************************************************************/
-static void __dead2 ronaldo_system_off(void)
+static void __dead2 zynqmp_system_off(void)
 {
 #if 0
 	/* Write the System Configuration Control Register */
@@ -281,11 +281,11 @@ static void __dead2 ronaldo_system_off(void)
 		wfi();
 	}
 
-	ERROR("Ronaldo System Off: operation not handled.\n");
+	ERROR("ZynqMP System Off: operation not handled.\n");
 	panic();
 }
 
-static void __dead2 ronaldo_system_reset(void)
+static void __dead2 zynqmp_system_reset(void)
 {
 #if 0
 	/* Write the System Configuration Control Register */
@@ -301,21 +301,21 @@ static void __dead2 ronaldo_system_reset(void)
 		wfi();
 	}
 
-	ERROR("Ronaldo System Reset: operation not handled.\n");
+	ERROR("ZynqMP System Reset: operation not handled.\n");
 	panic();
 }
 
 /*******************************************************************************
  * Export the platform handlers to enable psci to invoke them
  ******************************************************************************/
-static const plat_pm_ops_t ronaldo_ops = {
-	.affinst_on		= ronaldo_affinst_on,
-	.affinst_off		= ronaldo_affinst_off,
-	.affinst_suspend	= ronaldo_affinst_suspend,
-	.affinst_on_finish	= ronaldo_affinst_on_finish,
-	.affinst_suspend_finish	= ronaldo_affinst_suspend_finish,
-	.system_off		= ronaldo_system_off,
-	.system_reset		= ronaldo_system_reset
+static const plat_pm_ops_t zynqmp_ops = {
+	.affinst_on		= zynqmp_affinst_on,
+	.affinst_off		= zynqmp_affinst_off,
+	.affinst_suspend	= zynqmp_affinst_suspend,
+	.affinst_on_finish	= zynqmp_affinst_on_finish,
+	.affinst_suspend_finish	= zynqmp_affinst_suspend_finish,
+	.system_off		= zynqmp_system_off,
+	.system_reset		= zynqmp_system_reset
 };
 
 /*******************************************************************************
@@ -323,6 +323,6 @@ static const plat_pm_ops_t ronaldo_ops = {
  ******************************************************************************/
 int32_t platform_setup_pm(const plat_pm_ops_t **plat_ops)
 {
-	*plat_ops = &ronaldo_ops;
+	*plat_ops = &zynqmp_ops;
 	return 0;
 }

@@ -14,7 +14,7 @@
 #include "pm_api_sys.h"
 #include "pm_client.h"
 #include "reg-apu.h"
-#include "ronaldo-map.dtsh"
+#include "zynqmp-map.dtsh"
 
 #define DISABLE_PWRDN_REQ	0U
 #define ENABLE_PWRDN_REQ	1U

@@ -28,11 +28,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# TSP source files specific to Ronaldo platform
+# TSP source files specific to ZynqMP platform
 BL32_SOURCES		+=	drivers/arm/gic/arm_gic.c			\
 				drivers/arm/gic/gic_v2.c			\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/common/plat_gic.c				\
-				plat/ronaldo/aarch64/fvp_common.c		\
-				plat/ronaldo/aarch64/fvp_helpers.S		\
-				plat/ronaldo/tsp/tsp_plat_setup.c
+				plat/zynqmp/aarch64/fvp_common.c		\
+				plat/zynqmp/aarch64/fvp_helpers.S		\
+				plat/zynqmp/tsp/tsp_plat_setup.c

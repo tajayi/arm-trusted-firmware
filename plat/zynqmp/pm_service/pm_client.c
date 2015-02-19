@@ -15,7 +15,7 @@
 #include "pm_svc_main.h"
 #include "reg-ipi.h"
 #include "reg-ipibuf.h"
-#include "ronaldo-map.dtsh"
+#include "zynqmp-map.dtsh"
 
 static bakery_lock_t pm_secure_lock __attribute__ ((section("tzfw_coherent_mem")));
 

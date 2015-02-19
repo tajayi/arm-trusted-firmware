@@ -67,7 +67,7 @@ int plat_get_max_afflvl()
 }
 
 /*******************************************************************************
- * This function populates the Ronaldo specific topology information.
+ * This function populates the ZynqMP specific topology information.
  * Currently only one fixed configuration (1 cluster containing 4 cpus) is
  * supported.
  ******************************************************************************/
