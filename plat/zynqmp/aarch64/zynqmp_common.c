@@ -128,11 +128,14 @@ DEFINE_CONFIGURE_MMU_EL(3)
 #define ZYNQMP_RTL_VER_MASK   0xFF0
 #define ZYNQMP_RTL_VER_SHIFT  4
 
+#define ZYNQMP_CSU_BASEADDR		0xFFCA0000
+#define ZYNQMP_CSU_VERSION_OFFSET	0x44
+
 static unsigned int zynqmp_get_silicon_ver(void)
 {
 	uint32_t ver;
 
-	ver = mmio_read_32(0xFFCA0044);
+	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_SILICON_VER_MASK;
 	ver >>= ZYNQMP_SILICON_VER_SHIFT;
 
@@ -143,7 +146,7 @@ static uint32_t zynqmp_get_rtl_ver(void)
 {
 	uint32_t ver;
 
-	ver = mmio_read_32(0xFFCA0044);
+	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_RTL_VER_MASK;
 	ver >>= ZYNQMP_RTL_VER_SHIFT;
 
@@ -214,6 +217,14 @@ uint32_t zynqmp_is_pmu_up(void)
 	return ver;
 }
 
+#define ZYNQMP_CRL_APB_BASEADDR				0xFF5E0000
+#define ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET	0x128
+#define ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT	(1 << 24)
+
+#define ZYNQMP_IOU_SCNTRS_BASEADDR		0xFF260000
+#define ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET	0x0
+#define ZYNQMP_IOU_SCNTRS_CONTROL_EN		(1 << 0)
+#define ZYNQMP_IOU_SCNTRS_BASEFREQ_OFFSET	0x20
 /*******************************************************************************
  * A single boot loader stack is expected to work on both the Foundation ZYNQMP
  * models and the two flavours of the Base ZYNQMP models (AEMv8 & Cortex). The
@@ -232,15 +243,20 @@ int zynqmp_config_setup(void)
 
 	zynqmp_print_platform_name();
 
-	/* Global timer init */
-	/* Program time stamp reference clk, CRL_APB_TIMESTAMP_REF_CTRL */
-	val = mmio_read_32(0xFF5E0128);
-	val |= 0x1000000;
-	mmio_write_32(0xFF5E0128, val);
+	/* Global timer init - Program time stamp reference clk */
+	val = mmio_read_32(ZYNQMP_CRL_APB_BASEADDR +
+			   ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET);
+	val |= ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT;
+	mmio_write_32(ZYNQMP_CRL_APB_BASEADDR +
+		      ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET, val);
 
 	/* Program freq register in System counter  and enable system counter. */
-	mmio_write_32(0xFF260020, zynqmp_get_silicon_freq());
-	mmio_write_32(0xFF260000, 0x1);
+	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
+		      ZYNQMP_IOU_SCNTRS_BASEFREQ_OFFSET,
+		      zynqmp_get_silicon_freq());
+	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
+	              ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET,
+		      ZYNQMP_IOU_SCNTRS_CONTROL_EN);
 
 	plat_config.flags |= CONFIG_HAS_CCI;
 
