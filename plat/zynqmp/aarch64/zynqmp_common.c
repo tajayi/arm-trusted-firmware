@@ -118,23 +118,23 @@ const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
 DEFINE_CONFIGURE_MMU_EL(1)
 DEFINE_CONFIGURE_MMU_EL(3)
 
-#define ZYNQ_SILICON_VER_MASK   0xF000
-#define ZYNQ_SILICON_VER_SHIFT  12
+#define ZYNQMP_SILICON_VER_MASK   0xF000
+#define ZYNQMP_SILICON_VER_SHIFT  12
 #define ZYNQMP_CSU_VERSION_SILICON      0x0
 #define ZYNQMP_CSU_VERSION_EP108        0x1
 #define ZYNQMP_CSU_VERSION_VELOCE       0x2
 #define ZYNQMP_CSU_VERSION_QEMU         0x3
 
-#define ZYNQ_RTL_VER_MASK   0xFF0
-#define ZYNQ_RTL_VER_SHIFT  4
+#define ZYNQMP_RTL_VER_MASK   0xFF0
+#define ZYNQMP_RTL_VER_SHIFT  4
 
 static unsigned int zynqmp_get_silicon_ver(void)
 {
 	uint32_t ver;
 
 	ver = mmio_read_32(0xFFCA0044);
-	ver &= ZYNQ_SILICON_VER_MASK;
-	ver >>= ZYNQ_SILICON_VER_SHIFT;
+	ver &= ZYNQMP_SILICON_VER_MASK;
+	ver >>= ZYNQMP_SILICON_VER_SHIFT;
 
 	return ver;
 }
@@ -144,8 +144,8 @@ static uint32_t zynqmp_get_rtl_ver(void)
 	uint32_t ver;
 
 	ver = mmio_read_32(0xFFCA0044);
-	ver &= ZYNQ_RTL_VER_MASK;
-	ver >>= ZYNQ_RTL_VER_SHIFT;
+	ver &= ZYNQMP_RTL_VER_MASK;
+	ver >>= ZYNQMP_RTL_VER_SHIFT;
 
 	return ver;
 }
