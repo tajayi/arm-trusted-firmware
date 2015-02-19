@@ -182,10 +182,10 @@
 /*******************************************************************************
  * GIC-400 & interrupt handling related constants
  ******************************************************************************/
-#define RDO_GICD_BASE                  0xF9010000
-#define RDO_GICC_BASE                  0xF9020000
-#define RDO_GICH_BASE                  0xF9040000
-#define RDO_GICV_BASE                  0xF9060000
+#define RDO_GICD_BASE		0xF9010000
+#define RDO_GICC_BASE		0xF9020000
+#define RDO_GICH_BASE		0xF9040000
+#define RDO_GICV_BASE		0xF9060000
 
 #define IRQ_TZ_WDOG			56
 #define IRQ_SEC_PHY_TIMER		29
