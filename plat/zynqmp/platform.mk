@@ -30,35 +30,35 @@
 
 # Shared memory may be allocated at the top of Trusted SRAM (tsram) or at the
 # base of Trusted SRAM (tdram)
-FVP_SHARED_DATA_LOCATION	:=	tsram
-ifeq (${FVP_SHARED_DATA_LOCATION}, tsram)
-  FVP_SHARED_DATA_LOCATION_ID := FVP_IN_TRUSTED_SRAM
-else ifeq (${FVP_SHARED_DATA_LOCATION}, tdram)
-  FVP_SHARED_DATA_LOCATION_ID := FVP_IN_TRUSTED_DRAM
+ZYNQMP_SHARED_DATA_LOCATION	:=	tsram
+ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tsram)
+  ZYNQMP_SHARED_DATA_LOCATION_ID := ZYNQMP_IN_TRUSTED_SRAM
+else ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tdram)
+  ZYNQMP_SHARED_DATA_LOCATION_ID := ZYNQMP_IN_TRUSTED_DRAM
 else
-  $(error "Unsupported FVP_SHARED_DATA_LOCATION value")
+  $(error "Unsupported ZYNQMP_SHARED_DATA_LOCATION value")
 endif
 
-# On FVP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
+# On ZYNQMP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
 # Trusted SRAM is the default.
-FVP_TSP_RAM_LOCATION	:=	tsram
-ifeq (${FVP_TSP_RAM_LOCATION}, tsram)
-  FVP_TSP_RAM_LOCATION_ID := FVP_IN_TRUSTED_SRAM
-else ifeq (${FVP_TSP_RAM_LOCATION}, tdram)
-  FVP_TSP_RAM_LOCATION_ID := FVP_IN_TRUSTED_DRAM
+ZYNQMP_TSP_RAM_LOCATION	:=	tsram
+ifeq (${ZYNQMP_TSP_RAM_LOCATION}, tsram)
+  ZYNQMP_TSP_RAM_LOCATION_ID := ZYNQMP_IN_TRUSTED_SRAM
+else ifeq (${ZYNQMP_TSP_RAM_LOCATION}, tdram)
+  ZYNQMP_TSP_RAM_LOCATION_ID := ZYNQMP_IN_TRUSTED_DRAM
 else
-  $(error "Unsupported FVP_TSP_RAM_LOCATION value")
+  $(error "Unsupported ZYNQMP_TSP_RAM_LOCATION value")
 endif
 
-ifeq (${FVP_SHARED_DATA_LOCATION}, tsram)
-  ifeq (${FVP_TSP_RAM_LOCATION}, tdram)
+ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tsram)
+  ifeq (${ZYNQMP_TSP_RAM_LOCATION}, tdram)
     $(error Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported)
   endif
 endif
 
 # Process flags
-$(eval $(call add_define,FVP_SHARED_DATA_LOCATION_ID))
-$(eval $(call add_define,FVP_TSP_RAM_LOCATION_ID))
+$(eval $(call add_define,ZYNQMP_SHARED_DATA_LOCATION_ID))
+$(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 
 PLAT_INCLUDES		:=	-Iplat/zynqmp/include/				\
 				-Iplat/zynqmp/pm_service/			\
@@ -79,13 +79,13 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
-				plat/zynqmp/bl31_fvp_setup.c			\
-				plat/zynqmp/fvp_security.c			\
+				plat/zynqmp/bl31_zynqmp_setup.c			\
+				plat/zynqmp/zynqmp_security.c			\
 				plat/zynqmp/plat_pm.c				\
 				plat/zynqmp/plat_topology.c			\
 				plat/zynqmp/sip_svc_setup.c			\
-				plat/zynqmp/aarch64/fvp_helpers.S		\
-				plat/zynqmp/aarch64/fvp_common.c		\
+				plat/zynqmp/aarch64/zynqmp_helpers.S		\
+				plat/zynqmp/aarch64/zynqmp_common.c		\
 				plat/zynqmp/pm_service/pm_svc_main.c		\
 				plat/zynqmp/pm_service/pm_api_sys.c		\
 				plat/zynqmp/pm_service/pm_client.c

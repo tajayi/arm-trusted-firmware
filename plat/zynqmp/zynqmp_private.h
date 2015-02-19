@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __FVP_PRIVATE_H__
-#define __FVP_PRIVATE_H__
+#ifndef __ZYNQMP_PRIVATE_H__
+#define __ZYNQMP_PRIVATE_H__
 
 #include <bl_common.h>
 #include <platform_def.h>
@@ -63,42 +63,42 @@ struct meminfo;
 /*******************************************************************************
  * Function and variable prototypes
  ******************************************************************************/
-void fvp_configure_mmu_el1(unsigned long total_base,
+void zynqmp_configure_mmu_el1(unsigned long total_base,
 			   unsigned long total_size,
 			   unsigned long,
 			   unsigned long,
 			   unsigned long,
 			   unsigned long);
-void fvp_configure_mmu_el3(unsigned long total_base,
+void zynqmp_configure_mmu_el3(unsigned long total_base,
 			   unsigned long total_size,
 			   unsigned long,
 			   unsigned long,
 			   unsigned long,
 			   unsigned long);
-int fvp_config_setup(void);
+int zynqmp_config_setup(void);
 
-void fvp_cci_init(void);
-void fvp_cci_enable(void);
+void zynqmp_cci_init(void);
+void zynqmp_cci_enable(void);
 
-void fvp_gic_init(void);
+void zynqmp_gic_init(void);
 
 /* Declarations for plat_topology.c */
 int plat_setup_topology(void);
 
-/* Declarations for fvp_io_storage.c */
-void fvp_io_setup(void);
+/* Declarations for zynqmp_io_storage.c */
+void zynqmp_io_setup(void);
 
-/* Declarations for fvp_security.c */
-void fvp_security_setup(void);
+/* Declarations for zynqmp_security.c */
+void zynqmp_security_setup(void);
 
 /* Gets the SPR for BL32 entry */
-uint32_t fvp_get_spsr_for_bl32_entry(void);
+uint32_t zynqmp_get_spsr_for_bl32_entry(void);
 
 /* Gets the SPSR for BL33 entry */
-uint32_t fvp_get_spsr_for_bl33_entry(void);
+uint32_t zynqmp_get_spsr_for_bl33_entry(void);
 
 /* ZynqMP specific functions */
 uint32_t zynqmp_get_uart_clk(void);
 uint32_t zynqmp_is_pmu_up(void);
 
-#endif /* __FVP_PRIVATE_H__ */
+#endif /* __ZYNQMP_PRIVATE_H__ */

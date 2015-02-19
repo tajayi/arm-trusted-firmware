@@ -32,8 +32,8 @@
 #include <console.h>
 #include <debug.h>
 #include <platform_tsp.h>
-#include "../fvp_def.h"
-#include "../fvp_private.h"
+#include "../zynqmp_def.h"
+#include "../zynqmp_private.h"
 
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
@@ -76,7 +76,7 @@ void tsp_early_platform_setup(void)
 	console_init(RDO_UART0_BASE, zynqmp_get_uart_clk(), CADENCE_UART_BAUDRATE);
 
 	/* Initialize the platform config for future decision making */
-	fvp_config_setup();
+	zynqmp_config_setup();
 }
 
 /*******************************************************************************
@@ -84,7 +84,7 @@ void tsp_early_platform_setup(void)
  ******************************************************************************/
 void tsp_platform_setup(void)
 {
-	fvp_gic_init();
+	zynqmp_gic_init();
 }
 
 /*******************************************************************************
@@ -93,7 +93,7 @@ void tsp_platform_setup(void)
  ******************************************************************************/
 void tsp_plat_arch_setup(void)
 {
-	fvp_configure_mmu_el1(BL32_RO_BASE,
+	zynqmp_configure_mmu_el1(BL32_RO_BASE,
 			      (BL32_COHERENT_RAM_LIMIT - BL32_RO_BASE),
 			      BL32_RO_BASE,
 			      BL32_RO_LIMIT,

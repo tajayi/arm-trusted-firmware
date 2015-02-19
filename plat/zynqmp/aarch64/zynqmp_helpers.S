@@ -152,7 +152,7 @@ loop:
 	 * void plat_report_exception(unsigned int type)
 	 * Function to report an unhandled exception
 	 * with platform-specific means.
-	 * On FVP platform, it updates the LEDs
+	 * On ZYNQMP platform, it updates the LEDs
 	 * to indicate where we are
 	 * ---------------------------------------------
 	 */
@@ -171,7 +171,7 @@ func plat_report_exception
 
 func platform_is_primary_cpu
 	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)
-	cmp	x0, #FVP_PRIMARY_CPU
+	cmp	x0, #ZYNQMP_PRIMARY_CPU
 	cset	x0, eq
 	ret
 

@@ -36,7 +36,7 @@
 #include <platform.h>
 #include <psci.h>
 #include <errno.h>
-#include "fvp_private.h"
+#include "zynqmp_private.h"
 #include "pm_api_sys.h"
 
 /*******************************************************************************
@@ -46,12 +46,12 @@
 static void zynqmp_program_mailbox(uint64_t mpidr, uint64_t address)
 {
 	uint64_t linear_id;
-	mailbox_t *fvp_mboxes;
+	mailbox_t *zynqmp_mboxes;
 
 	linear_id = platform_get_core_pos(mpidr);
-	fvp_mboxes = (mailbox_t *)MBOX_BASE;
-	fvp_mboxes[linear_id].value = address;
-	flush_dcache_range((unsigned long) &fvp_mboxes[linear_id],
+	zynqmp_mboxes = (mailbox_t *)MBOX_BASE;
+	zynqmp_mboxes[linear_id].value = address;
+	flush_dcache_range((unsigned long) &zynqmp_mboxes[linear_id],
 			   sizeof(unsigned long));
 }
 

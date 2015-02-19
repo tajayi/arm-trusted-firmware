@@ -28,27 +28,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __FVP_DEF_H__
-#define __FVP_DEF_H__
+#ifndef __ZYNQMP_DEF_H__
+#define __ZYNQMP_DEF_H__
 
 /* Firmware Image Package */
 #define FIP_IMAGE_NAME			"fip.bin"
-#define FVP_PRIMARY_CPU			0x0
+#define ZYNQMP_PRIMARY_CPU			0x0
 
-/* Memory location options for Shared data and TSP in FVP */
-#define FVP_IN_TRUSTED_SRAM		0
-#define FVP_IN_TRUSTED_DRAM		1
+/* Memory location options for Shared data and TSP in ZYNQMP */
+#define ZYNQMP_IN_TRUSTED_SRAM		0
+#define ZYNQMP_IN_TRUSTED_DRAM		1
 
 /*******************************************************************************
- * FVP memory map related constants
+ * ZYNQMP memory map related constants
  ******************************************************************************/
 
-#define FVP_TRUSTED_SRAM_BASE	0xFFFC0000
-#define FVP_TRUSTED_SRAM_SIZE	0x00040000
+#define ZYNQMP_TRUSTED_SRAM_BASE	0xFFFC0000
+#define ZYNQMP_TRUSTED_SRAM_SIZE	0x00040000
 
-/* Location of trusted dram on the base fvp */
-#define FVP_TRUSTED_DRAM_BASE	0x04000000 /* Can't overlap TZROM area */
-#define FVP_TRUSTED_DRAM_SIZE	0x02000000
+/* Location of trusted dram on the base zynqmp */
+#define ZYNQMP_TRUSTED_DRAM_BASE	0x04000000 /* Can't overlap TZROM area */
+#define ZYNQMP_TRUSTED_DRAM_SIZE	0x02000000
 
 #define FLASH0_BASE		0x08000000
 #define FLASH0_SIZE		TZROM_SIZE
@@ -81,25 +81,25 @@
 #define NSRAM_SIZE		0x10000
 
 /* 4KB shared memory */
-#define FVP_SHARED_RAM_SIZE	0x1000
+#define ZYNQMP_SHARED_RAM_SIZE	0x1000
 
 /* Location of shared memory */
-#if (FVP_SHARED_DATA_LOCATION_ID == FVP_IN_TRUSTED_DRAM)
+#if (ZYNQMP_SHARED_DATA_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM)
 /* Shared memory at the base of Trusted DRAM */
-# define FVP_SHARED_RAM_BASE		FVP_TRUSTED_DRAM_BASE
-# define FVP_TRUSTED_SRAM_LIMIT		(FVP_TRUSTED_SRAM_BASE \
-					+ FVP_TRUSTED_SRAM_SIZE)
-#elif (FVP_SHARED_DATA_LOCATION_ID == FVP_IN_TRUSTED_SRAM)
-# if (FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_DRAM)
+# define ZYNQMP_SHARED_RAM_BASE		ZYNQMP_TRUSTED_DRAM_BASE
+# define ZYNQMP_TRUSTED_SRAM_LIMIT		(ZYNQMP_TRUSTED_SRAM_BASE \
+					+ ZYNQMP_TRUSTED_SRAM_SIZE)
+#elif (ZYNQMP_SHARED_DATA_LOCATION_ID == ZYNQMP_IN_TRUSTED_SRAM)
+# if (ZYNQMP_TSP_RAM_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM)
 #  error "Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported"
 # endif
 /* Shared memory at the top of the Trusted SRAM */
-# define FVP_SHARED_RAM_BASE		(FVP_TRUSTED_SRAM_BASE \
-					+ FVP_TRUSTED_SRAM_SIZE \
-					- FVP_SHARED_RAM_SIZE)
-# define FVP_TRUSTED_SRAM_LIMIT		FVP_SHARED_RAM_BASE
+# define ZYNQMP_SHARED_RAM_BASE		(ZYNQMP_TRUSTED_SRAM_BASE \
+					+ ZYNQMP_TRUSTED_SRAM_SIZE \
+					- ZYNQMP_SHARED_RAM_SIZE)
+# define ZYNQMP_TRUSTED_SRAM_LIMIT		ZYNQMP_SHARED_RAM_BASE
 #else
-# error "Unsupported FVP_SHARED_DATA_LOCATION_ID value"
+# error "Unsupported ZYNQMP_SHARED_DATA_LOCATION_ID value"
 #endif
 
 #define DRAM1_BASE		0x00000000ull
@@ -119,11 +119,11 @@
 #define TZNVCTR_BASE		0x7fe70000
 #define TZROOTKEY_BASE		0x7fe80000
 
-/* Load address of BL33 in the FVP port */
+/* Load address of BL33 in the ZYNQMP port */
 #define NS_IMAGE_OFFSET		(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
 
 /* Special value used to verify platform parameters from BL2 to BL3-1 */
-#define FVP_BL31_PLAT_PARAM_VAL	0x0f1e2d3c4b5a6978ULL
+#define ZYNQMP_BL31_PLAT_PARAM_VAL	0x0f1e2d3c4b5a6978ULL
 
 /*
  * V2M sysled bit definitions. The values written to this
@@ -158,8 +158,8 @@
 
 #define SYS_ID_BLD_LENGTH	4
 
-#define HBI_FVP_BASE		0x020
-#define REV_FVP_BASE_V0		0x0
+#define HBI_ZYNQMP_BASE		0x020
+#define REV_ZYNQMP_BASE_V0		0x0
 
 #define HBI_FOUNDATION		0x010
 #define REV_FOUNDATION_V2_0	0x0
@@ -168,7 +168,7 @@
 #define BLD_GIC_VE_MMAP	0x0
 #define BLD_GIC_A53A57_MMAP	0x1
 
-/* FVP Power controller base address*/
+/* ZYNQMP Power controller base address*/
 #define PWRC_BASE		0x1c100000
 
 
@@ -217,26 +217,26 @@
  * The NSAIDs for this platform as used to program the TZC400.
  */
 
-/* NSAIDs used by devices in TZC filter 0 on FVP */
-#define FVP_NSAID_DEFAULT		0
-#define FVP_NSAID_PCI			1
-#define FVP_NSAID_VIRTIO		8  /* from FVP v5.6 onwards */
-#define FVP_NSAID_AP			9  /* Application Processors */
-#define FVP_NSAID_VIRTIO_OLD		15 /* until FVP v5.5 */
+/* NSAIDs used by devices in TZC filter 0 on ZYNQMP */
+#define ZYNQMP_NSAID_DEFAULT		0
+#define ZYNQMP_NSAID_PCI			1
+#define ZYNQMP_NSAID_VIRTIO		8  /* from ZYNQMP v5.6 onwards */
+#define ZYNQMP_NSAID_AP			9  /* Application Processors */
+#define ZYNQMP_NSAID_VIRTIO_OLD		15 /* until ZYNQMP v5.5 */
 
-/* NSAIDs used by devices in TZC filter 2 on FVP */
-#define FVP_NSAID_HDLCD0		2
-#define FVP_NSAID_CLCD			7
+/* NSAIDs used by devices in TZC filter 2 on ZYNQMP */
+#define ZYNQMP_NSAID_HDLCD0		2
+#define ZYNQMP_NSAID_CLCD			7
 
 /*******************************************************************************
  *  Shared Data
  ******************************************************************************/
 
 /* Entrypoint mailboxes */
-#define MBOX_BASE		FVP_SHARED_RAM_BASE
+#define MBOX_BASE		ZYNQMP_SHARED_RAM_BASE
 #define MBOX_SIZE		0x200
 
 /* Base address where parameters to BL31 are stored */
 #define PARAMS_BASE		(MBOX_BASE + MBOX_SIZE)
 
-#endif /* __FVP_DEF_H__ */
+#endif /* __ZYNQMP_DEF_H__ */

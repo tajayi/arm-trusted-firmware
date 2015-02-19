@@ -32,7 +32,7 @@
 #define __PLATFORM_DEF_H__
 
 #include <arch.h>
-#include "../fvp_def.h"
+#include "../zynqmp_def.h"
 
 
 /*******************************************************************************
@@ -83,30 +83,30 @@
  * present). BL31_BASE is calculated using the current BL3-1 debug size plus a
  * little space for growth.
  */
-#define BL31_BASE			(FVP_TRUSTED_SRAM_LIMIT - 0x1D000)
-#define BL31_PROGBITS_LIMIT		(FVP_TRUSTED_SRAM_LIMIT - 0x6000)
-#define BL31_LIMIT			FVP_TRUSTED_SRAM_LIMIT
+#define BL31_BASE			(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x1D000)
+#define BL31_PROGBITS_LIMIT		(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x6000)
+#define BL31_LIMIT			ZYNQMP_TRUSTED_SRAM_LIMIT
 
 /*******************************************************************************
  * BL32 specific defines.
  ******************************************************************************/
 /*
- * On FVP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
+ * On ZYNQMP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
  */
-#if FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_SRAM
-# define TSP_SEC_MEM_BASE		FVP_TRUSTED_SRAM_BASE
-# define TSP_SEC_MEM_SIZE		FVP_TRUSTED_SRAM_SIZE
+#if ZYNQMP_TSP_RAM_LOCATION_ID == ZYNQMP_IN_TRUSTED_SRAM
+# define TSP_SEC_MEM_BASE		ZYNQMP_TRUSTED_SRAM_BASE
+# define TSP_SEC_MEM_SIZE		ZYNQMP_TRUSTED_SRAM_SIZE
 # define TSP_PROGBITS_LIMIT		BL31_BASE
-# define BL32_BASE			FVP_TRUSTED_SRAM_BASE
+# define BL32_BASE			ZYNQMP_TRUSTED_SRAM_BASE
 # define BL32_LIMIT			BL31_BASE
-#elif FVP_TSP_RAM_LOCATION_ID == FVP_IN_TRUSTED_DRAM
-# define TSP_SEC_MEM_BASE		FVP_TRUSTED_DRAM_BASE
-# define TSP_SEC_MEM_SIZE		FVP_TRUSTED_DRAM_SIZE
-# define BL32_BASE			(FVP_TRUSTED_DRAM_BASE \
-					+ FVP_SHARED_RAM_SIZE)
-# define BL32_LIMIT			(FVP_TRUSTED_DRAM_BASE + (1 << 21))
+#elif ZYNQMP_TSP_RAM_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM
+# define TSP_SEC_MEM_BASE		ZYNQMP_TRUSTED_DRAM_BASE
+# define TSP_SEC_MEM_SIZE		ZYNQMP_TRUSTED_DRAM_SIZE
+# define BL32_BASE			(ZYNQMP_TRUSTED_DRAM_BASE \
+					+ ZYNQMP_SHARED_RAM_SIZE)
+# define BL32_LIMIT			(ZYNQMP_TRUSTED_DRAM_BASE + (1 << 21))
 #else
-# error "Unsupported FVP_TSP_RAM_LOCATION_ID value"
+# error "Unsupported ZYNQMP_TSP_RAM_LOCATION_ID value"
 #endif
 
 /*

@@ -38,11 +38,11 @@
 #include <platform.h>
 #include <plat_config.h>
 #include <xlat_tables.h>
-#include "../fvp_def.h"
+#include "../zynqmp_def.h"
 
 /*******************************************************************************
  * plat_config holds the characteristics of the differences between the three
- * FVP platforms (Base, A53_A57 & Foundation). It will be populated during cold
+ * ZYNQMP platforms (Base, A53_A57 & Foundation). It will be populated during cold
  * boot at each boot stage by the primary before enabling the MMU (to allow cci
  * configuration) & used thereafter. Each BL will have its own copy to allow
  * independent operation.
@@ -54,10 +54,10 @@ plat_config_t plat_config;
  * This doesn't include TZRAM as the 'mem_layout' argument passed to
  * configure_mmu_elx() will give the available subset of that,
  */
-const mmap_region_t fvp_mmap[] = {
-	{ FVP_SHARED_RAM_BASE,	FVP_SHARED_RAM_BASE,	FVP_SHARED_RAM_SIZE,
+const mmap_region_t zynqmp_mmap[] = {
+	{ ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_SIZE,
 						MT_MEMORY | MT_RW | MT_SECURE },
-	{ FVP_TRUSTED_DRAM_BASE, FVP_TRUSTED_DRAM_BASE,	FVP_TRUSTED_DRAM_SIZE,
+	{ ZYNQMP_TRUSTED_DRAM_BASE, ZYNQMP_TRUSTED_DRAM_BASE,	ZYNQMP_TRUSTED_DRAM_SIZE,
 						MT_MEMORY | MT_RW | MT_SECURE },
 	{ DEVICE0_BASE,	DEVICE0_BASE,	DEVICE0_SIZE,
 						MT_DEVICE | MT_RW | MT_SECURE },
@@ -92,7 +92,7 @@ const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
  * the platform memory map & initialize the mmu, for the given exception level
  ******************************************************************************/
 #define DEFINE_CONFIGURE_MMU_EL(_el)					\
-	void fvp_configure_mmu_el##_el(unsigned long total_base,	\
+	void zynqmp_configure_mmu_el##_el(unsigned long total_base,	\
 				   unsigned long total_size,		\
 				   unsigned long ro_start,		\
 				   unsigned long ro_limit,		\
@@ -108,7 +108,7 @@ const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
 		mmap_add_region(coh_start, coh_start,			\
 				coh_limit - coh_start,			\
 				MT_DEVICE | MT_RW | MT_SECURE);		\
-		mmap_add(fvp_mmap);					\
+		mmap_add(zynqmp_mmap);					\
 		init_xlat_tables();					\
 									\
 		enable_mmu_el##_el(0);					\
@@ -215,13 +215,13 @@ uint32_t zynqmp_is_pmu_up(void)
 }
 
 /*******************************************************************************
- * A single boot loader stack is expected to work on both the Foundation FVP
- * models and the two flavours of the Base FVP models (AEMv8 & Cortex). The
+ * A single boot loader stack is expected to work on both the Foundation ZYNQMP
+ * models and the two flavours of the Base ZYNQMP models (AEMv8 & Cortex). The
  * SYS_ID register provides a mechanism for detecting the differences between
  * these platforms. This information is stored in a per-BL array to allow the
  * code to take the correct path.Per BL platform configuration.
  ******************************************************************************/
-int fvp_config_setup(void)
+int zynqmp_config_setup(void)
 {
 	uint32_t val;
 
@@ -260,7 +260,7 @@ uint64_t plat_get_syscnt_freq(void)
 	return counter_base_frequency;
 }
 
-void fvp_cci_init(void)
+void zynqmp_cci_init(void)
 {
 	/*
 	 * Initialize CCI-400 driver
@@ -271,7 +271,7 @@ void fvp_cci_init(void)
 			CCI400_SL_IFACE4_CLUSTER_IX);
 }
 
-void fvp_cci_enable(void)
+void zynqmp_cci_enable(void)
 {
 	/*
 	 * Enable CCI-400 coherency for this cluster. No need
@@ -282,7 +282,7 @@ void fvp_cci_enable(void)
 		cci_enable_cluster_coherency(read_mpidr());
 }
 
-void fvp_gic_init(void)
+void zynqmp_gic_init(void)
 {
 	arm_gic_init(plat_config.gicc_base,
 		plat_config.gicd_base,
@@ -295,7 +295,7 @@ void fvp_gic_init(void)
 /*******************************************************************************
  * Gets SPSR for BL32 entry
  ******************************************************************************/
-uint32_t fvp_get_spsr_for_bl32_entry(void)
+uint32_t zynqmp_get_spsr_for_bl32_entry(void)
 {
 	/*
 	 * The Secure Payload Dispatcher service is responsible for
@@ -307,7 +307,7 @@ uint32_t fvp_get_spsr_for_bl32_entry(void)
 /*******************************************************************************
  * Gets SPSR for BL33 entry
  ******************************************************************************/
-uint32_t fvp_get_spsr_for_bl33_entry(void)
+uint32_t zynqmp_get_spsr_for_bl33_entry(void)
 {
 	unsigned long el_status;
 	unsigned int mode;

@@ -32,8 +32,8 @@
 #include <debug.h>
 #include <plat_config.h>
 #include <tzc400.h>
-#include "fvp_def.h"
-#include "fvp_private.h"
+#include "zynqmp_def.h"
+#include "zynqmp_private.h"
 
 /* Used to improve readability for configuring regions. */
 #define FILTER_SHIFT(filter)	(1 << filter)
@@ -44,11 +44,11 @@
  * TODO:
  * Might want to enable interrupt on violations when supported?
  */
-void fvp_security_setup(void)
+void zynqmp_security_setup(void)
 {
 	/*
-	 * The Base FVP has a TrustZone address space controller, the Foundation
-	 * FVP does not. Trying to program the device on the foundation FVP will
+	 * The Base ZYNQMP has a TrustZone address space controller, the Foundation
+	 * ZYNQMP does not. Trying to program the device on the foundation ZYNQMP will
 	 * cause an abort.
 	 *
 	 * If the platform had additional peripheral specific security
@@ -72,7 +72,7 @@ void fvp_security_setup(void)
 	tzc_init(TZC400_BASE);
 
 	/*
-	 * Currently only filters 0 and 2 are connected on Base FVP.
+	 * Currently only filters 0 and 2 are connected on Base ZYNQMP.
 	 * Filter 0 : CPU clusters (no access to DRAM by default)
 	 * Filter 1 : not connected
 	 * Filter 2 : LCDs (access to VRAM allowed by default)
@@ -89,7 +89,7 @@ void fvp_security_setup(void)
 	 * Allow only non-secure access to all DRAM to supported devices.
 	 * Give access to the CPUs and Virtio. Some devices
 	 * would normally use the default ID so allow that too. We use
-	 * two regions to cover the blocks of physical memory in the FVPs.
+	 * two regions to cover the blocks of physical memory in the ZYNQMPs.
 	 *
 	 * Software executing in the secure state, such as a secure
 	 * boot-loader, can access the DRAM by using the NS attributes in
@@ -100,11 +100,11 @@ void fvp_security_setup(void)
 	tzc_configure_region(FILTER_SHIFT(0), 1,
 			DRAM1_BASE, DRAM1_END - DRAM1_SEC_SIZE,
 			TZC_REGION_S_NONE,
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_DEFAULT) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_PCI) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_AP) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_VIRTIO) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_VIRTIO_OLD));
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_DEFAULT) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_PCI) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_AP) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_VIRTIO) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_VIRTIO_OLD));
 
 	/* Set to cover the secure reserved region */
 	tzc_configure_region(FILTER_SHIFT(0), 3,
@@ -115,11 +115,11 @@ void fvp_security_setup(void)
 	/* Set to cover the second block of DRAM */
 	tzc_configure_region(FILTER_SHIFT(0), 2,
 			DRAM2_BASE, DRAM2_END, TZC_REGION_S_NONE,
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_DEFAULT) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_PCI) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_AP) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_VIRTIO) |
-			TZC_REGION_ACCESS_RDWR(FVP_NSAID_VIRTIO_OLD));
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_DEFAULT) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_PCI) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_AP) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_VIRTIO) |
+			TZC_REGION_ACCESS_RDWR(ZYNQMP_NSAID_VIRTIO_OLD));
 
 	/*
 	 * TODO: Interrupts are not currently supported. The only

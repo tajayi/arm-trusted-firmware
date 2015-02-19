@@ -38,8 +38,8 @@
 #include <mmio.h>
 #include <platform.h>
 #include <stddef.h>
-#include "fvp_def.h"
-#include "fvp_private.h"
+#include "zynqmp_def.h"
+#include "zynqmp_private.h"
 
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
@@ -118,7 +118,7 @@ entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
  * Perform any BL31 specific platform actions. Here is an opportunity to copy
  * parameters passed by the calling EL (S-EL1 in BL2 & S-EL3 in BL1) before they
  * are lost (potentially). This needs to be done before the MMU is initialized
- * so that the memory layout can be used while creating page tables. On the FVP
+ * so that the memory layout can be used while creating page tables. On the ZYNQMP
  * we know that BL2 has populated the parameters in secure DRAM. So we just use
  * the reference passed in 'from_bl2' instead of copying. The 'data' parameter
  * is not used since all the information is contained in 'from_bl2'. Also, BL2
@@ -132,7 +132,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	console_init(RDO_UART0_BASE, zynqmp_get_uart_clk(), CADENCE_UART_BAUDRATE);
 
 	/* Initialize the platform config for future decision making */
-	fvp_config_setup();
+	zynqmp_config_setup();
 
 #if RESET_TO_BL31
 	/* There are no parameters from BL2 if BL31 is a reset vector */
@@ -142,11 +142,11 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 
 	/*
 	 * Do initial security configuration to allow DRAM/device access. On
-	 * Base FVP only DRAM security is programmable (via TrustZone), but
+	 * Base ZYNQMP only DRAM security is programmable (via TrustZone), but
 	 * other platforms might have more programmable security devices
 	 * present.
 	 */
-	fvp_security_setup();
+	zynqmp_security_setup();
 
 	/* Populate entry point information for BL3-2 and BL3-3 */
 	SET_PARAM_HEAD(&bl32_image_ep_info,
@@ -155,7 +155,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 				0);
 	SET_SECURITY_STATE(bl32_image_ep_info.h.attr, SECURE);
 	bl32_image_ep_info.pc = BL32_BASE;
-	bl32_image_ep_info.spsr = fvp_get_spsr_for_bl32_entry();
+	bl32_image_ep_info.spsr = zynqmp_get_spsr_for_bl32_entry();
 
 	SET_PARAM_HEAD(&bl33_image_ep_info,
 				PARAM_EP,
@@ -166,19 +166,19 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * is located and the entry state information
 	 */
 	bl33_image_ep_info.pc = plat_get_ns_image_entrypoint();
-	bl33_image_ep_info.spsr = fvp_get_spsr_for_bl33_entry();
+	bl33_image_ep_info.spsr = zynqmp_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 #else
 	/* Check params passed from BL2 should not be NULL,
 	 * We are not checking plat_params_from_bl2 as NULL as we are not
-	 * using it on FVP
+	 * using it on ZYNQMP
 	 */
 	assert(from_bl2 != NULL);
 	assert(from_bl2->h.type == PARAM_BL31);
 	assert(from_bl2->h.version >= VERSION_1);
 
 	bl2_to_bl31_params = from_bl2;
-	assert(((unsigned long)plat_params_from_bl2) == FVP_BL31_PLAT_PARAM_VAL);
+	assert(((unsigned long)plat_params_from_bl2) == ZYNQMP_BL31_PLAT_PARAM_VAL);
 
 #endif
 }
@@ -190,7 +190,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 void bl31_platform_setup(void)
 {
 	/* Initialize the gic cpu and distributor interfaces */
-	fvp_gic_init();
+	zynqmp_gic_init();
 	arm_gic_setup();
 
 	/* Topologies are best known to the platform. */
@@ -203,12 +203,12 @@ void bl31_platform_setup(void)
  ******************************************************************************/
 void bl31_plat_arch_setup(void)
 {
-	fvp_cci_init();
+	zynqmp_cci_init();
 #if RESET_TO_BL31
-	fvp_cci_enable();
+	zynqmp_cci_enable();
 
 #endif
-	fvp_configure_mmu_el3(BL31_RO_BASE,
+	zynqmp_configure_mmu_el3(BL31_RO_BASE,
 			      (BL31_COHERENT_RAM_LIMIT - BL31_RO_BASE),
 			      BL31_RO_BASE,
 			      BL31_RO_LIMIT,
