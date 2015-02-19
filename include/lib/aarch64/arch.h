@@ -38,7 +38,9 @@
 #define MIDR_IMPL_MASK		0xff
 #define MIDR_IMPL_SHIFT		0x18
 #define MIDR_VAR_SHIFT		20
+#define MIDR_VAR_BITS		4
 #define MIDR_REV_SHIFT		0
+#define MIDR_REV_BITS		4
 #define MIDR_PN_MASK		0xfff
 #define MIDR_PN_SHIFT		0x4
 
@@ -59,7 +61,11 @@
 #define MPIDR_AFFLVL1		1
 #define MPIDR_AFFLVL2		2
 #define MPIDR_AFFLVL3		3
-/* TODO: Support only the first 3 affinity levels for now */
+/*
+ * The MPIDR_MAX_AFFLVL count starts from 0. Take care to
+ * add one while using this macro to define array sizes.
+ * TODO: Support only the first 3 affinity levels for now.
+ */
 #define MPIDR_MAX_AFFLVL	2
 
 /* Constant to highlight the assumption that MPIDR allocation starts from 0 */
@@ -121,6 +127,10 @@
 
 #define SCTLR_EL1_RES1  ((1 << 29) | (1 << 28) | (1 << 23) | (1 << 22) | \
 			(1 << 11))
+#define SCTLR_AARCH32_EL1_RES1 \
+			((1 << 23) | (1 << 22) | (1 << 11) | (1 << 4) | \
+			(1 << 3))
+
 #define SCTLR_M_BIT		(1 << 0)
 #define SCTLR_A_BIT		(1 << 1)
 #define SCTLR_C_BIT		(1 << 2)

@@ -89,7 +89,6 @@ static int32_t ronaldo_do_plat_actions(uint32_t afflvl, uint32_t state)
  ******************************************************************************/
 static int32_t ronaldo_affinst_on(uint64_t mpidr,
 				  uint64_t sec_entrypoint,
-				  uint64_t ns_entrypoint,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
@@ -137,16 +136,15 @@ static int32_t ronaldo_affinst_on(uint64_t mpidr,
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-static int32_t ronaldo_affinst_off(uint64_t mpidr,
-				   uint32_t afflvl,
-				   uint32_t state)
+static void ronaldo_affinst_off(uint32_t afflvl, uint32_t state)
 {
 	uint32_t r;
-	uint32_t node_id = platform_get_core_pos(read_mpidr_el1()) + 2;
+	uint64_t mpidr = read_mpidr_el1();
+	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/* Determine if any platform actions need to be executed */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
-		return PSCI_E_SUCCESS;
+		return;
 
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
@@ -171,8 +169,6 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
 		NOTICE("call pm_self_suspend(node_id)\n");
 		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
 	}
-
-	return PSCI_E_SUCCESS;
 }
 
 /*******************************************************************************
@@ -187,18 +183,17 @@ static int32_t ronaldo_affinst_off(uint64_t mpidr,
  * global variables across calls. It will be wise to do flush a write to the
  * global to prevent unpredictable results.
  ******************************************************************************/
-static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
-				       uint64_t sec_entrypoint,
-				       uint64_t ns_entrypoint,
+static void ronaldo_affinst_suspend(uint64_t sec_entrypoint,
 				       uint32_t afflvl,
 				       uint32_t state)
 {
 	uint32_t r;
-	uint32_t node_id = platform_get_core_pos(read_mpidr_el1()) + 2;
+	uint64_t mpidr = read_mpidr_el1();
+	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
-		return PSCI_E_SUCCESS;
+		return;
 
 	/*
 	 * Setup mailbox with address for CPU entrypoint when it next powers up.
@@ -227,8 +222,6 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
 		 */
 		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
 	}
-
-	return PSCI_E_SUCCESS;
 }
 
 /*******************************************************************************
@@ -238,13 +231,13 @@ static int32_t ronaldo_affinst_suspend(uint64_t mpidr,
  * was turned off prior to wakeup and do what's necessary to setup it up
  * correctly.
  ******************************************************************************/
-static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
-					 uint32_t afflvl,
-					 uint32_t state)
+static void ronaldo_affinst_on_finish(uint32_t afflvl, uint32_t state)
 {
+	uint64_t mpidr = read_mpidr_el1();
+
 	/* Determine if any platform actions need to be executed. */
 	if (ronaldo_do_plat_actions(afflvl, state) == -EAGAIN)
-		return PSCI_E_SUCCESS;
+		return;
 
 	/* Enable the gic cpu interface */
 	arm_gic_cpuif_setup();
@@ -254,8 +247,6 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
 
 	/* Clear the mailbox for this cpu. */
 	ronaldo_program_mailbox(mpidr, 0);
-
-	return PSCI_E_SUCCESS;
 }
 
 /*******************************************************************************
@@ -265,11 +256,9 @@ static int32_t ronaldo_affinst_on_finish(uint64_t mpidr,
  * TODO: At the moment we reuse the on finisher and reinitialize the secure
  * context. Need to implement a separate suspend finisher.
  ******************************************************************************/
-static int32_t ronaldo_affinst_suspend_finish(uint64_t mpidr,
-					      uint32_t afflvl,
-					      uint32_t state)
+static void ronaldo_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
 {
-	return ronaldo_affinst_on_finish(mpidr, afflvl, state);
+	ronaldo_affinst_on_finish(afflvl, state);
 }
 
 
