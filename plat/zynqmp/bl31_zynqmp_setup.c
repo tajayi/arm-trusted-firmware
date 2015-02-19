@@ -70,17 +70,8 @@ extern unsigned long __COHERENT_RAM_END__;
 #define BL31_COHERENT_RAM_BASE (unsigned long)(&__COHERENT_RAM_START__)
 #define BL31_COHERENT_RAM_LIMIT (unsigned long)(&__COHERENT_RAM_END__)
 
-
-#if RESET_TO_BL31
 static entry_point_info_t bl32_image_ep_info;
 static entry_point_info_t bl33_image_ep_info;
-#else
-/*******************************************************************************
- * Reference to structure which holds the arguments that have been passed to
- * BL31 from BL2.
- ******************************************************************************/
-static bl31_params_t *bl2_to_bl31_params;
-#endif
 
 /*******************************************************************************
  * Return a pointer to the 'entry_point_info' structure of the next image for the
@@ -90,28 +81,12 @@ static bl31_params_t *bl2_to_bl31_params;
  ******************************************************************************/
 entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
 {
-#if RESET_TO_BL31
 	assert(sec_state_is_valid(type));
 
 	if (type == NON_SECURE)
 		return &bl33_image_ep_info;
 	else
 		return &bl32_image_ep_info;
-#else
-	entry_point_info_t *next_image_info;
-
-	assert(sec_state_is_valid(type));
-
-	next_image_info = (type == NON_SECURE) ?
-		bl2_to_bl31_params->bl33_ep_info :
-		bl2_to_bl31_params->bl32_ep_info;
-
-	/* None of the images on this platform can have 0x0 as the entrypoint */
-	if (next_image_info->pc)
-		return next_image_info;
-	else
-		return NULL;
-#endif
 }
 
 /*******************************************************************************
@@ -134,11 +109,9 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	/* Initialize the platform config for future decision making */
 	zynqmp_config_setup();
 
-#if RESET_TO_BL31
 	/* There are no parameters from BL2 if BL31 is a reset vector */
 	assert(from_bl2 == NULL);
 	assert(plat_params_from_bl2 == NULL);
-
 
 	/*
 	 * Do initial security configuration to allow DRAM/device access. On
@@ -168,19 +141,6 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl33_image_ep_info.pc = plat_get_ns_image_entrypoint();
 	bl33_image_ep_info.spsr = zynqmp_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
-#else
-	/* Check params passed from BL2 should not be NULL,
-	 * We are not checking plat_params_from_bl2 as NULL as we are not
-	 * using it on ZYNQMP
-	 */
-	assert(from_bl2 != NULL);
-	assert(from_bl2->h.type == PARAM_BL31);
-	assert(from_bl2->h.version >= VERSION_1);
-
-	bl2_to_bl31_params = from_bl2;
-	assert(((unsigned long)plat_params_from_bl2) == ZYNQMP_BL31_PLAT_PARAM_VAL);
-
-#endif
 }
 
 /*******************************************************************************
@@ -204,10 +164,8 @@ void bl31_platform_setup(void)
 void bl31_plat_arch_setup(void)
 {
 	zynqmp_cci_init();
-#if RESET_TO_BL31
 	zynqmp_cci_enable();
 
-#endif
 	zynqmp_configure_mmu_el3(BL31_RO_BASE,
 			      (BL31_COHERENT_RAM_LIMIT - BL31_RO_BASE),
 			      BL31_RO_BASE,
