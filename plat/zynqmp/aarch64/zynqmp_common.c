@@ -242,6 +242,8 @@ int zynqmp_config_setup(void)
 	mmio_write_32(0xFF260020, zynqmp_get_silicon_freq());
 	mmio_write_32(0xFF260000, 0x1);
 
+	plat_config.flags |= CONFIG_HAS_CCI;
+
 	return 0;
 }
 

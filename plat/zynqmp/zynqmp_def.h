@@ -175,7 +175,7 @@
 /*******************************************************************************
  * CCI-400 related constants
  ******************************************************************************/
-#define CCI400_BASE			0x2c090000
+#define CCI400_BASE			0xFD6E0000
 #define CCI400_SL_IFACE3_CLUSTER_IX	0
 #define CCI400_SL_IFACE4_CLUSTER_IX	1
 
