@@ -28,54 +28,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Contains APU specific macros and macros to be defined depending on
+ * the execution enviroment.
+ */
+
 #ifndef _PM_CLIENT_H_
 #define _PM_CLIENT_H_
 
-#define IPI_APU_MASK		0x00000001
-#define IPI_RPU_0_MASK		0x00000100
-#define IPI_RPU_1_MASK		0x00000200
+#include <arch_helpers.h>
+#include <arm_gic.h> /* plat_gic when becomes available */
+#include <bakery_lock.h>
+#include <debug.h>
+#include <platform.h>
+#include <mmio.h>
 
-#define IPI_TRIG_OFFSET		0x00000000
-#define IPI_OBS_OFFSET		0x00000004
-#define IPI_ISR_OFFSET		0x00000010
+#include "apu.h"
+#include "pm_defs.h"
+#include "pm_common.h"
 
-/* Power Management IPI interrupt number, to configure here */
-#define PM_INT_NUM		0
-#define IPI_PMU_PM_INT_BASE	(IPI_PMU_0_TRIG + (PM_INT_NUM * 0x1000))
-#define IPI_PMU_PM_INT_MASK	(IPI_APU_ISR_PMU_0_MASK << PM_INT_NUM)
-#if (PM_INT_NUM < 0 || PM_INT_NUM > 3)
-	#error PM_INT_NUM value out of range
+#define APU_0_PWRCTL_CPUPWRDWNREQ_MASK	1U
+#define APU_1_PWRCTL_CPUPWRDWNREQ_MASK	2U
+#define APU_2_PWRCTL_CPUPWRDWNREQ_MASK	4U
+#define APU_3_PWRCTL_CPUPWRDWNREQ_MASK	8U
+
+#define IPI_APU_MASK		1U
+
+#define IPI_TRIG_OFFSET		0
+#define IPI_OBS_OFFSET		4
+
+#define UNDEFINED_CPUID		(~0)
+
+/* Macros to allow pm_api_sys.c to remain PU independent */
+#define pm_read(addr)		mmio_read_32(addr)
+#define pm_write(addr, value)	mmio_write_32(addr, value)
+#define pm_print		INFO
+#define pm_this_cpuid()		platform_get_core_pos(read_mpidr_el1())
+
+/* Conditional debugging prints */
+#ifdef DEBUG_MODE
+	#define pm_dbg(MSG, ...)	pm_print(MSG,##__VA_ARGS__)
+#else
+	#define pm_dbg(MSG, ...)	{}
 #endif
 
-#define IPI_PU_BASE	0x00000000
-#define IPIBUF_PU_BASE	IPIBUF_APU_OFFSET
+bakery_lock_t pm_secure_lock;
 
-#define IPIBUF_API_ID_OFFSET	0x0
-#define IPIBUF_ARG1_OFFSET	(IPIBUF_API_ID_OFFSET + 0x4)
-#define IPIBUF_ARG2_OFFSET	(IPIBUF_API_ID_OFFSET + 0x8)
-#define IPIBUF_ARG3_OFFSET	(IPIBUF_API_ID_OFFSET + 0xC)
-#define IPIBUF_ARG4_OFFSET	(IPIBUF_API_ID_OFFSET + 0x10)
+/* Functions to be implemented by each PU */
+enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc);
+enum pm_ret_status pm_ipi_buff_read32(const struct pm_proc *const proc,
+					     uint32_t *value);
+enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
+				      uint32_t payload[PAYLOAD_ARG_CNT]);
+void pm_client_suspend(const struct pm_proc *const proc);
+void pm_client_abort_suspend(void);
+void pm_client_wakeup(const struct pm_proc *const proc);
 
-#define PM_ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
-
-enum irqreturn_t {
-	IRQ_OK = 1,
-	IRQ_FAIL,
-};
-
-struct payload {
-	uint32_t api_id;
-	uint32_t arg[4];
-};
-
-/*******************************************
- *Function Prototypes
- *******************************************/
-extern int pm_ipi_init(void);
-extern void pm_ipi_msg_start(void);
-extern void pm_ipi_msg_end(void);
-extern void pm_ipi_send(const struct payload *pload);
-/* Temporary here in lack of FIQs */
-enum irqreturn_t ipi_fiq_handler(void);
+/* Global variables to be set in pm_client.c */
+extern const enum pm_node_id subsystem_node;
+extern const struct pm_proc *primary_proc;
 
 #endif /* _PM_CLIENT_H_ */

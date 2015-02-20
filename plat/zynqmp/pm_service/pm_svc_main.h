@@ -31,11 +31,13 @@
 #ifndef _PM_SVC_MAIN_H_
 #define _PM_SVC_MAIN_H_
 
+#include "pm_common.h"
+
 /* PM Function identifiers  */
-#define PM_SMC_INIT			0xa01
-#define PM_SMC_NOTIFY			0xa02
-/* Temporary, in lack of FIQs */
-#define PM_SMC_IRQ			0xa03
+#define PM_F_INIT			0xa01
+#define PM_F_GETARGS			0xa02
+/* Temporary, due to lack of FIQ support in ATF */
+#define PM_F_IRQ			0xa03
 
 /**
  * pm_context - Structure which contains data for power management

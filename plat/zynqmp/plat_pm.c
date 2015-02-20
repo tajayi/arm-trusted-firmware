@@ -37,6 +37,7 @@
 #include <psci.h>
 #include <errno.h>
 #include "zynqmp_private.h"
+#include "pm_client.h"
 #include "pm_api_sys.h"
 
 /*******************************************************************************
@@ -84,6 +85,32 @@ static int32_t zynqmp_do_plat_actions(uint32_t afflvl, uint32_t state)
 }
 
 /*******************************************************************************
+ * ZynqMP handler called when an affinity instance is about to enter standby.
+ * Mandatory
+ ******************************************************************************/
+void zynqmp_affinst_standby(unsigned int power_state)
+{
+	unsigned int target_afflvl;
+
+	/* Sanity check the requested state */
+	target_afflvl = psci_get_pstate_afflvl(power_state);
+
+	/*
+	 * It's possible to enter standby only on affinity level 0 i.e. a cpu
+	 * on the ZynqMP. Ignore any other affinity level.
+	 */
+	if (target_afflvl != MPIDR_AFFLVL0)
+		return;
+
+	/*
+	 * Enter standby state
+	 * dsb is good practice before using wfi to enter low power states
+	 */
+	dsb();
+	wfi();
+}
+
+/*******************************************************************************
  * ZynqMP handler called when an affinity instance is about to be turned on. The
  * level and mpidr determine the affinity instance.
  ******************************************************************************/
@@ -92,7 +119,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
-	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
+	const struct pm_proc *proc = pm_get_proc(mpidr);
 
 	/*
 	 * PMU takes care of powering up higher affinity levels so we
@@ -115,8 +142,8 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 		r &= ~(0x401 << mpidr);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
-		/* Sent request to PMU to wake up selected APU CPU core */
-		pm_req_wakeup((enum pm_node_id)node_id, REQ_ACK_NO/*REQ_ACK_STANDARD*/);
+		/* Send request to PMU to wake up selected APU CPU core */
+		pm_req_wakeup(proc->node_id, REQ_ACK_NO);
 	}
 
 	return PSCI_E_SUCCESS;
@@ -136,7 +163,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
-	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
+	const struct pm_proc *proc = pm_get_proc(mpidr);
 
 	/* Determine if any platform actions need to be executed */
 	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -153,13 +180,11 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 	} else {
 		if (afflvl > MPIDR_AFFLVL0) {
 			/* Send request to PMU to suspend APU subsystem */
-			NOTICE("call pm_self_suspend(NODE_APU)\n");
-			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
+			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
 		}
 
 		/* Send request to PMU to power down the appropriate APU CPU core */
-		NOTICE("call pm_self_suspend(node_id)\n");
-		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
+		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
 	}
 }
 
@@ -180,7 +205,7 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 				       uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
-	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
+	const struct pm_proc* proc = pm_get_proc(mpidr);
 
 	/* Determine if any platform actions need to be executed. */
 	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -203,10 +228,10 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 		/* APU is to be turned off */
 		if (afflvl > MPIDR_AFFLVL0) {
 			/* Send request to PMU to suspend the APU CPU */
-			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
+			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
 		}
 		/* Send request to PMU to suspend the appropriate APU CPU core */
-		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
+		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
 	}
 }
 
@@ -294,6 +319,7 @@ static void __dead2 zynqmp_system_reset(void)
  * Export the platform handlers to enable psci to invoke them
  ******************************************************************************/
 static const plat_pm_ops_t zynqmp_ops = {
+	.affinst_standby	= zynqmp_affinst_standby,
 	.affinst_on		= zynqmp_affinst_on,
 	.affinst_off		= zynqmp_affinst_off,
 	.affinst_suspend	= zynqmp_affinst_suspend,

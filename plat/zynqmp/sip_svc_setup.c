@@ -74,14 +74,13 @@ uint64_t sip_svc_smc_handler(uint32_t smc_fid,
 	}
 
 	switch (smc_fid) {
-#if 0
 	case ZYNQMP_SIP_SVC_CALL_COUNT:
 		/*
 		 * Return the number of SiP Service Calls.
 		 * For now PM is the only SiP service implemented.
 		 */
 		SMC_RET1(handle, PM_API_MAX);
-#endif
+
 	case ZYNQMP_SIP_SVC_UID:
 		/* Return UID to the caller */
 		SMC_UUID_RET(handle, zynqmp_sip_uid);
