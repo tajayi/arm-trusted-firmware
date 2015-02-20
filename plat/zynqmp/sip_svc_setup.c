@@ -91,7 +91,7 @@ uint64_t sip_svc_smc_handler(uint32_t smc_fid,
 		SMC_RET2(handle, SIP_SVC_VERSION_MAJOR, SIP_SVC_VERSION_MINOR);
 
 	default:
-		WARN("Unimplemented Sip Service Call: 0x%x \n", smc_fid);
+		WARN("Unimplemented SiP Service Call: 0x%x\n", smc_fid);
 		SMC_RET1(handle, SMC_UNK);
 	}
 }

@@ -37,20 +37,20 @@
 /* Temporary, in lack of FIQs */
 #define PM_SMC_IRQ			0xa03
 
-/*******************************************************************************
- * Structure which contains data for power management
- * 'pm_notify_irq'	-entrance in Gic used for pm_notify action
- * '*pld'		-pointer to payload structure which contains received
+/**
+ * pm_context - Structure which contains data for power management
+ * @api_version		version of PM API, must match with one on PMU side
+ * @payload		payload array used to store received
  * 			data from ipi buffer registers
- ******************************************************************************/
+ */
 struct pm_context {
-	uint32_t pm_notify_irq;
-	struct payload *pld;
+	uint32_t api_version;
+	uint32_t payload[PAYLOAD_ARG_CNT];
 };
 
 extern struct pm_context pm_ctx;
 
-uint32_t pm_setup(void);
+int32_t pm_setup(void);
 uint64_t pm_smc_handler(uint32_t smc_fid,
 			uint64_t x1,
 			uint64_t x2,

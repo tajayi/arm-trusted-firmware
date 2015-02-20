@@ -40,7 +40,7 @@
 #include "pm_client.h"
 #include "pm_svc_main.h"
 
-/* Global PM context structure. Contains local data (at ATF) for PM. */
+/* Global PM context structure. Contains data for power management */
 struct pm_context pm_ctx;
 
 /* PM service setup, called from sip_svc_setup */
@@ -95,6 +95,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 		pm_req_suspend(x1, x2, x3, x4);
 		SMC_RET1(handle, 0);
 
+	/* PM API Functions */
 	case PM_SELF_SUSPEND:
 		pm_self_suspend(x1, x2, x3, x4);
 		SMC_RET1(handle, 0);
@@ -150,7 +151,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, 0);
 
 	default:
-		WARN("Unimplemented PM Service Call: 0x%x \n", smc_fid);
+		WARN("Unimplemented PM Service Call: 0x%x\n", smc_fid);
 		SMC_RET1(handle, SMC_UNK);
 	}
 }

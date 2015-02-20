@@ -116,9 +116,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 		r &= ~(0x401 << mpidr);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
-		/*
-		 * Sent request to PMU to wake up selected APU CPU core
-		 */
+		/* Sent request to PMU to wake up selected APU CPU core */
 		pm_req_wakeup((enum pm_node_id)node_id, REQ_ACK_NO/*REQ_ACK_STANDARD*/);
 	}
 
@@ -156,16 +154,12 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		if (afflvl > MPIDR_AFFLVL0) {
-			/*
-			 * Send request to PMU to suspend APU subsystem
-			 */
+			/* Send request to PMU to suspend APU subsystem */
 			NOTICE("call pm_self_suspend(NODE_APU)\n");
 			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
 		}
 
-		/*
-		 * Send request to PMU to power down the appropriate APU CPU core
-		 */
+		/* Send request to PMU to power down the appropriate APU CPU core */
 		NOTICE("call pm_self_suspend(node_id)\n");
 		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
 	}
@@ -211,15 +205,10 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 	} else {
 		/* APU is to be turned off */
 		if (afflvl > MPIDR_AFFLVL0) {
-			/*
-			 * Send request to PMU to suspend the APU CPU
-			 */
+			/* Send request to PMU to suspend the APU CPU */
 			pm_self_suspend(NODE_APU, REQ_ACK_NO, MAX_LATENCY, 0);
 		}
-
-		/*
-		 * Send request to PMU to suspend the appropriate APU CPU core
-		 */
+		/* Send request to PMU to suspend the appropriate APU CPU core */
 		pm_self_suspend((enum pm_node_id)node_id, REQ_ACK_NO, MAX_LATENCY, 0);
 	}
 }
