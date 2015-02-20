@@ -250,7 +250,6 @@ static void zynqmp_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
 	zynqmp_affinst_on_finish(afflvl, state);
 }
 
-
 /*******************************************************************************
  * ZynqMP handlers to shutdown/reboot the system
  ******************************************************************************/
