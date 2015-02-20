@@ -92,7 +92,6 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
-	uint32_t r;
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
 	/*
@@ -112,7 +111,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 	dsb();
 
 	if (!zynqmp_is_pmu_up()) {
-		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
 		r &= ~(0x401 << mpidr);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
@@ -136,7 +135,6 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
  ******************************************************************************/
 static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 {
-	uint32_t r;
 	uint64_t mpidr = read_mpidr_el1();
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
@@ -149,7 +147,7 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 
 	if (!zynqmp_is_pmu_up()) {
 		/* Program the power controller to power off this cpu. */
-		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
 		r |= 1 << (mpidr & 0xf);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
@@ -181,7 +179,6 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 				       uint32_t afflvl,
 				       uint32_t state)
 {
-	uint32_t r;
 	uint64_t mpidr = read_mpidr_el1();
 	uint32_t node_id = platform_get_core_pos(mpidr) + 2;
 
@@ -199,7 +196,7 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 
 	if (!zynqmp_is_pmu_up()) {
 		/* Program the power controller to power off this cpu. */
-		r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
 		r |= 1 << (mpidr & 0xf);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
