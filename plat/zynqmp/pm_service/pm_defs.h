@@ -28,6 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* ZynqMP power management enums and defines */
+
 #ifndef _PM_DEFS_H_
 #define _PM_DEFS_H_
 
@@ -35,9 +37,18 @@
  * Macro definitions
  ********************************************************************/
 
+/*
+ * Version number is a 32bit value, like:
+ * (PM_VERSION_MAJOR << 16) | PM_VERSION_MINOR
+ */
+#define PM_VERSION_MAJOR	0
+#define PM_VERSION_MINOR	1
+
+#define PM_VERSION	((PM_VERSION_MAJOR << 16) | PM_VERSION_MINOR)
+
 /* Capabilities for RAM */
-#define CAPABILITY_ACCESSIBLE		0x00000001U
-#define CAPABILITY_PRESERVE_CONTEXT	0x00000002U
+#define PM_CAP_ACCESS	0x1U
+#define PM_CAP_CONTEXT	0x2U
 
 #define MAX_LATENCY	(~0U)
 #define MAX_QOS		100U
@@ -47,11 +58,16 @@
  ********************************************************************/
 
 enum pm_api_id {
+	/* Miscellaneous API functions: */
+	PM_GET_API_VERSION = 1, /* Do not change or move */
+	PM_SET_CONFIGURATION,
+	PM_GET_NODE_STATUS,
+	PM_GET_OP_CHARACTERISTIC,
+	PM_REGISTER_NOTIFIER,
 	/* API for suspending of PUs: */
-	PM_REQ_SUSPEND = 1,
+	PM_REQ_SUSPEND,
 	PM_SELF_SUSPEND,
 	PM_FORCE_POWERDOWN,
-	PM_POWERDOWN,
 	PM_ABORT_SUSPEND,
 	PM_REQ_WAKEUP,
 	PM_SET_WAKEUP_SOURCE,
@@ -61,12 +77,6 @@ enum pm_api_id {
 	PM_RELEASE_NODE,
 	PM_SET_REQUIREMENT,
 	PM_SET_MAX_LATENCY,
-	/* Miscellaneous API functions: */
-	PM_GET_API_VERSION,
-	PM_SET_CONFIGURATION,
-	PM_GET_NODE_STATUS,
-	PM_GET_OP_CHARACTERISTIC,
-	PM_REGISTER_NOTIFIER,
 	/* Direct control API functions: */
 	PM_CLOCK_REQUEST,
 	PM_CLOCK_RELEASE,
@@ -77,6 +87,7 @@ enum pm_api_id {
 	PM_RESET_GET_STATUS,
 	PM_MMIO_WRITE,
 	PM_MMIO_READ,
+	PM_API_MAX
 };
 
 enum pm_api_cb_id {
@@ -114,9 +125,9 @@ enum pm_node_id {
 
 enum pm_request_ack {
 	REQ_ACK_NO = 1,
-	REQ_ACK_STANDARD,
-	REQ_ACK_ERROR,
-	REQ_ACK_DETAILED,
+	REQ_ACK_BLOCKING,
+	REQ_ACK_CB_STANDARD,
+	REQ_ACK_CB_ERROR,
 };
 
 enum pm_abort_reason {
@@ -136,6 +147,47 @@ enum pm_ram_state {
 	PM_RAM_STATE_OFF = 1,
 	PM_RAM_STATE_RETENTION,
 	PM_RAM_STATE_ON,
+};
+
+enum pm_opchar_type {
+	PM_OPCHAR_TYPE_POWER = 1,
+	PM_OPCHAR_TYPE_ENERGY,
+	PM_OPCHAR_TYPE_TEMP,
+};
+
+/**
+ * @PM_RET_SUCCESS:		success
+ * @PM_RET_ERROR_ARGS:		illegal arguments provided
+ * @PM_RET_ERROR_ACCESS:	access rights violation
+ * @PM_RET_ERROR_TIMEOUT:	timeout in communication with PMU
+ * @PM_RET_ERROR_NOTSUPPORTED:	feature not supported
+ * @PM_RET_ERROR_PROC:		node is not a processor node
+ * @PM_RET_ERROR_API_ID:	illegal API ID
+ * @PM_RET_ERROR_OTHER:		other error
+ */
+enum pm_ret_status {
+	PM_RET_SUCCESS,
+	PM_RET_ERROR_ARGS,
+	PM_RET_ERROR_ACCESS,
+	PM_RET_ERROR_TIMEOUT,
+	PM_RET_ERROR_NOTSUPPORTED,
+	PM_RET_ERROR_PROC,
+	PM_RET_ERROR_API_ID,
+	PM_RET_ERROR_FAILURE,
+	PM_RET_ERROR_COMMUNIC,
+	PM_RET_ERROR_DOUBLEREQ,
+	PM_RET_ERROR_OTHER,
+};
+
+/**
+ * @PM_INITIAL_BOOT:	boot is a fresh system startup
+ * @PM_RESUME:		boot is a resume
+ * @PM_BOOT_ERROR:	error, boot cause cannot be identified
+ */
+enum pm_boot_status {
+	PM_INITIAL_BOOT,
+	PM_RESUME,
+	PM_BOOT_ERROR,
 };
 
 #endif /* _PM_DEFS_H_ */
