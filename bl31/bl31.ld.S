@@ -36,7 +36,7 @@ ENTRY(bl31_entrypoint)
 
 
 MEMORY {
-    RAM (rwx): ORIGIN = BL31_BASE, LENGTH = BL31_LIMIT
+    RAM (rwx): ORIGIN = BL31_BASE, LENGTH = BL31_LIMIT - BL31_BASE
 }
 
 
@@ -117,6 +117,7 @@ SECTIONS
         *(xlat_table)
     } >RAM
 
+#if USE_COHERENT_MEM
     /*
      * The base address of the coherent memory section must be page-aligned (4K)
      * to guarantee that the coherent data are stored on their own pages and
@@ -135,12 +136,15 @@ SECTIONS
         . = NEXT(4096);
         __COHERENT_RAM_END__ = .;
     } >RAM
+#endif
 
     __BL31_END__ = .;
 
     __BSS_SIZE__ = SIZEOF(.bss);
+#if USE_COHERENT_MEM
     __COHERENT_RAM_UNALIGNED_SIZE__ =
         __COHERENT_RAM_END_UNALIGNED__ - __COHERENT_RAM_START__;
+#endif
 
     ASSERT(. <= BL31_LIMIT, "BL3-1 image has exceeded its limit.")
 }
