@@ -119,7 +119,8 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 				  uint32_t afflvl,
 				  uint32_t state)
 {
-	const struct pm_proc *proc = pm_get_proc(mpidr);
+	uint32_t linear_id = platform_get_core_pos(mpidr);
+	const struct pm_proc *proc = pm_get_proc(linear_id);
 
 	/*
 	 * PMU takes care of powering up higher affinity levels so we
@@ -133,13 +134,13 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 	 */
 	zynqmp_program_mailbox(mpidr, sec_entrypoint);
 
-	mmio_write_32(R_RVBAR_L_0 + mpidr * 8, sec_entrypoint);
-	mmio_write_32(R_RVBAR_H_0 + mpidr * 8, sec_entrypoint >> 32);
+	mmio_write_32(R_RVBAR_L_0 + linear_id * 8, sec_entrypoint);
+	mmio_write_32(R_RVBAR_H_0 + linear_id * 8, sec_entrypoint >> 32);
 	dsb();
 
 	if (!zynqmp_is_pmu_up()) {
 		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r &= ~(0x401 << mpidr);
+		r &= ~(0x401 << linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		/* Send request to PMU to wake up selected APU CPU core */
@@ -163,7 +164,8 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
-	const struct pm_proc *proc = pm_get_proc(mpidr);
+	uint32_t linear_id = platform_get_core_pos(mpidr);
+	const struct pm_proc *proc = pm_get_proc(linear_id);
 
 	/* Determine if any platform actions need to be executed */
 	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -175,7 +177,7 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 	if (!zynqmp_is_pmu_up()) {
 		/* Program the power controller to power off this cpu. */
 		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r |= 1 << (mpidr & 0xf);
+		r |= 1 << (linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		if (afflvl > MPIDR_AFFLVL0) {
@@ -205,7 +207,8 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 				       uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
-	const struct pm_proc* proc = pm_get_proc(mpidr);
+	uint32_t linear_id = platform_get_core_pos(mpidr);
+	const struct pm_proc* proc = pm_get_proc(linear_id);
 
 	/* Determine if any platform actions need to be executed. */
 	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -222,7 +225,7 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 	if (!zynqmp_is_pmu_up()) {
 		/* Program the power controller to power off this cpu. */
 		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r |= 1 << (mpidr & 0xf);
+		r |= 1 << (linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		/* APU is to be turned off */
