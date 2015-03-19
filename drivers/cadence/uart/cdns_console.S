@@ -134,13 +134,13 @@ func console_core_putc
 1:
 	/* Check if the transmit FIFO is full */
 	ldr	w2, [x1, #R_UART_SR]
-	tbnz	w2, #UART_SR_INTR_TFUL, 1b
+	tbnz	w2, #UART_SR_INTR_TFUL_BIT, 1b
 	mov	w2, #0xD
 	str	w2, [x1, #R_UART_TX]
 2:
 	/* Check if the transmit FIFO is full */
 	ldr	w2, [x1, #R_UART_SR]
-	tbnz	w2, #UART_SR_INTR_TFUL, 2b
+	tbnz	w2, #UART_SR_INTR_TFUL_BIT, 2b
 	str	w0, [x1, #R_UART_TX]
 	ret
 putc_error:
@@ -162,7 +162,7 @@ func console_getc
 1:
 	/* Check if the receive FIFO is empty */
 	ldr	w0, [x1, #R_UART_SR]
-	tbnz	w0, #UART_SR_INTR_REMPTY, 1b
+	tbnz	w0, #UART_SR_INTR_REMPTY_BIT, 1b
 	ldr	w0, [x1, #R_UART_RX]
 	ret
 getc_error:

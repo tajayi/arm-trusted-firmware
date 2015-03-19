@@ -51,9 +51,16 @@
 #define R_UART_BRG	(0x18)
 #define R_UART_RTRIG	(0x20)
 #define R_UART_SR	(0x2C)
+
+/* We don't deduce the MASK from the BIT to allow this to
+   be included in assembly files.  */
+#define UART_SR_INTR_RTRIG_BIT	0
 #define UART_SR_INTR_RTRIG	0x00000001
+#define UART_SR_INTR_REMPTY_BIT	1
 #define UART_SR_INTR_REMPTY	0x00000002
+#define UART_SR_INTR_TEMPTY_BIT	3
 #define UART_SR_INTR_TEMPTY	0x00000008
+#define UART_SR_INTR_TFUL_BIT	4
 #define UART_SR_INTR_TFUL	0x00000010
 
 #define R_UART_TX	(0x30)
