@@ -83,7 +83,7 @@
  * present). BL31_BASE is calculated using the current BL3-1 debug size plus a
  * little space for growth.
  */
-#define BL31_BASE			(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x1D000)
+#define BL31_BASE			(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x1B000)
 #define BL31_PROGBITS_LIMIT		(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x6000)
 #define BL31_LIMIT			ZYNQMP_TRUSTED_SRAM_LIMIT
 
