@@ -243,6 +243,13 @@ interrupt_type_handler_t get_interrupt_type_handler(uint32_t type)
 	if (validate_interrupt_type(type))
 		return NULL;
 
+	if (type == INTR_TYPE_S_EL1
+            && !intr_type_descs[type].handler) {
+		/* If this is a secure interrupt without
+		 * any S-EL1 handler, fallback to EL3 interrupts.  */
+		type = INTR_TYPE_EL3;
+	}
+
 	return intr_type_descs[type].handler;
 }
 
