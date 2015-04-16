@@ -188,7 +188,7 @@
 #define RDO_GICV_BASE		0xF9060000
 
 #define IRQ_SEC_PHY_TIMER		29
-#define IRQ_SEC_IPI_APU			81
+#define IRQ_SEC_IPI_APU			67
 #define IRQ_SEC_SGI_0			8
 #define IRQ_SEC_SGI_1			9
 #define IRQ_SEC_SGI_2			10
