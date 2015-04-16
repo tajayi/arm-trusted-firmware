@@ -41,6 +41,10 @@
 #include "zynqmp_def.h"
 #include "zynqmp_private.h"
 
+#include <runtime_svc.h>
+#include <interrupt_mgmt.h>
+#include <debug.h>
+
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
  * of trusted SRAM
@@ -143,6 +147,16 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 }
 
+static uint64_t rdo_el3_interrupt_handler(uint32_t id,
+					   uint32_t flags,
+					   void *handle,
+					   void *cookie)
+{
+	printf("%s id=%x flags=%x handle=%p cookie=%p\n",
+		__func__, id, flags, handle, cookie);
+	return 0;
+}
+
 /*******************************************************************************
  * Initialize the gic, configure the CLCD and zero out variables needed by the
  * secondaries to boot up correctly.
@@ -155,6 +169,18 @@ void bl31_platform_setup(void)
 
 	/* Topologies are best known to the platform. */
 	plat_setup_topology();
+}
+
+void bl31_late_platform_setup(void)
+{
+	uint64_t flags = 0;
+	uint64_t rc;
+
+	set_interrupt_rm_flag(flags, NON_SECURE);
+	rc = register_interrupt_type_handler(INTR_TYPE_EL3,
+					rdo_el3_interrupt_handler, flags);
+	if (rc)
+		panic();
 }
 
 /*******************************************************************************

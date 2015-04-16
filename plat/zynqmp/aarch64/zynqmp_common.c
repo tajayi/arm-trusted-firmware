@@ -72,8 +72,8 @@ const mmap_region_t zynqmp_mmap[] = {
 
 /* Array of secure interrupts to be configured by the gic driver */
 const unsigned int irq_sec_array[] = {
-	IRQ_TZ_WDOG,
 	IRQ_SEC_PHY_TIMER,
+	IRQ_SEC_IPI_APU,
 	IRQ_SEC_SGI_0,
 	IRQ_SEC_SGI_1,
 	IRQ_SEC_SGI_2,
