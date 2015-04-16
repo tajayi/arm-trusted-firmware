@@ -87,6 +87,10 @@
  * of interrupt. If the model does not match one of the valid masks
  * -EINVAL is returned.
  ******************************************************************************/
+#define validate_el3_interrupt_rm(x)	(x == INTR_SEL1_VALID_RM0 ? 0 : \
+					 (x == INTR_SEL1_VALID_RM1 ? 0 :\
+					  -EINVAL))
+
 #define validate_sel1_interrupt_rm(x)	(x == INTR_SEL1_VALID_RM0 ? 0 : \
 					 (x == INTR_SEL1_VALID_RM1 ? 0 :\
 					  -EINVAL))
