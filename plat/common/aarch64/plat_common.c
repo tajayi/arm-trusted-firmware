@@ -35,8 +35,13 @@
  * provide typical implementations that may be re-used by multiple
  * platforms but may also be overridden by a platform if required.
  */
+#pragma weak bl31_late_platform_setup
 #pragma weak bl31_plat_enable_mmu
 #pragma weak bl32_plat_enable_mmu
+
+void bl31_late_platform_setup(void)
+{
+}
 
 void bl31_plat_enable_mmu(uint32_t flags)
 {
