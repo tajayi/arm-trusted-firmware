@@ -152,8 +152,10 @@ int32_t set_routing_model(uint32_t type, uint32_t flags)
 
 	/* Update the routing model in internal data structures */
 	intr_type_descs[type].flags = flags;
-	set_scr_el3_from_rm(type, flags, SECURE);
-	set_scr_el3_from_rm(type, flags, NON_SECURE);
+	if (get_interrupt_rm_flag(flags, SECURE))
+		set_scr_el3_from_rm(type, flags, SECURE);
+	if (get_interrupt_rm_flag(flags, NON_SECURE))
+		set_scr_el3_from_rm(type, flags, NON_SECURE);
 
 	return 0;
 }
