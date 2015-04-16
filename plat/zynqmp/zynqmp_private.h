@@ -33,6 +33,7 @@
 
 #include <bl_common.h>
 #include <platform_def.h>
+#include <interrupt_mgmt.h>
 
 
 typedef volatile struct mailbox {
@@ -100,5 +101,11 @@ uint32_t zynqmp_get_spsr_for_bl33_entry(void);
 /* ZynqMP specific functions */
 uint32_t zynqmp_get_uart_clk(void);
 uint32_t zynqmp_is_pmu_up(void);
+
+/*
+ * Register handler to specific GIC entrance
+ * for INTR_TYPE_EL3 type of interrupt
+ */
+int request_intr_type_el3(uint32_t, interrupt_type_handler_t);
 
 #endif /* __ZYNQMP_PRIVATE_H__ */

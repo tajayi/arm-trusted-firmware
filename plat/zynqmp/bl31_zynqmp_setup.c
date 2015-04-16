@@ -44,6 +44,7 @@
 #include <runtime_svc.h>
 #include <interrupt_mgmt.h>
 #include <debug.h>
+#include <errno.h>
 
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
@@ -147,13 +148,41 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 }
 
+static interrupt_type_handler_t type_el3_interrupt_table[MAX_INTR_EL3];
+
+/* Register INTR_TYPE_EL3 interrupt handler to specific GIC entrance */
+int request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
+{
+	/* Validate 'handler' and 'id' parameters */
+	if (!handler || id >= MAX_INTR_EL3)
+		return -EINVAL;
+
+	/* Check if a handler has already been registered */
+	if (type_el3_interrupt_table[id])
+		return -EALREADY;
+
+	type_el3_interrupt_table[id] = handler;
+
+	return 0;
+}
+
 static uint64_t rdo_el3_interrupt_handler(uint32_t id,
 					   uint32_t flags,
 					   void *handle,
 					   void *cookie)
 {
-	printf("%s id=%x flags=%x handle=%p cookie=%p\n",
-		__func__, id, flags, handle, cookie);
+	uint32_t intr_id;
+	interrupt_type_handler_t handler;
+
+#if IMF_READ_INTERRUPT_ID
+	intr_id = id;
+#else
+	intr_id = plat_ic_get_pending_interrupt_id();
+#endif
+	handler = type_el3_interrupt_table[intr_id];
+	if (handler != NULL)
+		handler(intr_id, flags, handle, cookie);
+
 	return 0;
 }
 
