@@ -36,17 +36,17 @@
 /* PM Function identifiers  */
 #define PM_F_INIT			0xa01
 #define PM_F_GETARGS			0xa02
-/* Temporary, due to lack of FIQ support in ATF */
-#define PM_F_IRQ			0xa03
 
 /**
  * pm_context - Structure which contains data for power management
  * @api_version		version of PM API, must match with one on PMU side
+ * @callback_irq	registered interrupt number used for pm callback action
  * @payload		payload array used to store received
  * 			data from ipi buffer registers
  */
 struct pm_context {
 	uint32_t api_version;
+	uint32_t callback_irq;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 };
 

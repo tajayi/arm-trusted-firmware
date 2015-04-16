@@ -41,14 +41,94 @@
 #include "pm_common.h"
 #include "pm_client.h"
 #include "pm_svc_main.h"
+#include "../zynqmp_def.h"
+#include "../zynqmp_private.h"
 
 /* Global PM context structure. Contains data for power management */
 struct pm_context pm_ctx;
 
 /**
+ * read_ipi_buffer() - Read from IPI buffer registers
+ * @proc - Pointer to the processor who expected data
+ * @pld - array of 5 elements
+ *
+ * Read value from ipi buffer registers (from PMU) and store
+ * in PM context payload structure
+ */
+void read_ipi_buffer(const struct pm_proc *const proc, uint32_t *pld)
+{
+	uint32_t i;
+	uint32_t offset = 0;
+	uint32_t buffer_base = proc->ipi->buffer_base +
+		IPI_BUFFER_TARGET_PMU_OFFSET +
+		IPI_BUFFER_RESP_OFFSET;
+
+	/* Read from IPI buffer and store into payload array */
+	for (i = 0; i < PAYLOAD_ARG_CNT; i++) {
+		pld[i] = pm_read(buffer_base + offset);
+		offset += PAYLOAD_ARG_SIZE;
+	}
+}
+
+/**
+ * trigger_callback_irq() - Set interrupt for non-secure EL1/EL2
+ * @irq_num - entrance in GIC
+ *
+ * Inform non-secure software layer (EL1/2) that PMU responsed on acknowledge
+ * or demands suspend action.
+ */
+static void trigger_callback_irq(uint32_t irq_num)
+{
+	/* Set interrupt for non-secure EL1/EL2 */
+	gicd_set_ispendr(RDO_GICD_BASE, irq_num);
+	gicd_set_isactiver(RDO_GICD_BASE, irq_num);
+}
+
+/**
+ * ipi_fiq_handler() - IPI Handler for PM-API callbacks
+ * @id - 	number of the highest priority pending interrupt of the type
+ *		that this handler was registered for
+ * @flags - 	security state, bit[0]
+ * @handler - 	pointer to 'cpu_context' structure of the current CPU for the
+ * 	      	security state specified in the 'flags' parameter
+ * @cookie  - 	unused
+ *
+ * Function registered as INTR_TYPE_EL3 interrupt handler
+ *
+ * PMU sends IPI interrupts for PM-API callbacks.
+ * This handler reads data from payload buffers and
+ * based on read data decodes type of callback and call proper function.
+ *
+ * In presence of non-secure software layers (EL1/2) sets the interrupt
+ * at registered entrance in GIC and informs that PMU responsed or demands
+ * action
+ */
+static uint64_t ipi_fiq_handler(uint32_t id,
+				uint32_t flags,
+				void *handle,
+				void *cookie)
+{
+	const struct pm_proc *proc = pm_get_proc(pm_this_cpuid());
+	uint32_t ipi_apu_isr_reg = pm_read(IPI_APU_ISR);
+
+	/* Read PM-API Arguments */
+	read_ipi_buffer(proc, pm_ctx.payload);
+
+	/*
+	 * Inform non-secure software layer (EL1/2) by setting the interrupt
+	 * at registered entrance in GIC, that PMU responsed or demands action
+	 */
+	trigger_callback_irq(pm_ctx.callback_irq);
+
+	/* Clear IPI_APU_ISR bit */
+	pm_write(IPI_APU_ISR, ipi_apu_isr_reg & IPI_PMU_PM_INT_MASK);
+
+	return 0;
+}
+
+/**
  * pm_ipi_init() - Initialize IPI peripheral for communication with PMU
  *
- * TODO - Add registering of fiq interrupt handler
  * @return - 	On success, the initialization function must return 0.
  *		Any other return value will cause the framework to ignore
  *		the service
@@ -72,7 +152,8 @@ int32_t pm_ipi_init(void)
 	pm_write(IPI_APU_IER,
 		 ipi_apu_ier_reg | IPI_APU_IER_PMU_0_MASK);
 
-	return 0;
+	/* Register IPI interrupt as INTR_TYPE_EL3 */
+	return request_intr_type_el3(IRQ_SEC_IPI_APU, ipi_fiq_handler);
 }
 
 /**
@@ -106,28 +187,6 @@ int32_t pm_setup(void)
 }
 
 /**
- * read_ipi_buffer() - Read from IPI buffer registers
- * @proc - Pointer to the processor who expected data
- * @pld - array of 5 elements
- *
- * Read value from ipi buffer registers (from PMU) and store
- * in PM context payload structure
- */
-void read_ipi_buffer(const struct pm_proc *const proc, uint32_t *pld)
-{
-	uint32_t i;
-	uint32_t offset = 0;
-	uint32_t buffer_base = proc->ipi->buffer_base +
-		IPI_BUFFER_TARGET_PMU_OFFSET +
-		IPI_BUFFER_RESP_OFFSET;
-
-	/* Read from IPI buffer and store into payload array */
-	for (i = 0; i < PAYLOAD_ARG_CNT; i++) {
-		pld[i] = pm_read(buffer_base + offset);
-		offset += PAYLOAD_ARG_SIZE;
-	}
-}
-/**
  * pm_smc_handler() - SMC handler for PM-API calls coming from EL1/EL2.
  * @smc_fid - Function Identifier
  * @x1 - x4 - Arguments
@@ -155,6 +214,34 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 	enum pm_ret_status ret;
 
 	switch (smc_fid & FUNCID_NUM_MASK) {
+	case PM_F_INIT:
+		VERBOSE("Initialize pm callback, irq: %d\n", x1);
+
+		/* Save pm callback irq number */
+		pm_ctx.callback_irq = x1;
+		gicd_set_isenabler(RDO_GICD_BASE, x1);
+		SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS);
+
+	case PM_F_GETARGS:
+	{
+		uint64_t callback_arg;
+
+		/*
+		* According to SMC calling convention the return values are
+		* stored in registers x0-x3
+		* x0 = pm_api_id
+		* x1 = arg0
+		* x2 = arg1
+		* x3 lower 32bit = arg2
+		* x3 higher 32bit = arg3
+		*/
+		callback_arg = pm_ctx.payload[4];
+		callback_arg = (callback_arg << 32) + pm_ctx.payload[3];
+		SMC_RET4(handle,
+			 pm_ctx.payload[0], pm_ctx.payload[1],
+			 pm_ctx.payload[2], callback_arg);
+	}
+
 	/* PM API Functions */
 	case PM_SELF_SUSPEND:
 		ret = pm_self_suspend(x1, x2, x3);
