@@ -41,8 +41,8 @@ void cadence_serial_setbrg(uint32_t base, uint32_t clock, uint32_t baudrate)
 	uint32_t baud = baudrate;
 
 	/* Covering case where input clock is so slow */
-	if (clock < 1000000 && baudrate > 9600) {
-		baud = 9600;
+	if (clock < 1000000 && baudrate > 4800) {
+		baud = 4800;
 	}
 
 	/*                master clock

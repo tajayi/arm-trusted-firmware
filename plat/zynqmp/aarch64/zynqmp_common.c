@@ -159,7 +159,7 @@ uint32_t zynqmp_get_uart_clk(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		return 96000;
+		return 48000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 25000000;
 	}
@@ -173,7 +173,7 @@ static unsigned int zynqmp_get_silicon_freq(void)
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		return 20000;
+		return 10000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 4000000;
 	}
