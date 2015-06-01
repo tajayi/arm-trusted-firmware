@@ -69,7 +69,7 @@ PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				lib/aarch64/xlat_tables.c			\
 				plat/common/aarch64/plat_common.c		\
 
-BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
+BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				drivers/arm/gic/arm_gic.c			\
 				drivers/arm/gic/gic_v2.c			\
 				drivers/arm/gic/gic_v3.c			\

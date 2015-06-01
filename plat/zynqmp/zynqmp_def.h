@@ -176,8 +176,8 @@
  * CCI-400 related constants
  ******************************************************************************/
 #define CCI400_BASE			0xFD6E0000
-#define CCI400_SL_IFACE3_CLUSTER_IX	0
-#define CCI400_SL_IFACE4_CLUSTER_IX	1
+#define CCI400_CLUSTER0_SL_IFACE_IX	3
+#define CCI400_CLUSTER1_SL_IFACE_IX	4
 
 /*******************************************************************************
  * GIC-400 & interrupt handling related constants
