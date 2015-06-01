@@ -84,9 +84,6 @@ const unsigned int irq_sec_array[] = {
 	IRQ_SEC_SGI_7
 };
 
-const unsigned int num_sec_irqs = sizeof(irq_sec_array) /
-	sizeof(irq_sec_array[0]);
-
 /*******************************************************************************
  * Macro generating the code for the function setting up the pagetables as per
  * the platform memory map & initialize the mmu, for the given exception level
@@ -308,7 +305,7 @@ void zynqmp_gic_init(void)
 		plat_config.gicd_base,
 		1,
 		irq_sec_array,
-		num_sec_irqs);
+		ARRAY_SIZE(irq_sec_array));
 }
 
 
