@@ -37,7 +37,6 @@
 	.globl	platform_get_entrypoint
 	.globl	plat_secondary_cold_boot_setup
 	.globl	platform_mem_init
-	.globl	plat_report_exception
 	.globl	platform_is_primary_cpu
 
 	/* -----------------------------------------------------
@@ -148,28 +147,6 @@ loop:
 	b.gt	loop
 	ret
 endfunc platform_mem_init
-
-	/* ---------------------------------------------
-	 * void plat_report_exception(unsigned int type)
-	 * Function to report an unhandled exception
-	 * with platform-specific means.
-	 * On ZYNQMP platform, it updates the LEDs
-	 * to indicate where we are
-	 * ---------------------------------------------
-	 */
-func plat_report_exception
-	mrs	x1, CurrentEl
-	lsr	x1, x1, #MODE_EL_SHIFT
-	lsl	x1, x1, #SYS_LED_EL_SHIFT
-	lsl	x0, x0, #SYS_LED_EC_SHIFT
-	mov	x2, #(SECURE << SYS_LED_SS_SHIFT)
-	orr	x0, x0, x2
-	orr	x0, x0, x1
-/*	mov	x1, #VE_SYSREGS_BASE
-	add	x1, x1, #V2M_SYS_LED
-	str	w0, [x1] */
-	ret
-endfunc plat_report_exception
 
 func platform_is_primary_cpu
 	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)
