@@ -39,8 +39,6 @@
 	.globl	platform_mem_init
 	.globl	plat_report_exception
 	.globl	platform_is_primary_cpu
-	.globl	plat_crash_console_init
-	.globl	plat_crash_console_putc
 
 	/* -----------------------------------------------------
 	 * void plat_secondary_cold_boot_setup (void);
@@ -179,30 +177,3 @@ func platform_is_primary_cpu
 	cset	x0, eq
 	ret
 endfunc platform_is_primary_cpu
-
-	/* ---------------------------------------------
-	 * int plat_crash_console_init(void)
-	 * Function to initialize the crash console
-	 * without a C Runtime to print crash report.
-	 * Clobber list : x0, x1, x2
-	 * ---------------------------------------------
-	 */
-func plat_crash_console_init
-	b	zynqmp_get_uart_clk
-	mov	x1, x0
-	mov_imm	x0, RDO_UART0_BASE
-	mov_imm	x2, CADENCE_UART_BAUDRATE
-	b	console_core_init
-endfunc plat_crash_console_init
-
-	/* ---------------------------------------------
-	 * int plat_crash_console_putc(int c)
-	 * Function to print a character on the crash
-	 * console without a C Runtime.
-	 * Clobber list : x1, x2
-	 * ---------------------------------------------
-	 */
-func plat_crash_console_putc
-	mov_imm	x1, RDO_UART0_BASE
-	b	console_core_putc
-endfunc plat_crash_console_putc

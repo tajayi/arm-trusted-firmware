@@ -70,6 +70,7 @@ PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				drivers/cadence/uart/cdns_common.c		\
 				lib/aarch64/xlat_tables.c			\
 				plat/arm/common/aarch64/arm_common.c		\
+				plat/arm/common/aarch64/arm_helpers.S           \
 				plat/common/aarch64/plat_common.c		\
 				plat/zynqmp/aarch64/zynqmp_common.c
 

@@ -207,9 +207,14 @@
 #define RDO_UART0_BASE         0xFF000000
 #define RDO_UART1_BASE         0xFF001000
 
+#define PLAT_ARM_CRASH_UART_BASE	RDO_UART0_BASE
+/* impossible to call C routine how it is done now - hardcode any value */
+#define	PLAT_ARM_CRASH_UART_CLK_IN_HZ	25000000 /* FIXME */
+
 /* Must be non zero */
 #define CADENCE_UART_BAUDRATE (115200)
 
+#define ARM_CONSOLE_BAUDRATE	CADENCE_UART_BAUDRATE
 /*******************************************************************************
  *  Shared Data
  ******************************************************************************/
