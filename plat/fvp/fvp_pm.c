@@ -32,7 +32,7 @@
 #include <arm_gic.h>
 #include <assert.h>
 #include <bakery_lock.h>
-#include <cci400.h>
+#include <cci.h>
 #include <debug.h>
 #include <mmio.h>
 #include <platform.h>
@@ -64,7 +64,7 @@ static void fvp_program_mailbox(uint64_t mpidr, uint64_t address)
  * Function which implements the common FVP specific operations to power down a
  * cpu in response to a CPU_OFF or CPU_SUSPEND request.
  ******************************************************************************/
-static void fvp_cpu_pwrdwn_common()
+static void fvp_cpu_pwrdwn_common(void)
 {
 	/* Prevent interrupts from spuriously waking up this cpu */
 	arm_gic_cpuif_deactivate();
@@ -77,13 +77,12 @@ static void fvp_cpu_pwrdwn_common()
  * Function which implements the common FVP specific operations to power down a
  * cluster in response to a CPU_OFF or CPU_SUSPEND request.
  ******************************************************************************/
-static void fvp_cluster_pwrdwn_common()
+static void fvp_cluster_pwrdwn_common(void)
 {
 	uint64_t mpidr = read_mpidr_el1();
 
 	/* Disable coherency if this cluster is to be turned off */
-	if (get_plat_config()->flags & CONFIG_HAS_CCI)
-		cci_disable_cluster_coherency(mpidr);
+	fvp_cci_disable();
 
 	/* Program the power controller to turn the cluster off */
 	fvp_pwrc_write_pcoffr(mpidr);

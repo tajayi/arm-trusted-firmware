@@ -33,7 +33,7 @@
 #include <assert.h>
 #include <bl31.h>
 #include <bl_common.h>
-#include <cci400.h>
+#include <cci.h>
 #include <console.h>
 #include <mmio.h>
 #include <platform.h>
@@ -123,9 +123,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * a warm boot. BL1 should have already enabled CCI coherency for this
 	 * cluster during cold boot.
 	 */
-	cci_init(CCI400_BASE,
-		 CCI400_SL_IFACE3_CLUSTER_IX,
-		 CCI400_SL_IFACE4_CLUSTER_IX);
+	plat_cci_init();
 
 	/*
 	 * Check params passed from BL2 should not be NULL,
@@ -182,7 +180,7 @@ void bl31_platform_setup(void)
  * Perform the very early platform specific architectural setup here. At the
  * moment this is only intializes the mmu in a quick and dirty way.
  ******************************************************************************/
-void bl31_plat_arch_setup()
+void bl31_plat_arch_setup(void)
 {
 	configure_mmu_el3(BL31_RO_BASE,
 			  (BL31_END - BL31_RO_BASE),
