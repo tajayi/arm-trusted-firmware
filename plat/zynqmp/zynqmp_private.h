@@ -69,8 +69,6 @@ int zynqmp_config_setup(void);
 void zynqmp_cci_init(void);
 void zynqmp_cci_enable(void);
 
-void zynqmp_gic_init(void);
-
 /* Declarations for plat_topology.c */
 int plat_setup_topology(void);
 

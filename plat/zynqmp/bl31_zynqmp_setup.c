@@ -198,7 +198,7 @@ static uint64_t rdo_el3_interrupt_handler(uint32_t id,
 void bl31_platform_setup(void)
 {
 	/* Initialize the gic cpu and distributor interfaces */
-	zynqmp_gic_init();
+	plat_arm_gic_init();
 	arm_gic_setup();
 
 	/* Topologies are best known to the platform. */

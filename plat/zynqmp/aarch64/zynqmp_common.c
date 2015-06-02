@@ -263,7 +263,7 @@ void fvp_cci_disable(void)
 		cci_disable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
 }
 
-void zynqmp_gic_init(void)
+void plat_arm_gic_init(void)
 {
 	arm_gic_init(arm_config.gicc_base,
 		arm_config.gicd_base,
