@@ -106,21 +106,6 @@ endfunc plat_secondary_cold_boot_setup
 func platform_get_entrypoint
 	mov	x9, x30 // lr
 	mov	x0, #0
-	b	exit
-warm_reset:
-	/* ---------------------------------------------
-	 * A per-cpu mailbox is maintained in the tru-
-	 * sted DRAM. Its flushed out of the caches
-	 * after every update using normal memory so
-	 * its safe to read it here with SO attributes
-	 * ---------------------------------------------
-	 */
-	ldr	x10, =MBOX_BASE
-	bl	platform_get_core_pos
-	lsl	x0, x0, #CACHE_WRITEBACK_SHIFT
-	ldr	x0, [x10, x0]
-	cbz	x0, _panic
-exit:
 	ret	x9
 _panic:	b	_panic
 endfunc platform_get_entrypoint
