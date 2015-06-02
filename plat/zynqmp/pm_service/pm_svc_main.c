@@ -80,8 +80,8 @@ void read_ipi_buffer(const struct pm_proc *const proc, uint32_t *pld)
 static void trigger_callback_irq(uint32_t irq_num)
 {
 	/* Set interrupt for non-secure EL1/EL2 */
-	gicd_set_ispendr(RDO_GICD_BASE, irq_num);
-	gicd_set_isactiver(RDO_GICD_BASE, irq_num);
+	gicd_set_ispendr(BASE_GICD_BASE, irq_num);
+	gicd_set_isactiver(BASE_GICD_BASE, irq_num);
 }
 
 /**
@@ -219,7 +219,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 
 		/* Save pm callback irq number */
 		pm_ctx.callback_irq = x1;
-		gicd_set_isenabler(RDO_GICD_BASE, x1);
+		gicd_set_isenabler(BASE_GICD_BASE, x1);
 		SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS);
 
 	case PM_F_GETARGS:

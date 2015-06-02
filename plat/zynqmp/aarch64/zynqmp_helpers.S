@@ -68,7 +68,7 @@ func plat_secondary_cold_boot_setup
 	 * Deactivate the gic cpu interface as well
 	 * ---------------------------------------------
 	 */
-	ldr	x1, =RDO_GICC_BASE
+	ldr	x1, =BASE_GICC_BASE
 	mov	w0, #(IRQ_BYP_DIS_GRP1 | FIQ_BYP_DIS_GRP1)
 	orr	w0, w0, #(IRQ_BYP_DIS_GRP0 | FIQ_BYP_DIS_GRP0)
 	str	w0, [x1, #GICC_CTLR]

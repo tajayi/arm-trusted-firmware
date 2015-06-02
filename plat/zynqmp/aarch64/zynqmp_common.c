@@ -235,10 +235,10 @@ int zynqmp_config_setup(void)
 {
 	uint32_t val;
 
-	plat_config.gicd_base = RDO_GICD_BASE;
-	plat_config.gicc_base = RDO_GICC_BASE;
-	plat_config.gich_base = RDO_GICH_BASE;
-	plat_config.gicv_base = RDO_GICV_BASE;
+	plat_config.gicd_base = BASE_GICD_BASE;
+	plat_config.gicc_base = BASE_GICC_BASE;
+	plat_config.gich_base = BASE_GICH_BASE;
+	plat_config.gicv_base = BASE_GICV_BASE;
 
 	zynqmp_print_platform_name();
 
