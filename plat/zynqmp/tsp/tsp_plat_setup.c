@@ -32,6 +32,8 @@
 #include <console.h>
 #include <debug.h>
 #include <platform_tsp.h>
+#include <xlat_tables.h>
+#include <plat_arm.h>
 #include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 
@@ -93,7 +95,7 @@ void tsp_platform_setup(void)
  ******************************************************************************/
 void tsp_plat_arch_setup(void)
 {
-	zynqmp_configure_mmu_el1(BL32_RO_BASE,
+	arm_configure_mmu_el1(BL32_RO_BASE,
 			      (BL32_COHERENT_RAM_LIMIT - BL32_RO_BASE),
 			      BL32_RO_BASE,
 			      BL32_RO_LIMIT,

@@ -37,6 +37,8 @@
 #include <console.h>
 #include <mmio.h>
 #include <platform.h>
+#include <xlat_tables.h>
+#include <plat_arm.h>
 #include <stddef.h>
 #include "zynqmp_def.h"
 #include "zynqmp_private.h"
@@ -132,7 +134,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 				0);
 	SET_SECURITY_STATE(bl32_image_ep_info.h.attr, SECURE);
 	bl32_image_ep_info.pc = BL32_BASE;
-	bl32_image_ep_info.spsr = zynqmp_get_spsr_for_bl32_entry();
+	bl32_image_ep_info.spsr = arm_get_spsr_for_bl32_entry();
 
 	NOTICE("BL3-1: Secure code at 0x%lx\n", bl32_image_ep_info.pc);
 
@@ -145,7 +147,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * is located and the entry state information
 	 */
 	bl33_image_ep_info.pc = plat_get_ns_image_entrypoint();
-	bl33_image_ep_info.spsr = zynqmp_get_spsr_for_bl33_entry();
+	bl33_image_ep_info.spsr = arm_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 
 	NOTICE("BL3-1: Non secure code at 0x%lx\n", bl33_image_ep_info.pc);
@@ -224,7 +226,7 @@ void bl31_plat_arch_setup(void)
 	zynqmp_cci_init();
 	zynqmp_cci_enable();
 
-	zynqmp_configure_mmu_el3(BL31_RO_BASE,
+	arm_configure_mmu_el3(BL31_RO_BASE,
 			      (BL31_COHERENT_RAM_LIMIT - BL31_RO_BASE),
 			      BL31_RO_BASE,
 			      BL31_RO_LIMIT,

@@ -120,7 +120,7 @@
 #define TZROOTKEY_BASE		0x7fe80000
 
 /* Load address of BL33 in the ZYNQMP port */
-#define NS_IMAGE_OFFSET		(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
+#define PLAT_ARM_NS_IMAGE_OFFSET	(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
 
 /* Special value used to verify platform parameters from BL2 to BL3-1 */
 #define ZYNQMP_BL31_PLAT_PARAM_VAL	0x0f1e2d3c4b5a6978ULL

@@ -38,6 +38,7 @@
 #include <mmio.h>
 #include <platform.h>
 #include <xlat_tables.h>
+#include <plat_arm.h>
 #include "../zynqmp_def.h"
 
 /*******************************************************************************
@@ -54,7 +55,7 @@ arm_config_t arm_config;
  * This doesn't include TZRAM as the 'mem_layout' argument passed to
  * configure_mmu_elx() will give the available subset of that,
  */
-const mmap_region_t zynqmp_mmap[] = {
+const mmap_region_t plat_arm_mmap[] = {
 	{ ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_SIZE,
 						MT_MEMORY | MT_RW | MT_SECURE },
 	{ ZYNQMP_TRUSTED_DRAM_BASE, ZYNQMP_TRUSTED_DRAM_BASE,	ZYNQMP_TRUSTED_DRAM_SIZE,
@@ -83,37 +84,6 @@ const unsigned int irq_sec_array[] = {
 	IRQ_SEC_SGI_6,
 	IRQ_SEC_SGI_7
 };
-
-/*******************************************************************************
- * Macro generating the code for the function setting up the pagetables as per
- * the platform memory map & initialize the mmu, for the given exception level
- ******************************************************************************/
-#define DEFINE_CONFIGURE_MMU_EL(_el)					\
-	void zynqmp_configure_mmu_el##_el(unsigned long total_base,	\
-				   unsigned long total_size,		\
-				   unsigned long ro_start,		\
-				   unsigned long ro_limit,		\
-				   unsigned long coh_start,		\
-				   unsigned long coh_limit)		\
-	{								\
-		mmap_add_region(total_base, total_base,			\
-				total_size,				\
-				MT_MEMORY | MT_RW | MT_SECURE);		\
-		mmap_add_region(ro_start, ro_start,			\
-				ro_limit - ro_start,			\
-				MT_MEMORY | MT_RO | MT_SECURE);		\
-		mmap_add_region(coh_start, coh_start,			\
-				coh_limit - coh_start,			\
-				MT_DEVICE | MT_RW | MT_SECURE);		\
-		mmap_add(zynqmp_mmap);					\
-		init_xlat_tables();					\
-									\
-		enable_mmu_el##_el(0);					\
-	}
-
-/* Define EL1 and EL3 variants of the function initialising the MMU */
-DEFINE_CONFIGURE_MMU_EL(1)
-DEFINE_CONFIGURE_MMU_EL(3)
 
 #define ZYNQMP_SILICON_VER_MASK   0xF000
 #define ZYNQMP_SILICON_VER_SHIFT  12
@@ -262,11 +232,6 @@ int zynqmp_config_setup(void)
 	return 0;
 }
 
-unsigned long plat_get_ns_image_entrypoint(void)
-{
-	return NS_IMAGE_OFFSET;
-}
-
 uint64_t plat_get_syscnt_freq(void)
 {
 	uint64_t counter_base_frequency;
@@ -277,21 +242,13 @@ uint64_t plat_get_syscnt_freq(void)
 	return counter_base_frequency;
 }
 
-/* Map of CCI masters with the slave interfaces they are connected */
-static const int cci_map[] = {
-	PLAT_ARM_CCI_CLUSTER0_SL_IFACE_IX,
-	PLAT_ARM_CCI_CLUSTER1_SL_IFACE_IX
-};
-
 void zynqmp_cci_init(void)
 {
 	/*
 	 * Initialize CCI-400 driver
 	 */
 	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
-		cci_init(PLAT_ARM_CCI_BASE,
-			cci_map,
-			ARRAY_SIZE(cci_map));
+		arm_cci_init();
 }
 
 void zynqmp_cci_enable(void)
@@ -313,44 +270,4 @@ void zynqmp_gic_init(void)
 		1,
 		irq_sec_array,
 		ARRAY_SIZE(irq_sec_array));
-}
-
-
-/*******************************************************************************
- * Gets SPSR for BL32 entry
- ******************************************************************************/
-uint32_t zynqmp_get_spsr_for_bl32_entry(void)
-{
-	/*
-	 * The Secure Payload Dispatcher service is responsible for
-	 * setting the SPSR prior to entry into the BL32 image.
-	 */
-	return 0;
-}
-
-/*******************************************************************************
- * Gets SPSR for BL33 entry
- ******************************************************************************/
-uint32_t zynqmp_get_spsr_for_bl33_entry(void)
-{
-	unsigned long el_status;
-	unsigned int mode;
-	uint32_t spsr;
-
-	/* Figure out what mode we enter the non-secure world in */
-	el_status = read_id_aa64pfr0_el1() >> ID_AA64PFR0_EL2_SHIFT;
-	el_status &= ID_AA64PFR0_ELX_MASK;
-
-	if (el_status)
-		mode = MODE_EL2;
-	else
-		mode = MODE_EL1;
-
-	/*
-	 * TODO: Consider the possibility of specifying the SPSR in
-	 * the FIP ToC and allowing the platform to have a say as
-	 * well.
-	 */
-	spsr = SPSR_64(mode, MODE_SP_ELX, DISABLE_ALL_EXCEPTIONS);
-	return spsr;
 }

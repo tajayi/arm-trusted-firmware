@@ -64,18 +64,6 @@ struct meminfo;
 /*******************************************************************************
  * Function and variable prototypes
  ******************************************************************************/
-void zynqmp_configure_mmu_el1(unsigned long total_base,
-			   unsigned long total_size,
-			   unsigned long,
-			   unsigned long,
-			   unsigned long,
-			   unsigned long);
-void zynqmp_configure_mmu_el3(unsigned long total_base,
-			   unsigned long total_size,
-			   unsigned long,
-			   unsigned long,
-			   unsigned long,
-			   unsigned long);
 int zynqmp_config_setup(void);
 
 void zynqmp_cci_init(void);
