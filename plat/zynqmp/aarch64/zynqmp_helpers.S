@@ -34,8 +34,8 @@
 #include <gic_v2.h>
 #include <platform_def.h>
 
-	.globl	platform_get_entrypoint
 	.globl	plat_secondary_cold_boot_setup
+	.globl	platform_get_entrypoint
 	.globl	platform_mem_init
 	.globl	platform_is_primary_cpu
 
