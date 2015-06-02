@@ -95,8 +95,3 @@ ifneq (${RESET_TO_BL31},1)
   $(error "Using BL3-1 as the reset vector is only one option supported on ZynqMP. \
   Please set RESET_TO_BL31 to 1.")
 endif
-
-# Flag used by the platform port to determine the version of ARM GIC
-# architecture to use for interrupt management in EL3.
-ARM_GIC_ARCH		:=	2
-$(eval $(call add_define,ARM_GIC_ARCH))
