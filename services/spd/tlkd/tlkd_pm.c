@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,25 +28,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <asm_macros.S>
+#include <psci.h>
 
-	.globl	spin_lock
-	.globl	spin_unlock
+#define MPIDR_CPU0	0x80000000
 
+/*******************************************************************************
+ * Return the type of payload TLKD is dealing with. Report the current
+ * resident cpu (mpidr format) if it is a UP/UP migratable payload.
+ ******************************************************************************/
+static int32_t cpu_migrate_info(uint64_t *resident_cpu)
+{
+	/* the payload runs only on CPU0 */
+	*resident_cpu = MPIDR_CPU0;
 
-func spin_lock
-	mov	w2, #1
-	sevl
-l1:	wfe
-l2:	ldaxr	w1, [x0]
-	cbnz	w1, l1
-	stxr	w1, w2, [x0]
-	cbnz	w1, l2
-	ret
-endfunc spin_lock
+	/* Uniprocessor, not migrate capable payload */
+	return PSCI_TOS_NOT_UP_MIG_CAP;
+}
 
-
-func spin_unlock
-	stlr	wzr, [x0]
-	ret
-endfunc spin_unlock
+/*******************************************************************************
+ * Structure populated by the Dispatcher to be given a chance to perform any
+ * bookkeeping before PSCI executes a power mgmt.  operation.
+ ******************************************************************************/
+const spd_pm_ops_t tlkd_pm_ops = {
+	.svc_migrate_info = cpu_migrate_info,
+};

@@ -117,6 +117,7 @@ func el1_sysregs_context_save
 	str	x15, [x0, #CTX_FP_FPEXC32_EL2]
 
 	ret
+endfunc el1_sysregs_context_save
 
 /* -----------------------------------------------------
  * The following function strictly follows the AArch64
@@ -207,6 +208,7 @@ func el1_sysregs_context_restore
 	/* No explict ISB required here as ERET covers it */
 
 	ret
+endfunc el1_sysregs_context_restore
 
 /* -----------------------------------------------------
  * The following function follows the aapcs_64 strictly
@@ -251,6 +253,7 @@ func fpregs_context_save
 	str	x10, [x0, #CTX_FP_FPCR]
 
 	ret
+endfunc fpregs_context_save
 
 /* -----------------------------------------------------
  * The following function follows the aapcs_64 strictly
@@ -300,4 +303,5 @@ func fpregs_context_restore
 	 */
 
 	ret
+endfunc fpregs_context_restore
 #endif /* CTX_INCLUDE_FPREGS */

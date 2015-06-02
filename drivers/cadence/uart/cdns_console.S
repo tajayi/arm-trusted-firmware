@@ -64,6 +64,7 @@ func console_init
         adrp    x3, console_base
         str     x0, [x3, :lo12:console_base]
         b       console_core_init
+endfunc console_init
 
 	/* -----------------------------------------------
 	 * int console_core_init(unsigned long base_addr,
@@ -99,6 +100,7 @@ func console_core_init
 	mov	w0, #1
 init_fail:
 	ret
+endfunc console_core_init
 
 	/* ---------------------------------------------
 	 * int console_putc(int c)
@@ -114,6 +116,7 @@ func console_putc
 	adrp	x2, console_base
 	ldr	x1, [x2, :lo12:console_base]
 	b	console_core_putc
+endfunc console_putc
 
 	/* --------------------------------------------------------
 	 * int console_core_putc(int c, unsigned int base_addr)
@@ -146,6 +149,7 @@ func console_core_putc
 putc_error:
 	mov	w0, #-1
 	ret
+endfunc console_core_putc
 
 	/* ---------------------------------------------
 	 * int console_getc(void)
@@ -168,3 +172,4 @@ func console_getc
 getc_error:
 	mov	w0, #-1
 	ret
+endfunc console_getc

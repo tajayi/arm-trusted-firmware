@@ -83,6 +83,7 @@ func plat_secondary_cold_boot_setup
 	wfi
 cb_panic:
 	b	cb_panic
+endfunc plat_secondary_cold_boot_setup
 
 
 	/* -----------------------------------------------------
@@ -125,6 +126,7 @@ warm_reset:
 exit:
 	ret	x9
 _panic:	b	_panic
+endfunc platform_get_entrypoint
 
 
 	/* -----------------------------------------------------
@@ -147,6 +149,7 @@ loop:
 	subs	w1, w1, #1
 	b.gt	loop
 	ret
+endfunc platform_mem_init
 
 	/* ---------------------------------------------
 	 * void plat_report_exception(unsigned int type)
@@ -168,12 +171,14 @@ func plat_report_exception
 	add	x1, x1, #V2M_SYS_LED
 	str	w0, [x1] */
 	ret
+endfunc plat_report_exception
 
 func platform_is_primary_cpu
 	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)
 	cmp	x0, #ZYNQMP_PRIMARY_CPU
 	cset	x0, eq
 	ret
+endfunc platform_is_primary_cpu
 
 	/* ---------------------------------------------
 	 * int plat_crash_console_init(void)
@@ -188,6 +193,7 @@ func plat_crash_console_init
 	mov_imm	x0, RDO_UART0_BASE
 	mov_imm	x2, CADENCE_UART_BAUDRATE
 	b	console_core_init
+endfunc plat_crash_console_init
 
 	/* ---------------------------------------------
 	 * int plat_crash_console_putc(int c)
@@ -199,3 +205,4 @@ func plat_crash_console_init
 func plat_crash_console_putc
 	mov_imm	x1, RDO_UART0_BASE
 	b	console_core_putc
+endfunc plat_crash_console_putc
