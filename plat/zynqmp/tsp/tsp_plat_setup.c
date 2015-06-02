@@ -37,16 +37,6 @@
 #include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 
-/*******************************************************************************
- * Declarations of linker defined symbols which will help us find the layout
- * of trusted SRAM
- ******************************************************************************/
-extern unsigned long __RO_START__;
-extern unsigned long __RO_END__;
-
-extern unsigned long __COHERENT_RAM_START__;
-extern unsigned long __COHERENT_RAM_END__;
-
 /*
  * The next 2 constants identify the extents of the code & RO data region.
  * These addresses are used by the MMU setup code and therefore they must be
