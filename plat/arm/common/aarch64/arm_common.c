@@ -31,8 +31,8 @@
 #include <arch_helpers.h>
 #include <cci.h>
 #include <mmio.h>
-#include <plat_arm.h>
 #include <xlat_tables.h>
+#include <plat_arm.h>
 
 
 static const int cci_map[] = {
