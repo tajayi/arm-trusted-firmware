@@ -98,10 +98,10 @@ cci_iface_regs:
 	.macro plat_print_interconnect_regs
 	adr	x6, cci_iface_regs
 	/* Store in x7 the base address of the first interface */
-	mov_imm	x7, (CCI400_BASE + SLAVE_IFACE3_OFFSET)
+	mov_imm	x7, (PLAT_ARM_CCI_BASE + SLAVE_IFACE3_OFFSET)
 	ldr	w8, [x7, #SNOOP_CTRL_REG]
 	/* Store in x7 the base address of the second interface */
-	mov_imm	x7, (CCI400_BASE + SLAVE_IFACE4_OFFSET)
+	mov_imm	x7, (PLAT_ARM_CCI_BASE + SLAVE_IFACE4_OFFSET)
 	ldr	w9, [x7, #SNOOP_CTRL_REG]
 	/* Store to the crash buf and print to console */
 	bl	str_in_crash_buf_print

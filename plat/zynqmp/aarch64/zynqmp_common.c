@@ -279,8 +279,8 @@ uint64_t plat_get_syscnt_freq(void)
 
 /* Map of CCI masters with the slave interfaces they are connected */
 static const int cci_map[] = {
-	CCI400_CLUSTER0_SL_IFACE_IX,
-	CCI400_CLUSTER1_SL_IFACE_IX
+	PLAT_ARM_CCI_CLUSTER0_SL_IFACE_IX,
+	PLAT_ARM_CCI_CLUSTER1_SL_IFACE_IX
 };
 
 void zynqmp_cci_init(void)
@@ -289,7 +289,7 @@ void zynqmp_cci_init(void)
 	 * Initialize CCI-400 driver
 	 */
 	if (plat_config.flags & CONFIG_HAS_CCI)
-		cci_init(CCI400_BASE,
+		cci_init(PLAT_ARM_CCI_BASE,
 			cci_map,
 			ARRAY_SIZE(cci_map));
 }
