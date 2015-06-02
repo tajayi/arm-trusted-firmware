@@ -135,6 +135,8 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl32_image_ep_info.pc = BL32_BASE;
 	bl32_image_ep_info.spsr = zynqmp_get_spsr_for_bl32_entry();
 
+	NOTICE("BL3-1: Secure code at 0x%lx\n", bl32_image_ep_info.pc);
+
 	SET_PARAM_HEAD(&bl33_image_ep_info,
 				PARAM_EP,
 				VERSION_1,
@@ -146,6 +148,8 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl33_image_ep_info.pc = plat_get_ns_image_entrypoint();
 	bl33_image_ep_info.spsr = zynqmp_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
+
+	NOTICE("BL3-1: Non secure code at 0x%lx\n", bl33_image_ep_info.pc);
 }
 
 static interrupt_type_handler_t type_el3_interrupt_table[MAX_INTR_EL3];
