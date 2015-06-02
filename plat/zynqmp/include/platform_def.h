@@ -113,7 +113,7 @@
 /*
  * ID of the secure physical generic timer interrupt used by the TSP.
  */
-#define TSP_IRQ_SEC_PHY_TIMER		IRQ_SEC_PHY_TIMER
+#define TSP_IRQ_SEC_PHY_TIMER		ARM_IRQ_SEC_PHY_TIMER
 
 /*******************************************************************************
  * Platform specific page table and MMU setup constants

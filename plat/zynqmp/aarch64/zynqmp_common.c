@@ -73,16 +73,16 @@ const mmap_region_t plat_arm_mmap[] = {
 
 /* Array of secure interrupts to be configured by the gic driver */
 const unsigned int irq_sec_array[] = {
-	IRQ_SEC_PHY_TIMER,
+	ARM_IRQ_SEC_PHY_TIMER,
 	IRQ_SEC_IPI_APU,
-	IRQ_SEC_SGI_0,
-	IRQ_SEC_SGI_1,
-	IRQ_SEC_SGI_2,
-	IRQ_SEC_SGI_3,
-	IRQ_SEC_SGI_4,
-	IRQ_SEC_SGI_5,
-	IRQ_SEC_SGI_6,
-	IRQ_SEC_SGI_7
+	ARM_IRQ_SEC_SGI_0,
+	ARM_IRQ_SEC_SGI_1,
+	ARM_IRQ_SEC_SGI_2,
+	ARM_IRQ_SEC_SGI_3,
+	ARM_IRQ_SEC_SGI_4,
+	ARM_IRQ_SEC_SGI_5,
+	ARM_IRQ_SEC_SGI_6,
+	ARM_IRQ_SEC_SGI_7
 };
 
 #define ZYNQMP_SILICON_VER_MASK   0xF000

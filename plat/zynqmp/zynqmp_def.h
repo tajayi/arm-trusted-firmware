@@ -187,17 +187,17 @@
 #define BASE_GICH_BASE		0xF9040000
 #define BASE_GICV_BASE		0xF9060000
 
-#define IRQ_SEC_PHY_TIMER		29
 #define IRQ_SEC_IPI_APU			67
-#define IRQ_SEC_SGI_0			8
-#define IRQ_SEC_SGI_1			9
-#define IRQ_SEC_SGI_2			10
-#define IRQ_SEC_SGI_3			11
-#define IRQ_SEC_SGI_4			12
-#define IRQ_SEC_SGI_5			13
-#define IRQ_SEC_SGI_6			14
-#define IRQ_SEC_SGI_7			15
-#define IRQ_SEC_SGI_8			16
+#define ARM_IRQ_SEC_PHY_TIMER		29
+
+#define ARM_IRQ_SEC_SGI_0		8
+#define ARM_IRQ_SEC_SGI_1		9
+#define ARM_IRQ_SEC_SGI_2		10
+#define ARM_IRQ_SEC_SGI_3		11
+#define ARM_IRQ_SEC_SGI_4		12
+#define ARM_IRQ_SEC_SGI_5		13
+#define ARM_IRQ_SEC_SGI_6		14
+#define ARM_IRQ_SEC_SGI_7		15
 
 #define MAX_INTR_EL3			128
 
