@@ -92,6 +92,7 @@
 #define PLATFORM_CORE_COUNT             6
 #define PLATFORM_NUM_AFFS		(PLATFORM_CLUSTER_COUNT + \
 					 PLATFORM_CORE_COUNT)
+#define PLATFORM_MAX_AFFLVL		MPIDR_AFFLVL1
 #define MAX_IO_DEVICES			3
 #define MAX_IO_HANDLES			4
 
@@ -183,7 +184,7 @@
 # define MAX_XLAT_TABLES		3
 #endif
 
-#define MAX_MMAP_REGIONS		16
+#define MAX_MMAP_REGIONS		(JUNO_MMAP_ENTRIES + JUNO_BL_REGIONS)
 
 /*******************************************************************************
  * ID of the secure physical generic timer interrupt used by the TSP

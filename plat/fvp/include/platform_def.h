@@ -105,6 +105,7 @@
 #define PLATFORM_MAX_CPUS_PER_CLUSTER	4
 #define PLATFORM_NUM_AFFS		(PLATFORM_CLUSTER_COUNT + \
 					 PLATFORM_CORE_COUNT)
+#define PLATFORM_MAX_AFFLVL		MPIDR_AFFLVL1
 #define MAX_IO_DEVICES			3
 #define MAX_IO_HANDLES			4
 
@@ -208,7 +209,7 @@
 # endif
 #endif
 
-#define MAX_MMAP_REGIONS		16
+#define MAX_MMAP_REGIONS		(FVP_MMAP_ENTRIES + FVP_BL_REGIONS)
 
 /*******************************************************************************
  * Declarations and constants to access the mailboxes safely. Each mailbox is

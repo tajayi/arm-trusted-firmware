@@ -59,14 +59,6 @@ unsigned int plat_get_aff_state(unsigned int aff_lvl,
 }
 
 /*******************************************************************************
- * Returns the number of supported affinity levels (1)
- ******************************************************************************/
-int plat_get_max_afflvl()
-{
-	return MPIDR_AFFLVL1;
-}
-
-/*******************************************************************************
  * This function populates the ZynqMP specific topology information.
  * Currently only one fixed configuration (1 cluster containing 4 cpus) is
  * supported.
