@@ -70,6 +70,7 @@ PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				drivers/cadence/uart/cdns_common.c		\
 				lib/aarch64/xlat_tables.c			\
 				plat/common/aarch64/plat_common.c		\
+				plat/zynqmp/aarch64/zynqmp_common.c
 
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				drivers/arm/gic/arm_gic.c			\
@@ -86,7 +87,6 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				plat/zynqmp/plat_topology.c			\
 				plat/zynqmp/sip_svc_setup.c			\
 				plat/zynqmp/aarch64/zynqmp_helpers.S		\
-				plat/zynqmp/aarch64/zynqmp_common.c		\
 				plat/zynqmp/pm_service/pm_svc_main.c		\
 				plat/zynqmp/pm_service/pm_api_sys.c		\
 				plat/zynqmp/pm_service/pm_client.c

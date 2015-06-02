@@ -33,6 +33,5 @@ BL32_SOURCES		+=	drivers/arm/gic/arm_gic.c			\
 				drivers/arm/gic/gic_v2.c			\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/common/plat_gic.c				\
-				plat/zynqmp/aarch64/zynqmp_common.c		\
 				plat/zynqmp/aarch64/zynqmp_helpers.S		\
 				plat/zynqmp/tsp/tsp_plat_setup.c
