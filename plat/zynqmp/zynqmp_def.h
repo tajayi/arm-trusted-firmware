@@ -211,26 +211,6 @@
 #define CADENCE_UART_BAUDRATE (115200)
 
 /*******************************************************************************
- * TrustZone address space controller related constants
- ******************************************************************************/
-#define TZC400_BASE			0x2a4a0000
-
-/*
- * The NSAIDs for this platform as used to program the TZC400.
- */
-
-/* NSAIDs used by devices in TZC filter 0 on ZYNQMP */
-#define ZYNQMP_NSAID_DEFAULT		0
-#define ZYNQMP_NSAID_PCI			1
-#define ZYNQMP_NSAID_VIRTIO		8  /* from ZYNQMP v5.6 onwards */
-#define ZYNQMP_NSAID_AP			9  /* Application Processors */
-#define ZYNQMP_NSAID_VIRTIO_OLD		15 /* until ZYNQMP v5.5 */
-
-/* NSAIDs used by devices in TZC filter 2 on ZYNQMP */
-#define ZYNQMP_NSAID_HDLCD0		2
-#define ZYNQMP_NSAID_CLCD			7
-
-/*******************************************************************************
  *  Shared Data
  ******************************************************************************/
 

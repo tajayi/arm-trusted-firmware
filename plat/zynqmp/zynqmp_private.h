@@ -89,9 +89,6 @@ int plat_setup_topology(void);
 /* Declarations for zynqmp_io_storage.c */
 void zynqmp_io_setup(void);
 
-/* Declarations for zynqmp_security.c */
-void zynqmp_security_setup(void);
-
 /* Gets the SPR for BL32 entry */
 uint32_t zynqmp_get_spsr_for_bl32_entry(void);
 

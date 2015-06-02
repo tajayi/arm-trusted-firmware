@@ -80,7 +80,6 @@ BL31_SOURCES		+=	drivers/arm/cci400/cci400.c			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/zynqmp/bl31_zynqmp_setup.c			\
-				plat/zynqmp/zynqmp_security.c			\
 				plat/zynqmp/plat_pm.c				\
 				plat/zynqmp/plat_topology.c			\
 				plat/zynqmp/sip_svc_setup.c			\
