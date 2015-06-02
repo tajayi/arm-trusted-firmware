@@ -47,8 +47,8 @@
 #define ZYNQMP_TRUSTED_SRAM_SIZE	0x00040000
 
 /* Location of trusted dram on the base zynqmp */
-#define ZYNQMP_TRUSTED_DRAM_BASE	0x04000000 /* Can't overlap TZROM area */
-#define ZYNQMP_TRUSTED_DRAM_SIZE	0x02000000
+#define ZYNQMP_TRUSTED_DRAM_BASE	0x30000000 /* Can't overlap TZROM area */
+#define ZYNQMP_TRUSTED_DRAM_SIZE	0x10000000
 
 #define FLASH0_BASE		0x08000000
 #define FLASH0_SIZE		TZROM_SIZE
