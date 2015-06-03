@@ -30,13 +30,13 @@
 
 #include <arch.h>
 #include <arch_helpers.h>
+#include <arm_config.h>
 #include <arm_gic.h>
 #include <bl_common.h>
 #include <cci.h>
 #include <debug.h>
 #include <mmio.h>
 #include <platform.h>
-#include <plat_config.h>
 #include <xlat_tables.h>
 #include "../zynqmp_def.h"
 
@@ -47,7 +47,7 @@
  * configuration) & used thereafter. Each BL will have its own copy to allow
  * independent operation.
  ******************************************************************************/
-plat_config_t plat_config;
+arm_config_t arm_config;
 
 /*
  * Table of regions to map using the MMU.
@@ -235,10 +235,10 @@ int zynqmp_config_setup(void)
 {
 	uint32_t val;
 
-	plat_config.gicd_base = BASE_GICD_BASE;
-	plat_config.gicc_base = BASE_GICC_BASE;
-	plat_config.gich_base = BASE_GICH_BASE;
-	plat_config.gicv_base = BASE_GICV_BASE;
+	arm_config.gicd_base = BASE_GICD_BASE;
+	arm_config.gicc_base = BASE_GICC_BASE;
+	arm_config.gich_base = BASE_GICH_BASE;
+	arm_config.gicv_base = BASE_GICV_BASE;
 
 	zynqmp_print_platform_name();
 
@@ -257,7 +257,7 @@ int zynqmp_config_setup(void)
 	              ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET,
 		      ZYNQMP_IOU_SCNTRS_CONTROL_EN);
 
-	plat_config.flags |= CONFIG_HAS_CCI;
+	arm_config.flags |= ARM_CONFIG_HAS_CCI;
 
 	return 0;
 }
@@ -288,7 +288,7 @@ void zynqmp_cci_init(void)
 	/*
 	 * Initialize CCI-400 driver
 	 */
-	if (plat_config.flags & CONFIG_HAS_CCI)
+	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
 		cci_init(PLAT_ARM_CCI_BASE,
 			cci_map,
 			ARRAY_SIZE(cci_map));
@@ -296,20 +296,20 @@ void zynqmp_cci_init(void)
 
 void zynqmp_cci_enable(void)
 {
-	if (plat_config.flags & CONFIG_HAS_CCI)
+	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
 		cci_enable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
 }
 
 void fvp_cci_disable(void)
 {
-	if (plat_config.flags & CONFIG_HAS_CCI)
+	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
 		cci_disable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
 }
 
 void zynqmp_gic_init(void)
 {
-	arm_gic_init(plat_config.gicc_base,
-		plat_config.gicd_base,
+	arm_gic_init(arm_config.gicc_base,
+		arm_config.gicd_base,
 		1,
 		irq_sec_array,
 		ARRAY_SIZE(irq_sec_array));

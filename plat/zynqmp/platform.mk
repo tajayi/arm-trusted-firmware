@@ -60,7 +60,9 @@ endif
 $(eval $(call add_define,ZYNQMP_SHARED_DATA_LOCATION_ID))
 $(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 
-PLAT_INCLUDES		:=	-Iplat/zynqmp/include/				\
+PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
+				-Iinclude/plat/arm/common/aarch64/		\
+				-Iplat/zynqmp/include/				\
 				-Iplat/zynqmp/pm_service/			\
 				-Iplat/zynqmp/pm_service/include
 
