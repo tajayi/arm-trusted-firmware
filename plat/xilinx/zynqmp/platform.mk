@@ -62,17 +62,17 @@ $(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 
 PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 				-Iinclude/plat/arm/common/aarch64/		\
-				-Iplat/zynqmp/include/				\
-				-Iplat/zynqmp/pm_service/			\
-				-Iplat/zynqmp/pm_service/include
+				-Iplat/xilinx/zynqmp/include/			\
+				-Iplat/xilinx/zynqmp/pm_service/		\
+				-Iplat/xilinx/zynqmp/pm_service/include
 
 PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
 				drivers/cadence/uart/cdns_common.c		\
 				lib/aarch64/xlat_tables.c			\
 				plat/arm/common/aarch64/arm_common.c		\
-				plat/arm/common/aarch64/arm_helpers.S           \
+				plat/arm/common/aarch64/arm_helpers.S		\
 				plat/common/aarch64/plat_common.c		\
-				plat/zynqmp/aarch64/zynqmp_common.c
+				plat/xilinx/zynqmp/aarch64/zynqmp_common.c
 
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				drivers/arm/gic/arm_gic.c			\
@@ -84,14 +84,14 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
-				plat/zynqmp/bl31_zynqmp_setup.c			\
-				plat/zynqmp/plat_pm.c				\
-				plat/zynqmp/plat_topology.c			\
-				plat/zynqmp/sip_svc_setup.c			\
-				plat/zynqmp/aarch64/zynqmp_helpers.S		\
-				plat/zynqmp/pm_service/pm_svc_main.c		\
-				plat/zynqmp/pm_service/pm_api_sys.c		\
-				plat/zynqmp/pm_service/pm_client.c
+				plat/xilinx/zynqmp/bl31_zynqmp_setup.c		\
+				plat/xilinx/zynqmp/plat_pm.c			\
+				plat/xilinx/zynqmp/plat_topology.c		\
+				plat/xilinx/zynqmp/sip_svc_setup.c		\
+				plat/xilinx/zynqmp/aarch64/zynqmp_helpers.S	\
+				plat/xilinx/zynqmp/pm_service/pm_svc_main.c	\
+				plat/xilinx/zynqmp/pm_service/pm_api_sys.c	\
+				plat/xilinx/zynqmp/pm_service/pm_client.c
 
 ifneq (${RESET_TO_BL31},1)
   $(error "Using BL3-1 as the reset vector is only one option supported on ZynqMP. \
