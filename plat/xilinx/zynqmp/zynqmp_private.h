@@ -46,4 +46,8 @@ unsigned int zynqmp_get_bootmode(void);
  */
 int zynqmp_request_intr_type_el3(unsigned int, interrupt_type_handler_t);
 
+/* For FSBL handover */
+void fsbl_atf_handover(entry_point_info_t *bl32_image_ep_info,
+		       entry_point_info_t *bl33_image_ep_info);
+
 #endif /* __ZYNQMP_PRIVATE_H__ */

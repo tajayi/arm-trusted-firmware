@@ -29,6 +29,13 @@ make ERROR_DEPRECATED=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zyn
     -   `cadence` : Cadence UART
     -   `dcc`     : ARM DCC JTAG UART
 
+# FSBL->ATF Parameter Passing
+The FSBL populates a data structure with image information for the ATF. The ATF
+uses that data to hand off to the loaded images. The address of the handoff data
+structure is passed in the ```PMU_GLOBAL.GLOBAL_GEN_STORAGE6``` register. The
+register is free to be used by other software once the ATF is bringing up
+further firmware images.
+
 # Power Domain Tree
 The following power domain tree represents the power domain model used by the
 ATF for ZynqMP:
