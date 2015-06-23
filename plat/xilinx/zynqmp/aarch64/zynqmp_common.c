@@ -40,6 +40,7 @@
 #include <xlat_tables.h>
 #include <plat_arm.h>
 #include "../zynqmp_def.h"
+#include "../zynqmp_private.h"
 
 /*******************************************************************************
  * plat_config holds the characteristics of the differences between the three
