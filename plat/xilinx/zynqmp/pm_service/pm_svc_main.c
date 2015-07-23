@@ -208,6 +208,13 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 {
 	enum pm_ret_status ret;
 
+	uint32_t pm_arg[4];
+
+	pm_arg[0] = (uint32_t)x1;
+	pm_arg[1] = (uint32_t)(x1 >> 32);
+	pm_arg[2] = (uint32_t)x2;
+	pm_arg[3] = (uint32_t)(x2 >> 32);
+
 	switch (smc_fid & FUNCID_NUM_MASK) {
 	case PM_F_INIT:
 		VERBOSE("Initialize pm callback, irq: %d\n", x1);
@@ -219,117 +226,123 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 
 	case PM_F_GETARGS:
 	{
-		uint64_t callback_arg;
+		uint64_t svc_ret[3];
+
+		svc_ret[0] = pm_ctx.payload[0];
+		svc_ret[0] |= (uint64_t)pm_ctx.payload[1] << 32;
+		svc_ret[1] = pm_ctx.payload[2];
+		svc_ret[1] |= (uint64_t)pm_ctx.payload[3] << 32;
+		svc_ret[2] = pm_ctx.payload[4];
 
 		/*
-		* According to SMC calling convention the return values are
-		* stored in registers x0-x3
-		* x0 = pm_api_id
-		* x1 = arg0
-		* x2 = arg1
-		* x3 lower 32bit = arg2
-		* x3 higher 32bit = arg3
-		*/
-		callback_arg = pm_ctx.payload[4];
-		callback_arg = (callback_arg << 32) + pm_ctx.payload[3];
-		SMC_RET4(handle,
-			 pm_ctx.payload[0], pm_ctx.payload[1],
-			 pm_ctx.payload[2], callback_arg);
+		 * According to SMC calling convention the return values are
+		 * stored in registers x0-x3
+		 * x0[31:0]  = pm_api_id
+		 * x0[63:32] = arg0
+		 * x1[31:0]  = arg1
+		 * x1[63:32] = arg2
+		 * x2[31:0]  = arg3
+		 */
+		SMC_RET3(handle, svc_ret[0], svc_ret[1], svc_ret[2]);
 	}
 
 	/* PM API Functions */
 	case PM_SELF_SUSPEND:
-		ret = pm_self_suspend(x1, x2, x3);
+		ret = pm_self_suspend(pm_arg[0], pm_arg[1], pm_arg[2]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REQ_SUSPEND:
-		ret = pm_req_suspend(x1, x2, x3, x4);
+		ret = pm_req_suspend(pm_arg[0], pm_arg[1], pm_arg[2],
+				     pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REQ_WAKEUP:
-		ret = pm_req_wakeup(x1, x2);
+		ret = pm_req_wakeup(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_FORCE_POWERDOWN:
-		ret = pm_force_powerdown(x1, x2);
+		ret = pm_force_powerdown(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_ABORT_SUSPEND:
-		ret = pm_abort_suspend(x1);
+		ret = pm_abort_suspend(pm_arg[0]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_SET_WAKEUP_SOURCE:
-		ret = pm_set_wakeup_source(x1, x2, x3);
+		ret = pm_set_wakeup_source(pm_arg[0], pm_arg[1], pm_arg[2]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_SYSTEM_SHUTDOWN:
-		ret = pm_system_shutdown(x1);
+		ret = pm_system_shutdown(pm_arg[0]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REQ_NODE:
-		ret = pm_req_node(x1, x2, x3, x4);
+		ret = pm_req_node(pm_arg[0], pm_arg[1], pm_arg[2], pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_RELEASE_NODE:
-		ret = pm_release_node(x1, x2);
+		ret = pm_release_node(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_SET_REQUIREMENT:
-		ret = pm_set_requirement(x1, x2, x3, x4);
+		ret = pm_set_requirement(pm_arg[0], pm_arg[1], pm_arg[2],
+					 pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_SET_MAX_LATENCY:
-		ret = pm_set_max_latency(x1, x2);
+		ret = pm_set_max_latency(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_GET_API_VERSION:
 		/* Check is PM API version already verified */
 		if (pm_ctx.api_version == PM_VERSION)
-			SMC_RET2(handle, (uint64_t)PM_RET_SUCCESS,
-					  PM_VERSION);
+			SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS |
+				 ((uint64_t)PM_VERSION << 32));
 
 		ret = pm_get_api_version(&pm_ctx.api_version);
-		SMC_RET2(handle, (uint64_t)ret,
-				 (uint64_t)pm_ctx.api_version);
+		SMC_RET1(handle, (uint64_t)ret |
+			 ((uint64_t)pm_ctx.api_version << 32));
 
 	case PM_SET_CONFIGURATION:
-		ret = pm_set_configuration(x1);
+		ret = pm_set_configuration(pm_arg[0]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_GET_NODE_STATUS:
-		ret = pm_get_node_status(x1);
+		ret = pm_get_node_status(pm_arg[0]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_GET_OP_CHARACTERISTIC:
-		ret = pm_get_op_characteristic(x1, x2);
+		ret = pm_get_op_characteristic(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REGISTER_NOTIFIER:
-		ret = pm_register_notifier(x1, x2, x3, x4);
+		ret = pm_register_notifier(pm_arg[0], pm_arg[1], pm_arg[2],
+					   pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_RESET_ASSERT:
-		ret = pm_reset_assert(x1, x2);
+		ret = pm_reset_assert(pm_arg[0], pm_arg[1]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_RESET_GET_STATUS:
 	{
 		uint32_t reset_status;
 
-		ret = pm_reset_get_status(x1, &reset_status);
-		SMC_RET2(handle, (uint64_t)ret, (uint64_t)reset_status);
+		ret = pm_reset_get_status(pm_arg[0], &reset_status);
+		SMC_RET1(handle, (uint64_t)ret |
+			 ((uint64_t)reset_status << 32));
 	}
 
 	/* PM memory access functions */
 	case PM_MMIO_WRITE:
-		ret = pm_mmio_write(x1, x2, x3);
+		ret = pm_mmio_write(pm_arg[0], pm_arg[1], pm_arg[2]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_MMIO_READ:
 	{
 		uint32_t value;
 
-		ret = pm_mmio_read(x1, x2, &value);
+		ret = pm_mmio_read(pm_arg[0], pm_arg[1], &value);
 		SMC_RET1(handle, (uint64_t)ret);
 	}
 	default:
