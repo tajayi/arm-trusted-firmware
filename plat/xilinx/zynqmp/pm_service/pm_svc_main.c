@@ -138,16 +138,11 @@ static uint64_t ipi_fiq_handler(uint32_t id,
  */
 int32_t pm_ipi_init(void)
 {
-	uint32_t ipi_pmu_ier_reg;
 	uint32_t ipi_apu_ier_reg;
 
 	bakery_lock_init(&pm_secure_lock);
 
 	/* IPI Interrupts Enable */
-	ipi_pmu_ier_reg = pm_read(IPI_PMU_3_IER);
-	pm_write(IPI_PMU_3_IER,
-		 ipi_pmu_ier_reg | IPI_PMU_3_IER_PMU_0_MASK);
-
 	ipi_apu_ier_reg = pm_read(IPI_APU_IER);
 	pm_write(IPI_APU_IER,
 		 ipi_apu_ier_reg | IPI_APU_IER_PMU_0_MASK);
