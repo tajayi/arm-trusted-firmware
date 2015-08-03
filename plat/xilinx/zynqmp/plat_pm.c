@@ -235,6 +235,11 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 
 			return;
 		}
+
+		/* Set RVBAR for wakeup entrypoint */
+		mmio_write_32(R_RVBAR_L_0 + linear_id * 8, sec_entrypoint);
+		mmio_write_32(R_RVBAR_H_0 + linear_id * 8, sec_entrypoint >> 32);
+
 		/* Send request to PMU to suspend the appropriate APU CPU core */
 		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
 	}
