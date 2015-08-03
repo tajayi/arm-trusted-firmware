@@ -219,9 +219,6 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 	 */
 	zynqmp_program_mailbox(mpidr, sec_entrypoint);
 
-	/* Prevent interrupts from spuriously waking up this cpu */
-	arm_gic_cpuif_deactivate();
-
 	if (!zynqmp_is_pmu_up()) {
 		/* Program the power controller to power off this cpu. */
 		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
@@ -234,6 +231,8 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
 			/* Send request for OCM retention state */
 			set_ocm_retention();
+
+			return;
 		}
 		/* Send request to PMU to suspend the appropriate APU CPU core */
 		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);

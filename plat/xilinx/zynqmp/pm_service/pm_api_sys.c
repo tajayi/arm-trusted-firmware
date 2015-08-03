@@ -69,26 +69,15 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	const struct pm_proc *proc = pm_get_proc_by_node(nid);
-	if (NULL == proc) {
-		/*
-		 * If a subsystem node ID (APU or RPU) was passed then
-		 * the processor to be used is the primary processor.
-		 * E.g. for the APU the primary processor is APU0
-		 */
-		if (subsystem_node == nid) {
-			proc = primary_proc;
-		} else {
-			return PM_RET_ERROR_ARGS;
-		}
-	}
+	const struct pm_proc *proc = pm_get_proc(pm_this_cpuid());
+
 	/*
 	 * Do client specific suspend operations
-	 * (e.g. disable interrupts and set powerdown request bit)
+	 * (e.g. set powerdown request bit)
 	 */
 	pm_client_suspend(proc);
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_SELF_SUSPEND, nid, latency, state, 0);
+	PACK_PAYLOAD(payload, PM_SELF_SUSPEND, proc->node_id, latency, state, 0);
 	ret = pm_ipi_send(proc, payload);
 	if (PM_RET_SUCCESS != ret)
 		return ret;

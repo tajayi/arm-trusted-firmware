@@ -170,8 +170,6 @@ const struct pm_proc *primary_proc = &pm_apu_0_proc;
  */
 void pm_client_suspend(const struct pm_proc *const proc)
 {
-	/* Disable interrupts at processor level (for current cpu) */
-	arm_gic_cpuif_deactivate();
 	/* Set powerdown request */
 	pm_write(APU_PWRCTL, pm_read(APU_PWRCTL) | proc->pwrdn_mask);
 }
