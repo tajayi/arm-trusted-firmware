@@ -91,4 +91,7 @@ uint32_t zynqmp_is_pmu_up(void);
  */
 int request_intr_type_el3(uint32_t, interrupt_type_handler_t);
 
+/* Declaration of function used as wake-up entrypoint */
+void bl31_entrypoint(void);
+
 #endif /* __ZYNQMP_PRIVATE_H__ */

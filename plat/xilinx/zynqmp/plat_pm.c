@@ -58,6 +58,21 @@ static void zynqmp_program_mailbox(uint64_t mpidr, uint64_t address)
 }
 
 /*******************************************************************************
+ * Private ZynqMP function to program the reset vector for a cpu before it is put
+ * in suspend state.
+ ******************************************************************************/
+static void zynqmp_program_rvbar(uint64_t mpidr, uint64_t address)
+{
+	uint32_t linear_id = platform_get_core_pos(mpidr);
+
+	/* Sanity check for the CPU id */
+	assert(linear_id < PLATFORM_CLUSTER0_CORE_COUNT);
+
+	mmio_write_32(R_RVBAR_L_0 + linear_id * 8, address);
+	mmio_write_32(R_RVBAR_H_0 + linear_id * 8, address >> 32);
+}
+
+/*******************************************************************************
  * Private ZynqMP function which is used to determine if any platform actions
  * should be performed for the specified affinity instance given its
  * state. Nothing needs to be done if the 'state' is not off or if this is not
@@ -134,9 +149,11 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 	 * Setup mailbox with address for CPU entrypoint when it next powers up
 	 */
 	zynqmp_program_mailbox(mpidr, sec_entrypoint);
-
-	mmio_write_32(R_RVBAR_L_0 + linear_id * 8, sec_entrypoint);
-	mmio_write_32(R_RVBAR_H_0 + linear_id * 8, sec_entrypoint >> 32);
+	/*
+	 * CPU will be woken up by releasing the reset
+	 * Program RVBAR to point on wakeup address
+	 */
+	zynqmp_program_rvbar(mpidr, sec_entrypoint);
 	dsb();
 
 	if (!zynqmp_is_pmu_up()) {
@@ -228,6 +245,12 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 	} else {
 		/* APU is to be turned off */
 		if (afflvl > MPIDR_AFFLVL0) {
+			/*
+			 * CPU will be woken up by releasing the reset
+			 * Program RVBAR to point on wakeup address
+			 * at bl31_entrypoint
+			 */
+			zynqmp_program_rvbar(mpidr, (uint64_t)bl31_entrypoint);
 			/* Send request to PMU to suspend the APU CPU */
 			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
 			/* Send request for OCM retention state */
@@ -236,9 +259,11 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 			return;
 		}
 
-		/* Set RVBAR for wakeup entrypoint */
-		mmio_write_32(R_RVBAR_L_0 + linear_id * 8, sec_entrypoint);
-		mmio_write_32(R_RVBAR_H_0 + linear_id * 8, sec_entrypoint >> 32);
+		/*
+		 * CPU will be woken up by releasing the reset
+		 * Program RVBAR to point on wakeup address
+		 */
+		zynqmp_program_rvbar(mpidr, sec_entrypoint);
 
 		/* Send request to PMU to suspend the appropriate APU CPU core */
 		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
