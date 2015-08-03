@@ -253,6 +253,8 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 			zynqmp_program_rvbar(mpidr, (uint64_t)bl31_entrypoint);
 			/* Send request to PMU to suspend the APU CPU */
 			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
+			/* Power down L2 cache */
+			pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
 			/* Send request for OCM retention state */
 			set_ocm_retention();
 
