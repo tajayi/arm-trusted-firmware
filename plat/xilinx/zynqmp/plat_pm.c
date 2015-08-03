@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <mmio.h>
+#include <plat_arm.h>
 #include <platform.h>
 #include <psci.h>
 #include <errno.h>
@@ -268,12 +269,31 @@ static void zynqmp_affinst_on_finish(uint32_t afflvl, uint32_t state)
  * ZynqMP handler called when an affinity instance has just been powered on after
  * having been suspended earlier. The level and mpidr determine the affinity
  * instance.
- * TODO: At the moment we reuse the on finisher and reinitialize the secure
- * context. Need to implement a separate suspend finisher.
  ******************************************************************************/
 static void zynqmp_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
 {
-	zynqmp_affinst_on_finish(afflvl, state);
+	uint64_t mpidr = read_mpidr_el1();
+	uint32_t linear_id = platform_get_core_pos(mpidr);
+	const struct pm_proc *proc = pm_get_proc(linear_id);
+
+	/* Determine if any platform actions need to be executed. */
+	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
+		return;
+
+	if (afflvl > MPIDR_AFFLVL0) {
+		/*
+		 * FPD domain was turned off, reinitialize GIC settings
+		 * Initialize the gic cpu and distributor interfaces
+		 */
+		plat_arm_gic_init();
+		arm_gic_setup();
+	}
+
+	/* Clear the APU power control register for this cpu */
+	pm_client_wakeup(proc);
+
+	/* Clear the mailbox for this cpu. */
+	zynqmp_program_mailbox(mpidr, 0);
 }
 
 /*******************************************************************************
