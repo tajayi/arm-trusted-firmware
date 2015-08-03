@@ -232,6 +232,8 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 		if (afflvl > MPIDR_AFFLVL0) {
 			/* Send request to PMU to suspend the APU CPU */
 			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
+			/* Send request for OCM retention state */
+			set_ocm_retention();
 		}
 		/* Send request to PMU to suspend the appropriate APU CPU core */
 		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);

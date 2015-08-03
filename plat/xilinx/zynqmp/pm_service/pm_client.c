@@ -33,6 +33,8 @@
  * for getting information about and changing state of the APU.
  */
 
+#include <assert.h>
+#include "pm_api_sys.h"
 #include "pm_client.h"
 
 static const struct pm_ipi apu_ipi = {
@@ -72,6 +74,40 @@ static const struct pm_proc *const pm_procs_all[] = {
 	&pm_apu_2_proc,
 	&pm_apu_3_proc,
 };
+
+/**
+ * set_ocm_retention() - Configure OCM memory banks for retention
+ *
+ * APU specific requirements for suspend action:
+ * OCM has to enter retention state in order to preserve saved
+ * context after suspend request. OCM banks are determined by
+ * __BL31_END__ linker symbol.
+ *
+ * Return:	Returns status, either success or error+reason
+ */
+enum pm_ret_status set_ocm_retention(void)
+{
+	enum pm_ret_status ret;
+
+	assert((unsigned long)&__BL31_END__ <= OCM_BANK_3 + 0xffff);
+
+	/* OCM_BANK_0 will always be occupied */
+	ret = pm_set_requirement(NODE_OCM_BANK_0, PM_CAP_CONTEXT, 0,
+				 REQ_ACK_NO);
+
+	/* Check for other OCM banks  */
+	if ((unsigned long)&__BL31_END__ >= OCM_BANK_1)
+		ret = pm_set_requirement(NODE_OCM_BANK_1, PM_CAP_CONTEXT, 0,
+					 REQ_ACK_NO);
+	if ((unsigned long)&__BL31_END__ >= OCM_BANK_2)
+		ret = pm_set_requirement(NODE_OCM_BANK_2, PM_CAP_CONTEXT, 0,
+					 REQ_ACK_NO);
+	if ((unsigned long)&__BL31_END__ >= OCM_BANK_3)
+		ret = pm_set_requirement(NODE_OCM_BANK_3, PM_CAP_CONTEXT, 0,
+					 REQ_ACK_NO);
+
+	return ret;
+}
 
 /**
  * pm_get_proc() - returns pointer to the proc structure

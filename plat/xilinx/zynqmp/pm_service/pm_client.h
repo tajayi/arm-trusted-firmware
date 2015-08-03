@@ -52,6 +52,11 @@
 #define APU_2_PWRCTL_CPUPWRDWNREQ_MASK	4U
 #define APU_3_PWRCTL_CPUPWRDWNREQ_MASK	8U
 
+#define OCM_BANK_0	0xFFFC0000
+#define OCM_BANK_1	(OCM_BANK_0 + 0x10000)
+#define OCM_BANK_2	(OCM_BANK_1 + 0x10000)
+#define OCM_BANK_3	(OCM_BANK_2 + 0x10000)
+
 #define IPI_APU_MASK		1U
 
 #define IPI_TRIG_OFFSET		0
@@ -83,9 +88,13 @@ enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
 void pm_client_suspend(const struct pm_proc *const proc);
 void pm_client_abort_suspend(void);
 void pm_client_wakeup(const struct pm_proc *const proc);
+enum pm_ret_status set_ocm_retention(void);
 
 /* Global variables to be set in pm_client.c */
 extern const enum pm_node_id subsystem_node;
 extern const struct pm_proc *primary_proc;
+
+/* Declaration of linker defined symbol */
+extern unsigned long __BL31_END__;
 
 #endif /* _PM_CLIENT_H_ */
