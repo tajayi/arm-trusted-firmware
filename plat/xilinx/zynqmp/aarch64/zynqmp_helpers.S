@@ -33,6 +33,7 @@
 #include <bl_common.h>
 #include <gic_v2.h>
 #include <platform_def.h>
+#include "apu.h"
 
 	.globl	plat_secondary_cold_boot_setup
 	.globl	platform_get_entrypoint
@@ -95,17 +96,38 @@ endfunc plat_secondary_cold_boot_setup
 	 * On a warm boot, each cpu jumps to the address in its
 	 * mailbox.
 	 *
+	 * Check power down request bitfield for CPU cores
+	 * in APU_PWRCTL register.
+	 * Value different than 0 indicates CPU had previously
+	 * requested suspend.
+	 *
 	 * TODO: Not a good idea to save lr in a temp reg
-	 * TODO: PSYSR is a common register and should be
-	 * 	accessed using locks. Since its not possible
-	 * 	to use locks immediately after a cold reset
-	 * 	we are relying on the fact that after a cold
-	 * 	reset all cpus will read the same WK field
 	 * -----------------------------------------------------
 	 */
 func platform_get_entrypoint
 	mov	x9, x30 // lr
-	mov	x0, #0
+	bl	platform_get_core_pos
+	ldr	x10, =APU_PWRCTL
+	ldr	w11, [x10]
+	ldr	w12, =APU_0_PWRCTL_CPUPWRDWNREQ_MASK
+	lsl	x12, x12, x0
+	and	x0, x11, x12
+	cbnz	x0, warm_reset
+	b	exit
+warm_reset:
+	/* -------------------------------------------------
+	 * A per-cpu mailbox is maintained in the OCM.
+	 * -------------------------------------------------
+	 */
+	bic	w11, w11, w12
+	str	w11, [x10] // APU_PWRCTL
+	mrs	x0, mpidr_el1
+	bl	platform_get_core_pos
+	ldr	x10, =MBOX_BASE
+	lsl	x0, x0, #CACHE_WRITEBACK_SHIFT
+	ldr	x0, [x10, x0]
+	cbz	x0, _panic
+exit:
 	ret	x9
 _panic:	b	_panic
 endfunc platform_get_entrypoint
