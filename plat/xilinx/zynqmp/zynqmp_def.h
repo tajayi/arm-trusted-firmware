@@ -226,4 +226,9 @@
 /* Base address where parameters to BL31 are stored */
 #define PARAMS_BASE		(MBOX_BASE + MBOX_SIZE)
 
+#define APU_0_PWRCTL_CPUPWRDWNREQ_MASK		1
+#define APU_1_PWRCTL_CPUPWRDWNREQ_MASK		2
+#define APU_2_PWRCTL_CPUPWRDWNREQ_MASK		4
+#define APU_3_PWRCTL_CPUPWRDWNREQ_MASK		8
+
 #endif /* __ZYNQMP_DEF_H__ */
