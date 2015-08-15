@@ -138,17 +138,23 @@ static uint64_t ipi_fiq_handler(uint32_t id,
  */
 int32_t pm_ipi_init(void)
 {
-	uint32_t ipi_apu_ier_reg;
+	int ret;
 
 	bakery_lock_init(&pm_secure_lock);
 
-	/* IPI Interrupts Enable */
-	ipi_apu_ier_reg = pm_read(IPI_APU_IER);
-	pm_write(IPI_APU_IER,
-		 ipi_apu_ier_reg | IPI_APU_IER_PMU_0_MASK);
+	/* IPI Interrupts Clear & Disable */
+	pm_write(IPI_APU_ISR, 0xffffffff);
+	pm_write(IPI_APU_IDR, 0xffffffff);
 
 	/* Register IPI interrupt as INTR_TYPE_EL3 */
-	return request_intr_type_el3(IRQ_SEC_IPI_APU, ipi_fiq_handler);
+	ret = request_intr_type_el3(IRQ_SEC_IPI_APU, ipi_fiq_handler);
+	if (ret)
+		return ret;
+
+	/* IPI Interrupts Enable */
+	pm_write(IPI_APU_IER, IPI_APU_IER_PMU_0_MASK);
+
+	return ret;
 }
 
 /**
