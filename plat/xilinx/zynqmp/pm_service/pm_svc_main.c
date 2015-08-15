@@ -34,6 +34,7 @@
  */
 
 #include <debug.h>
+#include <errno.h>
 #include <gic_v2.h>
 #include <runtime_svc.h>
 #include "ipi.h"
@@ -174,6 +175,9 @@ int32_t pm_ipi_init(void)
 int32_t pm_setup(void)
 {
 	int32_t status;
+
+	if (!zynqmp_is_pmu_up())
+		return -ENODEV;
 
 	/* initialize IPI interrupts */
 	status = pm_ipi_init();

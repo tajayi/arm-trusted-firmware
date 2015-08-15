@@ -183,18 +183,38 @@ static void zynqmp_print_platform_name(void)
 #define FW_IS_PRESENT		(1 << 4)
 
 /*
+ * Indicator for PMUFW discovery:
+ *   0 = No FW found
+ *   non-zero = FW is present
+ */
+static uint32_t zynqmp_pmufw_present;
+
+/*
+ * zynqmp_discover_pmufw - Discover presence of PMUFW
+ *
+ * Discover the presence of PMUFW and store it for later run-time queries
+ * through zynqmp_is_pmu_up.
+ * NOTE: This discovery method is fragile and will break if:
+ *  - setting FW_PRESENT is done by PMUFW itself and could be left out in PMUFW
+ *    (be it by error or intentionally)
+ *  - XPPU/XMPU may restrict ATF's access to the PMU address space
+ */
+static uint32_t zynqmp_discover_pmufw(void)
+{
+	zynqmp_pmufw_present = mmio_read_32(PMU_GLOBAL_CNTRL);
+	zynqmp_pmufw_present &= FW_IS_PRESENT;
+
+	return zynqmp_pmufw_present;
+}
+
+/*
  * zynqmp_is_pmu_up - Find if PMU firmware is up and running
  *
  * Return 0 if firmware is not available, non 0 otherwise
  */
 uint32_t zynqmp_is_pmu_up(void)
 {
-	uint32_t ver;
-
-	ver = mmio_read_32(PMU_GLOBAL_CNTRL);
-	ver &= FW_IS_PRESENT;
-
-	return ver;
+	return zynqmp_pmufw_present;
 }
 
 #define ZYNQMP_CRL_APB_BASEADDR				0xFF5E0000
@@ -221,6 +241,7 @@ int zynqmp_config_setup(void)
 	arm_config.gich_base = BASE_GICH_BASE;
 	arm_config.gicv_base = BASE_GICV_BASE;
 
+	zynqmp_discover_pmufw();
 	zynqmp_print_platform_name();
 
 	/* Global timer init - Program time stamp reference clk */
