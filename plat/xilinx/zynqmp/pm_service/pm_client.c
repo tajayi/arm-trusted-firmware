@@ -214,16 +214,18 @@ void pm_client_wakeup(const struct pm_proc *const proc)
  */
 enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc)
 {
+	uint32_t status;
+
 	bakery_lock_get(&pm_secure_lock);
-	uint32_t status = 1;
 
 	/* Wait until previous interrupt is handled by PMU */
-	while (status) {
+	do {
 		status = pm_read(proc->ipi->base + IPI_OBS_OFFSET)
 			& IPI_PMU_PM_INT_MASK;
 		/* TODO: 1) Use timer to add delay between read attempts */
 		/* TODO: 2) Return PM_RET_ERR_TIMEOUT if this times out */
-	}
+	} while (status);
+
 	/* Message sent successfully to PMU */
 	bakery_lock_release(&pm_secure_lock);
 
