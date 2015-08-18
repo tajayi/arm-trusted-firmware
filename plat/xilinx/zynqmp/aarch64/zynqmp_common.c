@@ -137,7 +137,7 @@ uint32_t zynqmp_get_uart_clk(void)
 	return 0;
 }
 
-static unsigned int zynqmp_get_silicon_freq(void)
+static unsigned int zynqmp_get_system_timer_freq(void)
 {
 	uint32_t ver = zynqmp_get_silicon_ver();
 
@@ -230,7 +230,7 @@ int zynqmp_config_setup(void)
 	/* Program freq register in System counter  and enable system counter. */
 	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
 		      ZYNQMP_IOU_SCNTRS_BASEFREQ_OFFSET,
-		      zynqmp_get_silicon_freq());
+		      zynqmp_get_system_timer_freq());
 	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
 	              ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET,
 		      ZYNQMP_IOU_SCNTRS_CONTROL_EN);
@@ -245,7 +245,7 @@ uint64_t plat_get_syscnt_freq(void)
 	uint64_t counter_base_frequency;
 
 	/* FIXME: Read the frequency from Frequency modes table */
-	counter_base_frequency = zynqmp_get_silicon_freq();
+	counter_base_frequency = zynqmp_get_system_timer_freq();
 
 	return counter_base_frequency;
 }
