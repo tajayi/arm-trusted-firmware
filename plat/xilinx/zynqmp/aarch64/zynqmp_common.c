@@ -157,19 +157,23 @@ static void zynqmp_print_platform_name(void)
 {
 	uint32_t ver = zynqmp_get_silicon_ver();
 	uint32_t rtl = zynqmp_get_rtl_ver();
+	char *label = "Uknown";
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
-		NOTICE("ATF running on VELOCE/RTL%d.%d\n",
-		       (rtl & 0xf0) >> 4, rtl & 0xf);
-		return;
+		label = "VELOCE";
+		break;
 	case ZYNQMP_CSU_VERSION_EP108:
-		NOTICE("ATF running on EP108/RTL%d.%d\n",
-		       (rtl & 0xf0) >> 4, rtl & 0xf);
-		return;
+		label = "EP108";
+		break;
+	case ZYNQMP_CSU_VERSION_QEMU:
+		label = "QEMU";
+		break;
 	}
 
-	NOTICE("ATF running on QEMU/RTL%d.%d\n", (rtl & 0xf0) >> 4, rtl & 0xf);
+	NOTICE("ATF running on %s/RTL%d.%d%s\n", label,
+	       (rtl & 0xf0) >> 4, rtl & 0xf,
+	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
 
 #define PMU_GLOBAL_CNTRL	0xFFD80000
