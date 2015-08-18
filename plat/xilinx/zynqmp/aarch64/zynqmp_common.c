@@ -130,9 +130,11 @@ uint32_t zynqmp_get_uart_clk(void)
 		return 48000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 25000000;
+	case ZYNQMP_CSU_VERSION_QEMU:
+		return 133000000;
 	}
 
-	return 133000000;
+	return 0;
 }
 
 static unsigned int zynqmp_get_silicon_freq(void)
@@ -144,10 +146,11 @@ static unsigned int zynqmp_get_silicon_freq(void)
 		return 10000;
 	case ZYNQMP_CSU_VERSION_EP108:
 		return 4000000;
+	case ZYNQMP_CSU_VERSION_QEMU:
+		return 50000000;
 	}
 
-	/* FIXME Qemu is exporting incorrect bit in this reg. 0 is allocated to real silicon */
-	return 50000000;
+	return 0;
 }
 
 static void zynqmp_print_platform_name(void)
