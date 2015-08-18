@@ -134,7 +134,7 @@ uint32_t zynqmp_get_uart_clk(void)
 		return 133000000;
 	}
 
-	return 0;
+	return 100000000;
 }
 
 static unsigned int zynqmp_get_system_timer_freq(void)
@@ -150,7 +150,7 @@ static unsigned int zynqmp_get_system_timer_freq(void)
 		return 50000000;
 	}
 
-	return 0;
+	return 100000000;
 }
 
 static void zynqmp_print_platform_name(void)
@@ -168,6 +168,9 @@ static void zynqmp_print_platform_name(void)
 		break;
 	case ZYNQMP_CSU_VERSION_QEMU:
 		label = "QEMU";
+		break;
+	case ZYNQMP_CSU_VERSION_SILICON:
+		label = "silicon";
 		break;
 	}
 
