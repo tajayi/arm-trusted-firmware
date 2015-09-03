@@ -174,9 +174,9 @@ static void zynqmp_print_platform_name(void)
 		break;
 	}
 
-	NOTICE("ATF running on %s/RTL%d.%d%s at 0x%x\n", label,
-	       (rtl & 0xf0) >> 4, rtl & 0xf,
-	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "", BL31_BASE);
+	NOTICE("ATF running on %s/RTL%d.%d at 0x%x%s\n", label,
+	       (rtl & 0xf0) >> 4, rtl & 0xf, BL31_BASE,
+	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
 
 #define PMU_GLOBAL_CNTRL	0xFFD80000
