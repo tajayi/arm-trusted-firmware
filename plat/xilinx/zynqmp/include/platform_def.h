@@ -84,9 +84,21 @@
  * present). BL31_BASE is calculated using the current BL3-1 debug size plus a
  * little space for growth.
  */
-#define BL31_BASE			(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x1B000)
-#define BL31_PROGBITS_LIMIT		(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x6000)
-#define BL31_LIMIT			ZYNQMP_TRUSTED_SRAM_LIMIT
+#if ZYNQMP_ATF_LOCATION_ID == ZYNQMP_IN_TRUSTED_SRAM
+# define BL31_BASE			(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x1B000)
+# define BL31_PROGBITS_LIMIT		(ZYNQMP_TRUSTED_SRAM_LIMIT - 0x6000)
+# define BL31_LIMIT			ZYNQMP_TRUSTED_SRAM_LIMIT
+#elif ZYNQMP_ATF_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM
+# if (ZYNQMP_TSP_RAM_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM)
+#  error "ATF location Trusted DRAM and TSP in Trusted DRAM is not supported"
+# endif
+# define BL31_BASE			(ZYNQMP_TRUSTED_DRAM_BASE + \
+					ZYNQMP_SHARED_RAM_SIZE)
+# define BL31_LIMIT			(ZYNQMP_TRUSTED_DRAM_BASE + \
+					ZYNQMP_TRUSTED_DRAM_SIZE)
+#else
+# error "Unsupported ZYNQMP_ATF_LOCATION_ID value"
+#endif
 
 /*******************************************************************************
  * BL32 specific defines.

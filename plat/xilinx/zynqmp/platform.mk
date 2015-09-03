@@ -28,6 +28,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+ZYNQMP_ATF_LOCATION	?=	tsram
+ifeq (${ZYNQMP_ATF_LOCATION}, tsram)
+  ZYNQMP_ATF_LOCATION_ID := ZYNQMP_IN_TRUSTED_SRAM
+else ifeq (${ZYNQMP_ATF_LOCATION}, tdram)
+  ZYNQMP_ATF_LOCATION_ID := ZYNQMP_IN_TRUSTED_DRAM
+else
+  $(error "Unsupported ZYNQMP_ATF_LOCATION value")
+endif
+
 # Shared memory may be allocated at the top of Trusted SRAM (tsram) or at the
 # base of Trusted SRAM (tdram)
 ZYNQMP_SHARED_DATA_LOCATION	?=	tsram
@@ -57,6 +66,7 @@ ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tsram)
 endif
 
 # Process flags
+$(eval $(call add_define,ZYNQMP_ATF_LOCATION_ID))
 $(eval $(call add_define,ZYNQMP_SHARED_DATA_LOCATION_ID))
 $(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 
