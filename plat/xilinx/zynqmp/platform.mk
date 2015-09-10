@@ -76,13 +76,23 @@ PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 				-Iplat/xilinx/zynqmp/pm_service/		\
 				-Iplat/xilinx/zynqmp/pm_service/include
 
-PLAT_BL_COMMON_SOURCES	:=	drivers/cadence/uart/cdns_console.S		\
-				drivers/cadence/uart/cdns_common.c		\
-				lib/aarch64/xlat_tables.c			\
+PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 				plat/arm/common/aarch64/arm_common.c		\
 				plat/arm/common/aarch64/arm_helpers.S		\
 				plat/common/aarch64/plat_common.c		\
 				plat/xilinx/zynqmp/aarch64/zynqmp_common.c
+
+ZYNQMP_CONSOLE	?=	cadence
+ifeq (${ZYNQMP_CONSOLE}, cadence)
+  PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S	\
+			    drivers/cadence/uart/cdns_common.c
+else ifeq (${ZYNQMP_CONSOLE}, dcc)
+  PLAT_BL_COMMON_SOURCES += drivers/console/console.S	\
+			    drivers/arm/dcc/dcc_console.c
+else
+  $(error "Please define ZYNQMP_CONSOLE")
+endif
+
 
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				drivers/arm/gic/arm_gic.c			\
