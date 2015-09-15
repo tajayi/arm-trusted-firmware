@@ -104,7 +104,5 @@ enum pm_ret_status pm_reset_get_status(const uint32_t reset_id,
 enum pm_ret_status pm_mmio_write(const uint32_t address,
 				 const uint32_t mask,
 				 const uint32_t value);
-enum pm_ret_status pm_mmio_read(const uint32_t address,
-				const uint32_t mask,
-				uint32_t *value);
+enum pm_ret_status pm_mmio_read(const uint32_t address, uint32_t *value);
 #endif /* _PM_API_SYS_H_ */

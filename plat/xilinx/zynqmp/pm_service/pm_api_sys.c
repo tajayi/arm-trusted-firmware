@@ -461,7 +461,6 @@ enum pm_ret_status pm_mmio_write(const uint32_t address,
 /**
  * pm_mmio_read() - Read value from protected mmio
  * @address	Address to write to
- * @mask	Mask to apply
  * @value	Value to write
  *
  * This function provides access to PM-related control registers
@@ -469,15 +468,13 @@ enum pm_ret_status pm_mmio_write(const uint32_t address,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_mmio_read(const uint32_t address,
-				const uint32_t mask,
-				uint32_t *value)
+enum pm_ret_status pm_mmio_read(const uint32_t address, uint32_t *value)
 {
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_MMIO_READ, address, mask, 0, 0);
+	PACK_PAYLOAD(payload, PM_MMIO_READ, address, 0, 0, 0);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if (PM_RET_SUCCESS != ret)

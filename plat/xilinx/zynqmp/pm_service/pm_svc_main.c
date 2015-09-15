@@ -352,7 +352,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 	{
 		uint32_t value;
 
-		ret = pm_mmio_read(pm_arg[0], pm_arg[1], &value);
+		ret = pm_mmio_read(pm_arg[0], &value);
 		SMC_RET1(handle, (uint64_t)ret | ((uint64_t)value) << 32);
 	}
 	default:
