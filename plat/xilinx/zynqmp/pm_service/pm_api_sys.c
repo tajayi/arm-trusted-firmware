@@ -43,13 +43,34 @@
  * pause and pm_dbg are used for debugging and should be removed in
  * final version.
  */
-#define PACK_PAYLOAD(pl, arg0, arg1, arg2, arg3, arg4)			\
-	pl[0] = (uint32_t)arg0;						\
-	pl[1] = (uint32_t)arg1;						\
-	pl[2] = (uint32_t)arg2;						\
-	pl[3] = (uint32_t)arg3;						\
-	pl[4] = (uint32_t)arg4;						\
-	pm_dbg("%s(%d, %d, %d, %d)\n", __func__, arg1, arg2, arg3, arg4);
+#define PM_PACK_PAYLOAD1(pl, arg0) {	\
+	pl[0] = (uint32_t)(arg0);	\
+}
+
+#define PM_PACK_PAYLOAD2(pl, arg0, arg1) {	\
+	pl[1] = (uint32_t)(arg1);		\
+	PM_PACK_PAYLOAD1(pl, arg0);		\
+}
+
+#define PM_PACK_PAYLOAD3(pl, arg0, arg1, arg2) {	\
+	pl[2] = (uint32_t)(arg2);			\
+	PM_PACK_PAYLOAD2(pl, arg0, arg1);		\
+}
+
+#define PM_PACK_PAYLOAD4(pl, arg0, arg1, arg2, arg3) {	\
+	pl[3] = (uint32_t)(arg3);			\
+	PM_PACK_PAYLOAD3(pl, arg0, arg1, arg2);		\
+}
+
+#define PM_PACK_PAYLOAD5(pl, arg0, arg1, arg2, arg3, arg4) {	\
+	pl[4] = (uint32_t)(arg4);				\
+	PM_PACK_PAYLOAD4(pl, arg0, arg1, arg2, arg3);		\
+}
+
+#define PM_PACK_PAYLOAD6(pl, arg0, arg1, arg2, arg3, arg4, arg5) {	\
+	pl[5] = (uint32_t)(arg5);					\
+	PM_PACK_PAYLOAD5(pl, arg0, arg1, arg2, arg3, arg4);		\
+}
 
 /**
  * pm_self_suspend() - PM call for processor to suspend itself
@@ -76,7 +97,8 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 	 */
 	pm_client_suspend(proc);
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_SELF_SUSPEND, proc->node_id, latency, state, 0);
+	PM_PACK_PAYLOAD4(payload, PM_SELF_SUSPEND, proc->node_id, latency,
+			 state);
 	ret = pm_ipi_send(proc, payload);
 	if (PM_RET_SUCCESS != ret)
 		return ret;
@@ -102,7 +124,7 @@ enum pm_ret_status pm_req_suspend(const enum pm_node_id target,
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_REQ_SUSPEND, target, ack, latency, state);
+	PM_PACK_PAYLOAD5(payload, PM_REQ_SUSPEND, target, ack, latency, state);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))
@@ -134,7 +156,7 @@ enum pm_ret_status pm_req_wakeup(const enum pm_node_id target,
 	pm_client_wakeup(proc);
 
 	/* Send request to the PMU to perform the wake of the PU */
-	PACK_PAYLOAD(payload, PM_REQ_WAKEUP, target, ack, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_REQ_WAKEUP, target, ack);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))
@@ -158,7 +180,7 @@ enum pm_ret_status pm_force_powerdown(const enum pm_node_id target,
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_FORCE_POWERDOWN, target, ack, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_FORCE_POWERDOWN, target, ack);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))
@@ -188,7 +210,8 @@ enum pm_ret_status pm_abort_suspend(const enum pm_abort_reason reason)
 	pm_client_abort_suspend();
 	/* Send request to the PMU */
 	/* TODO: allow passing the node ID of the affected CPU */
-	PACK_PAYLOAD(payload, PM_ABORT_SUSPEND, reason, primary_proc->node_id, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_ABORT_SUSPEND, reason,
+			 primary_proc->node_id);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -205,7 +228,8 @@ enum pm_ret_status pm_set_wakeup_source(const enum pm_node_id target,
 					const uint8_t enable)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
-	PACK_PAYLOAD(payload, PM_SET_WAKEUP_SOURCE, target, wkup_node, enable, 0);
+	PM_PACK_PAYLOAD4(payload, PM_SET_WAKEUP_SOURCE, target, wkup_node,
+			 enable);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -219,7 +243,7 @@ enum pm_ret_status pm_system_shutdown(const uint8_t restart)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_SYSTEM_SHUTDOWN, restart, 0, 0, 0);
+	PM_PACK_PAYLOAD2(payload, PM_SYSTEM_SHUTDOWN, restart);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -242,7 +266,7 @@ enum pm_ret_status pm_req_node(const enum pm_node_id nid,
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_REQ_NODE, nid, capabilities, qos, ack);
+	PM_PACK_PAYLOAD5(payload, PM_REQ_NODE, nid, capabilities, qos, ack);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))
@@ -270,7 +294,8 @@ enum pm_ret_status pm_set_requirement(const enum pm_node_id nid,
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_SET_REQUIREMENT, nid, capabilities, qos, ack);
+	PM_PACK_PAYLOAD5(payload, PM_SET_REQUIREMENT, nid, capabilities, qos,
+			 ack);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))
@@ -291,7 +316,7 @@ enum pm_ret_status pm_release_node(const enum pm_node_id nid,
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_RELEASE_NODE, nid, latency, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_RELEASE_NODE, nid, latency);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -307,7 +332,7 @@ enum pm_ret_status pm_set_max_latency(const enum pm_node_id nid,
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_SET_MAX_LATENCY, nid, latency, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_SET_MAX_LATENCY, nid, latency);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -325,7 +350,7 @@ enum pm_ret_status pm_get_api_version(uint32_t *version)
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_GET_API_VERSION, 0, 0, 0, 0);
+	PM_PACK_PAYLOAD1(payload, PM_GET_API_VERSION);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if (PM_RET_SUCCESS != ret)
@@ -357,7 +382,7 @@ enum pm_ret_status pm_get_node_status(const enum pm_node_id nid)
 	/* TODO: Add power state argument!! */
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PACK_PAYLOAD(payload, PM_GET_NODE_STATUS, nid, 0, 0, 0);
+	PM_PACK_PAYLOAD2(payload, PM_GET_NODE_STATUS, nid);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -407,7 +432,7 @@ enum pm_ret_status pm_reset_assert(const uint32_t reset,
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_RESET_ASSERT, reset, assert, 0, 0);
+	PM_PACK_PAYLOAD3(payload, PM_RESET_ASSERT, reset, assert);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -425,7 +450,7 @@ enum pm_ret_status pm_reset_get_status(const uint32_t reset,
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_RESET_GET_STATUS, reset, 0, 0, 0);
+	PM_PACK_PAYLOAD2(payload, PM_RESET_GET_STATUS, reset);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if (PM_RET_SUCCESS != ret)
@@ -453,7 +478,7 @@ enum pm_ret_status pm_mmio_write(const uint32_t address,
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_MMIO_WRITE, address, mask, value, 0);
+	PM_PACK_PAYLOAD4(payload, PM_MMIO_WRITE, address, mask, value);
 	return pm_ipi_send(primary_proc, payload);
 }
 
@@ -473,7 +498,7 @@ enum pm_ret_status pm_mmio_read(const uint32_t address, uint32_t *value)
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
-	PACK_PAYLOAD(payload, PM_MMIO_READ, address, 0, 0, 0);
+	PM_PACK_PAYLOAD2(payload, PM_MMIO_READ, address);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if (PM_RET_SUCCESS != ret)
