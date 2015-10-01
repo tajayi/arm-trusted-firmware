@@ -73,8 +73,7 @@ $(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 				-Iinclude/plat/arm/common/aarch64/		\
 				-Iplat/xilinx/zynqmp/include/			\
-				-Iplat/xilinx/zynqmp/pm_service/		\
-				-Iplat/xilinx/zynqmp/pm_service/include
+				-Iplat/xilinx/zynqmp/pm_service/
 
 PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 				plat/arm/common/aarch64/arm_common.c		\

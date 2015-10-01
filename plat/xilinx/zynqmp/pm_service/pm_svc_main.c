@@ -37,7 +37,6 @@
 #include <errno.h>
 #include <gic_v2.h>
 #include <runtime_svc.h>
-#include "ipi.h"
 #include "pm_api_sys.h"
 #include "pm_common.h"
 #include "pm_client.h"

@@ -43,7 +43,6 @@
 #include <platform.h>
 #include <mmio.h>
 
-#include "apu.h"
 #include "pm_defs.h"
 #include "pm_common.h"
 

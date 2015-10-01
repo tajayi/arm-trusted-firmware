@@ -33,7 +33,6 @@
 #include <bl_common.h>
 #include <gic_v2.h>
 #include <platform_def.h>
-#include "apu.h"
 
 	.globl	plat_secondary_cold_boot_setup
 	.globl	platform_get_entrypoint

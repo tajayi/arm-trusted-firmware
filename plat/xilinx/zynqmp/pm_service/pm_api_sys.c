@@ -34,7 +34,6 @@
  */
 
 #include "pm_client.h"
-#include "zynqmp-map.dtsh"
 #include "pm_common.h"
 #include "pm_api_sys.h"
 #include "ipi_buffer.h"

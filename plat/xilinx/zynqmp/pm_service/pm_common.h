@@ -36,7 +36,6 @@
 #ifndef _PM_COMMON_H_
 #define _PM_COMMON_H_
 
-#include "ipi.h"
 #include "ipi_buffer.h"
 #include "pm_defs.h"
 
