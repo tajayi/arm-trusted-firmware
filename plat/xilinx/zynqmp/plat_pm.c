@@ -179,11 +179,6 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 		r |= 1 << (linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
-		if (afflvl > MPIDR_AFFLVL0) {
-			/* Send request to PMU to suspend APU subsystem */
-			pm_self_suspend(NODE_APU, MAX_LATENCY, 0, 0);
-		}
-
 		/*
 		 * Send request to PMU to power down the appropriate APU CPU
 		 * core.
@@ -231,22 +226,17 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 		r |= 1 << (linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
+		/* Send request to PMU to suspend the appropriate APU CPU core */
+		pm_self_suspend(proc->node_id, MAX_LATENCY, 0,
+				(uint64_t)bl31_entrypoint);
+
 		/* APU is to be turned off */
 		if (afflvl > MPIDR_AFFLVL0) {
-
-			/* Send request to PMU to suspend the APU CPU */
-			pm_self_suspend(NODE_APU, MAX_LATENCY, 0, (uint64_t)bl31_entrypoint);
-
 			/* Power down L2 cache */
 			pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
 			/* Send request for OCM retention state */
 			set_ocm_retention();
-
-			return;
 		}
-
-		/* Send request to PMU to suspend the appropriate APU CPU core */
-		pm_self_suspend(proc->node_id, MAX_LATENCY, 0, sec_entrypoint);
 	}
 }
 
