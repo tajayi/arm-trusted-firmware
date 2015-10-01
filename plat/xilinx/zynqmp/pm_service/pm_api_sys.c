@@ -77,14 +77,17 @@
  * @nid		Node id of the processor or subsystem
  * @latency	Requested maximum wakeup latency (not supported)
  * @state	Requested state (not supported)
+ * @address	Resume address
  *
- * This is a blocking call, it will return only once PMU has responded
+ * This is a blocking call, it will return only once PMU has responded.
+ * On a wakeup, resume address will be automaticaly set by PMU.
  *
  * @return	Returns status, either success or error+reason
  */
 enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 				   const uint32_t latency,
-				   const uint8_t state)
+				   const uint8_t state,
+				   const uint64_t address)
 {
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
@@ -97,8 +100,8 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 	 */
 	pm_client_suspend(proc);
 	/* Send request to the PMU */
-	PM_PACK_PAYLOAD4(payload, PM_SELF_SUSPEND, proc->node_id, latency,
-			 state);
+	PM_PACK_PAYLOAD6(payload, PM_SELF_SUSPEND, proc->node_id, latency,
+			 state, address, (address >> 32));
 	ret = pm_ipi_send(proc, payload);
 	if (PM_RET_SUCCESS != ret)
 		return ret;
@@ -138,25 +141,37 @@ enum pm_ret_status pm_req_suspend(const enum pm_node_id target,
  *		     or subsystem
  * @target	Node id of the processor or subsystem to wake up
  * @ack		Flag to specify whether acknowledge requested
+ * @set_address	Resume address presence indicator
+ * 				1 resume address specified, 0 otherwise
+ * @address	Resume address
  *
  * This API function is either used to power up another APU core for SMP
  * (by PSCI) or to power up an entirely different PU or subsystem, such
- * as RPU0, RPU, or PL_CORE_xx
+ * as RPU0, RPU, or PL_CORE_xx. Resume address for the target PU will be
+ * automaticaly set by PMU.
  *
  * @return	Returns status, either success or error+reason
  */
 enum pm_ret_status pm_req_wakeup(const enum pm_node_id target,
+				 const uint32_t set_address,
+				 const uint64_t address,
 				 const enum pm_request_ack ack)
 {
 	enum pm_ret_status ret;
 	uint32_t payload[PAYLOAD_ARG_CNT];
+	uint64_t encoded_address;
 	const struct pm_proc *proc = pm_get_proc_by_node(target);
 
 	/* invoke APU-specific code for waking up another APU core */
 	pm_client_wakeup(proc);
 
+	/* encode set Address into 1st bit of address */
+	encoded_address = address;
+	encoded_address |= !!set_address;
+
 	/* Send request to the PMU to perform the wake of the PU */
-	PM_PACK_PAYLOAD3(payload, PM_REQ_WAKEUP, target, ack);
+	PM_PACK_PAYLOAD5(payload, PM_REQ_WAKEUP, target, encoded_address,
+			 encoded_address >> 32, ack);
 	ret = pm_ipi_send(primary_proc, payload);
 
 	if ((PM_RET_SUCCESS == ret) && (REQ_ACK_BLOCKING == ack))

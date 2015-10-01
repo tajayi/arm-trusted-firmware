@@ -44,7 +44,8 @@ enum pm_ret_status pm_req_suspend(const enum pm_node_id nid,
 
 enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 				   const uint32_t latency,
-				   const uint8_t state);
+				   const uint8_t state,
+				   const uint64_t address);
 
 enum pm_ret_status pm_force_powerdown(const enum pm_node_id nid,
 				      const enum pm_request_ack ack);
@@ -52,6 +53,8 @@ enum pm_ret_status pm_force_powerdown(const enum pm_node_id nid,
 enum pm_ret_status pm_abort_suspend(const enum pm_abort_reason reason);
 
 enum pm_ret_status pm_req_wakeup(const enum pm_node_id nid,
+				 const uint32_t set_address,
+				 const uint64_t address,
 				 const enum pm_request_ack ack);
 
 enum pm_ret_status pm_set_wakeup_source(const enum pm_node_id target,

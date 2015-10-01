@@ -257,7 +257,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 
 	/* PM API Functions */
 	case PM_SELF_SUSPEND:
-		ret = pm_self_suspend(pm_arg[0], pm_arg[1], pm_arg[2]);
+		ret = pm_self_suspend(pm_arg[0], pm_arg[1], pm_arg[2],
+				      pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REQ_SUSPEND:
@@ -266,7 +267,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_REQ_WAKEUP:
-		ret = pm_req_wakeup(pm_arg[0], pm_arg[1]);
+		ret = pm_req_wakeup(pm_arg[0], pm_arg[1], pm_arg[2],
+				    pm_arg[3]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_FORCE_POWERDOWN:

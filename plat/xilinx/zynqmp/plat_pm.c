@@ -58,21 +58,6 @@ static void zynqmp_program_mailbox(uint64_t mpidr, uint64_t address)
 }
 
 /*******************************************************************************
- * Private ZynqMP function to program the reset vector for a cpu before it is put
- * in suspend state.
- ******************************************************************************/
-static void zynqmp_program_rvbar(uint64_t mpidr, uint64_t address)
-{
-	uint32_t linear_id = platform_get_core_pos(mpidr);
-
-	/* Sanity check for the CPU id */
-	assert(linear_id < PLATFORM_CLUSTER0_CORE_COUNT);
-
-	mmio_write_32(R_RVBAR_L_0 + linear_id * 8, address);
-	mmio_write_32(R_RVBAR_H_0 + linear_id * 8, address >> 32);
-}
-
-/*******************************************************************************
  * Private ZynqMP function which is used to determine if any platform actions
  * should be performed for the specified affinity instance given its
  * state. Nothing needs to be done if the 'state' is not off or if this is not
@@ -149,11 +134,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 	 * Setup mailbox with address for CPU entrypoint when it next powers up
 	 */
 	zynqmp_program_mailbox(mpidr, sec_entrypoint);
-	/*
-	 * CPU will be woken up by releasing the reset
-	 * Program RVBAR to point on wakeup address
-	 */
-	zynqmp_program_rvbar(mpidr, sec_entrypoint);
+
 	dsb();
 
 	if (!zynqmp_is_pmu_up()) {
@@ -162,7 +143,7 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
 		/* Send request to PMU to wake up selected APU CPU core */
-		pm_req_wakeup(proc->node_id, REQ_ACK_NO);
+		pm_req_wakeup(proc->node_id, 1, sec_entrypoint, REQ_ACK_NO);
 	}
 
 	return PSCI_E_SUCCESS;
@@ -200,11 +181,18 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 	} else {
 		if (afflvl > MPIDR_AFFLVL0) {
 			/* Send request to PMU to suspend APU subsystem */
-			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
+			pm_self_suspend(NODE_APU, MAX_LATENCY, 0, 0);
 		}
 
-		/* Send request to PMU to power down the appropriate APU CPU core */
-		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
+		/*
+		 * Send request to PMU to power down the appropriate APU CPU
+		 * core.
+		 * According to PSCI specification, CPU_off function does not
+		 * have resume address and CPU core can only be woken up
+		 * invoking CPU_on function, during which resume address will
+		 * be set.
+		 */
+		pm_self_suspend(proc->node_id, MAX_LATENCY, 0, 0);
 	}
 }
 
@@ -245,14 +233,10 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 	} else {
 		/* APU is to be turned off */
 		if (afflvl > MPIDR_AFFLVL0) {
-			/*
-			 * CPU will be woken up by releasing the reset
-			 * Program RVBAR to point on wakeup address
-			 * at bl31_entrypoint
-			 */
-			zynqmp_program_rvbar(mpidr, (uint64_t)bl31_entrypoint);
+
 			/* Send request to PMU to suspend the APU CPU */
-			pm_self_suspend(NODE_APU, MAX_LATENCY, 0);
+			pm_self_suspend(NODE_APU, MAX_LATENCY, 0, (uint64_t)bl31_entrypoint);
+
 			/* Power down L2 cache */
 			pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
 			/* Send request for OCM retention state */
@@ -261,14 +245,8 @@ static void zynqmp_affinst_suspend(uint64_t sec_entrypoint,
 			return;
 		}
 
-		/*
-		 * CPU will be woken up by releasing the reset
-		 * Program RVBAR to point on wakeup address
-		 */
-		zynqmp_program_rvbar(mpidr, sec_entrypoint);
-
 		/* Send request to PMU to suspend the appropriate APU CPU core */
-		pm_self_suspend(proc->node_id, MAX_LATENCY, 0);
+		pm_self_suspend(proc->node_id, MAX_LATENCY, 0, sec_entrypoint);
 	}
 }
 
