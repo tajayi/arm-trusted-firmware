@@ -39,8 +39,6 @@
 #include "ipi_buffer.h"
 #include "pm_defs.h"
 
-#define PM_ARRAY_SIZE(x)	(sizeof(x) / sizeof(x)[0])
-
 #define PAYLOAD_ARG_CNT		6U
 #define PAYLOAD_ARG_SIZE	4U	/* size in bytes */
 

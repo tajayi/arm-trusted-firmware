@@ -34,6 +34,7 @@
  */
 
 #include <assert.h>
+#include <bl_common.h>
 #include "pm_api_sys.h"
 #include "pm_client.h"
 
@@ -117,7 +118,7 @@ enum pm_ret_status set_ocm_retention(void)
  */
 const struct pm_proc *pm_get_proc(const uint32_t cpuid)
 {
-	if (cpuid < PM_ARRAY_SIZE(pm_procs_all))
+	if (cpuid < ARRAY_SIZE(pm_procs_all))
 		return pm_procs_all[cpuid];
 
 	return NULL;
@@ -133,7 +134,7 @@ const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid)
 {
 	uint32_t i;
 
-	for (i = 0; i < PM_ARRAY_SIZE(pm_procs_all); i++) {
+	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
 		if (nid == pm_procs_all[i]->node_id) {
 			return pm_procs_all[i];
 		}
@@ -151,7 +152,7 @@ static uint32_t pm_get_cpuid(const enum pm_node_id nid)
 {
 	uint32_t i;
 
-	for (i = 0; i < PM_ARRAY_SIZE(pm_procs_all); i++) {
+	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
 		if (pm_procs_all[i]->node_id == nid) {
 			return i;
 		}
