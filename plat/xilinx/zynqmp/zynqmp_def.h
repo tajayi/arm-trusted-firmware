@@ -72,10 +72,16 @@
 #define APB_BASE		0xFD1A0000
 #define APB_SIZE		0x00600000
 
-#define APU_BASE		(0xFD5C0000) /* APU */
-#define R_RVBAR_L_0		(APU_BASE + 0x40)
-#define R_RVBAR_H_0		(APU_BASE + 0x44)
+/* CRF registers and bitfields */
 #define CRF_APB_RST_FPD_APU	(APB_BASE + 0X00000104)
+
+/* APU registers and bitfields */
+#define APU_BASE		0xFD5C0000
+#define APU_CONFIG_0		(APU_BASE + 0x20)
+#define APU_RVBAR_L_0		(APU_BASE + 0x40)
+#define APU_RVBAR_H_0		(APU_BASE + 0x44)
+
+#define APU_CONFIG_0_VINITHI_SHIFT	8
 
 #define NSRAM_BASE		0x2e000000
 #define NSRAM_SIZE		0x10000
