@@ -138,7 +138,20 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 	dsb();
 
 	if (!zynqmp_is_pmu_up()) {
-		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
+		uint32_t r;
+
+		/* program RVBAR */
+		mmio_write_32(APU_RVBAR_L_0 + (linear_id << 3), sec_entrypoint);
+		mmio_write_32(APU_RVBAR_H_0 + (linear_id << 3),
+			      sec_entrypoint >> 32);
+
+		/* clear VINITHI */
+		r = mmio_read_32(APU_CONFIG_0);
+		r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << linear_id);
+		mmio_write_32(APU_CONFIG_0, r);
+
+		/* release core reset */
+		r = mmio_read_32(CRF_APB_RST_FPD_APU);
 		r &= ~(0x401 << linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
