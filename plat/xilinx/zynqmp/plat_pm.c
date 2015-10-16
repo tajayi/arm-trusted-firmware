@@ -121,7 +121,6 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 				  uint32_t state)
 {
 	uint32_t linear_id = platform_get_core_pos(mpidr);
-	const struct pm_proc *proc = pm_get_proc(linear_id);
 
 	/*
 	 * PMU takes care of powering up higher affinity levels so we
@@ -150,11 +149,26 @@ static int32_t zynqmp_affinst_on(uint64_t mpidr,
 		r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << linear_id);
 		mmio_write_32(APU_CONFIG_0, r);
 
+		/* clear power down request */
+		r = mmio_read_32(APU_PWRCTL);
+		r &= ~(1 << linear_id);
+		mmio_write_32(APU_PWRCTL, r);
+
+		/* power up island */
+		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_EN, 1 << linear_id);
+		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_TRIG, 1 << linear_id);
+		/* FIXME: we should have a way to break out */
+		while (mmio_read_32(PMU_GLOBAL_REQ_PWRUP_STATUS) & (1 << linear_id))
+			;
+
 		/* release core reset */
 		r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r &= ~(0x401 << linear_id);
+		r &= ~((CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET |
+				CRF_APB_RST_FPD_APU_ACPU_RESET) << linear_id);
 		mmio_write_32(CRF_APB_RST_FPD_APU, r);
 	} else {
+		const struct pm_proc *proc = pm_get_proc(linear_id);
+
 		/* Send request to PMU to wake up selected APU CPU core */
 		pm_req_wakeup(proc->node_id, 1, sec_entrypoint, REQ_ACK_NO);
 	}
@@ -177,7 +191,6 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 {
 	uint64_t mpidr = read_mpidr_el1();
 	uint32_t linear_id = platform_get_core_pos(mpidr);
-	const struct pm_proc *proc = pm_get_proc(linear_id);
 
 	/* Determine if any platform actions need to be executed */
 	if (zynqmp_do_plat_actions(afflvl, state) == -EAGAIN)
@@ -187,11 +200,15 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 	arm_gic_cpuif_deactivate();
 
 	if (!zynqmp_is_pmu_up()) {
-		/* Program the power controller to power off this cpu. */
-		uint32_t r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r |= 1 << (linear_id);
-		mmio_write_32(CRF_APB_RST_FPD_APU, r);
+		uint32_t r;
+
+		/* set power down request */
+		r = mmio_read_32(APU_PWRCTL);
+		r |= (1 << linear_id);
+		mmio_write_32(APU_PWRCTL, r);
 	} else {
+		const struct pm_proc *proc = pm_get_proc(linear_id);
+
 		/*
 		 * Send request to PMU to power down the appropriate APU CPU
 		 * core.

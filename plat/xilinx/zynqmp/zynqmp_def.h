@@ -75,16 +75,30 @@
 /* CRF registers and bitfields */
 #define CRF_APB_RST_FPD_APU	(APB_BASE + 0X00000104)
 
+#define CRF_APB_RST_FPD_APU_ACPU_RESET		(1 << 0)
+#define CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET	(1 << 10)
+
 /* APU registers and bitfields */
 #define APU_BASE		0xFD5C0000
 #define APU_CONFIG_0		(APU_BASE + 0x20)
 #define APU_RVBAR_L_0		(APU_BASE + 0x40)
 #define APU_RVBAR_H_0		(APU_BASE + 0x44)
+#define APU_PWRCTL		(APU_BASE + 0x90)
 
 #define APU_CONFIG_0_VINITHI_SHIFT	8
+#define APU_0_PWRCTL_CPUPWRDWNREQ_MASK		1
+#define APU_1_PWRCTL_CPUPWRDWNREQ_MASK		2
+#define APU_2_PWRCTL_CPUPWRDWNREQ_MASK		4
+#define APU_3_PWRCTL_CPUPWRDWNREQ_MASK		8
 
 #define NSRAM_BASE		0x2e000000
 #define NSRAM_SIZE		0x10000
+
+/* PMU registers and bitfields */
+#define PMU_GLOBAL_BASE		0xFFD80000
+#define PMU_GLOBAL_REQ_PWRUP_STATUS	(PMU_GLOBAL_BASE + 0x110)
+#define PMU_GLOBAL_REQ_PWRUP_EN		(PMU_GLOBAL_BASE + 0x118)
+#define PMU_GLOBAL_REQ_PWRUP_TRIG	(PMU_GLOBAL_BASE + 0x120)
 
 /* 4KB shared memory */
 #define ZYNQMP_SHARED_RAM_SIZE	0x1000
@@ -231,12 +245,5 @@
 
 /* Base address where parameters to BL31 are stored */
 #define PARAMS_BASE		(MBOX_BASE + MBOX_SIZE)
-
-#define APU_PWRCTL		(APU_BASE + 0x00000090)
-
-#define APU_0_PWRCTL_CPUPWRDWNREQ_MASK		1
-#define APU_1_PWRCTL_CPUPWRDWNREQ_MASK		2
-#define APU_2_PWRCTL_CPUPWRDWNREQ_MASK		4
-#define APU_3_PWRCTL_CPUPWRDWNREQ_MASK		8
 
 #endif /* __ZYNQMP_DEF_H__ */
