@@ -152,7 +152,6 @@ static uint32_t pm_get_cpuid(const enum pm_node_id nid)
 	return UNDEFINED_CPUID;
 }
 
-const enum pm_node_id subsystem_node = NODE_APU;
 const struct pm_proc *primary_proc = &pm_procs_all[0];
 
 /**

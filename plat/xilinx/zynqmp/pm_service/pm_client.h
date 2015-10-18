@@ -83,7 +83,6 @@ void pm_client_wakeup(const struct pm_proc *const proc);
 enum pm_ret_status set_ocm_retention(void);
 
 /* Global variables to be set in pm_client.c */
-extern const enum pm_node_id subsystem_node;
 extern const struct pm_proc *primary_proc;
 
 /* Declaration of linker defined symbol */
