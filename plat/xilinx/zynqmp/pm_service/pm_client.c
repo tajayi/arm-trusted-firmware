@@ -44,36 +44,28 @@ static const struct pm_ipi apu_ipi = {
 	.buffer_base = IPI_BUFFER_APU_BASE,
 };
 
-static const struct pm_proc pm_apu_0_proc = {
-	.node_id = NODE_APU_0,
-	.pwrdn_mask = APU_0_PWRCTL_CPUPWRDWNREQ_MASK,
-	.ipi = &apu_ipi,
-};
-
-static const struct pm_proc pm_apu_1_proc = {
-	.node_id = NODE_APU_1,
-	.pwrdn_mask = APU_1_PWRCTL_CPUPWRDWNREQ_MASK,
-	.ipi = &apu_ipi,
-};
-
-static const struct pm_proc pm_apu_2_proc = {
-	.node_id = NODE_APU_2,
-	.pwrdn_mask = APU_2_PWRCTL_CPUPWRDWNREQ_MASK,
-	.ipi = &apu_ipi,
-};
-
-static const struct pm_proc pm_apu_3_proc = {
-	.node_id = NODE_APU_3,
-	.pwrdn_mask = APU_3_PWRCTL_CPUPWRDWNREQ_MASK,
-	.ipi = &apu_ipi,
-};
-
-/* Order in pm_proc_all array must match cpu ids */
-static const struct pm_proc *const pm_procs_all[] = {
-	&pm_apu_0_proc,
-	&pm_apu_1_proc,
-	&pm_apu_2_proc,
-	&pm_apu_3_proc,
+/* Order in pm_procs_all array must match cpu ids */
+static const struct pm_proc const pm_procs_all[] = {
+	{
+		.node_id = NODE_APU_0,
+		.pwrdn_mask = APU_0_PWRCTL_CPUPWRDWNREQ_MASK,
+		.ipi = &apu_ipi,
+	},
+	{
+		.node_id = NODE_APU_1,
+		.pwrdn_mask = APU_1_PWRCTL_CPUPWRDWNREQ_MASK,
+		.ipi = &apu_ipi,
+	},
+	{
+		.node_id = NODE_APU_2,
+		.pwrdn_mask = APU_2_PWRCTL_CPUPWRDWNREQ_MASK,
+		.ipi = &apu_ipi,
+	},
+	{
+		.node_id = NODE_APU_3,
+		.pwrdn_mask = APU_3_PWRCTL_CPUPWRDWNREQ_MASK,
+		.ipi = &apu_ipi,
+	},
 };
 
 /**
@@ -119,7 +111,7 @@ enum pm_ret_status set_ocm_retention(void)
 const struct pm_proc *pm_get_proc(const uint32_t cpuid)
 {
 	if (cpuid < ARRAY_SIZE(pm_procs_all))
-		return pm_procs_all[cpuid];
+		return &pm_procs_all[cpuid];
 
 	return NULL;
 }
@@ -135,8 +127,8 @@ const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid)
 	uint32_t i;
 
 	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
-		if (nid == pm_procs_all[i]->node_id) {
-			return pm_procs_all[i];
+		if (nid == pm_procs_all[i].node_id) {
+			return &pm_procs_all[i];
 		}
 	}
 	return NULL;
@@ -153,7 +145,7 @@ static uint32_t pm_get_cpuid(const enum pm_node_id nid)
 	uint32_t i;
 
 	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
-		if (pm_procs_all[i]->node_id == nid) {
+		if (pm_procs_all[i].node_id == nid) {
 			return i;
 		}
 	}
@@ -161,7 +153,7 @@ static uint32_t pm_get_cpuid(const enum pm_node_id nid)
 }
 
 const enum pm_node_id subsystem_node = NODE_APU;
-const struct pm_proc *primary_proc = &pm_apu_0_proc;
+const struct pm_proc *primary_proc = &pm_procs_all[0];
 
 /**
  * pm_client_suspend() - Client-specific suspend actions
