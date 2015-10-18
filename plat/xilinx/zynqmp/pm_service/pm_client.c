@@ -40,6 +40,9 @@
 #include "pm_client.h"
 #include "ipi_buffer.h"
 
+/* Declaration of linker defined symbol */
+extern unsigned long __BL31_END__;
+
 static const struct pm_ipi apu_ipi = {
 	.mask = IPI_APU_MASK,
 	.base = IPI_BASEADDR,

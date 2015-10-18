@@ -85,7 +85,4 @@ enum pm_ret_status set_ocm_retention(void);
 /* Global variables to be set in pm_client.c */
 extern const struct pm_proc *primary_proc;
 
-/* Declaration of linker defined symbol */
-extern unsigned long __BL31_END__;
-
 #endif /* _PM_CLIENT_H_ */
