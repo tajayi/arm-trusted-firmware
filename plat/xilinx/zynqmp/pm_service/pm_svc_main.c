@@ -41,6 +41,7 @@
 #include "pm_common.h"
 #include "pm_client.h"
 #include "pm_svc_main.h"
+#include "ipi_buffer.h"
 #include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 

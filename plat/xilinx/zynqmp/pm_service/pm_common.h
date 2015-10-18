@@ -36,7 +36,6 @@
 #ifndef _PM_COMMON_H_
 #define _PM_COMMON_H_
 
-#include "ipi_buffer.h"
 #include "pm_defs.h"
 
 #define PAYLOAD_ARG_CNT		6U

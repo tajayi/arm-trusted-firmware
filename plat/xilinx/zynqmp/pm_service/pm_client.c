@@ -37,6 +37,7 @@
 #include <bl_common.h>
 #include "pm_api_sys.h"
 #include "pm_client.h"
+#include "ipi_buffer.h"
 
 static const struct pm_ipi apu_ipi = {
 	.mask = IPI_APU_MASK,
