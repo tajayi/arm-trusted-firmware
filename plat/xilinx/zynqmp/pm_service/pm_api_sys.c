@@ -33,14 +33,14 @@
  * IPI interrupts
  */
 
+#include <arch_helpers.h>
+#include <platform.h>
 #include "pm_client.h"
 #include "pm_common.h"
 #include "pm_api_sys.h"
 
 /**
  * Assigning of argument values into array elements.
- * pause and pm_dbg are used for debugging and should be removed in
- * final version.
  */
 #define PM_PACK_PAYLOAD1(pl, arg0) {	\
 	pl[0] = (uint32_t)(arg0);	\
@@ -89,7 +89,8 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 				   const uint64_t address)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
-	const struct pm_proc *proc = pm_get_proc(pm_this_cpuid());
+	unsigned int cpuid = platform_get_core_pos(read_mpidr_el1());
+	const struct pm_proc *proc = pm_get_proc(cpuid);
 
 	/*
 	 * Do client specific suspend operations

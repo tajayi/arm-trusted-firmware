@@ -36,32 +36,8 @@
 #ifndef _PM_CLIENT_H_
 #define _PM_CLIENT_H_
 
-#include <arch_helpers.h>
-#include <debug.h>
-#include <platform.h>
-
 #include "pm_defs.h"
 #include "pm_common.h"
-
-#define OCM_BANK_0	0xFFFC0000
-#define OCM_BANK_1	(OCM_BANK_0 + 0x10000)
-#define OCM_BANK_2	(OCM_BANK_1 + 0x10000)
-#define OCM_BANK_3	(OCM_BANK_2 + 0x10000)
-
-#define UNDEFINED_CPUID		(~0)
-
-/* Macros to allow pm_api_sys.c to remain PU independent */
-#define pm_read(addr)		mmio_read_32(addr)
-#define pm_write(addr, value)	mmio_write_32(addr, value)
-#define pm_print		INFO
-#define pm_this_cpuid()		platform_get_core_pos(read_mpidr_el1())
-
-/* Conditional debugging prints */
-#ifdef DEBUG_MODE
-	#define pm_dbg(MSG, ...)	pm_print(MSG,##__VA_ARGS__)
-#else
-	#define pm_dbg(MSG, ...)	{}
-#endif
 
 /* Functions to be implemented by each PU */
 enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,

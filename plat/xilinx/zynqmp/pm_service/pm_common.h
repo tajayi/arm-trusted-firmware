@@ -36,6 +36,7 @@
 #ifndef _PM_COMMON_H_
 #define _PM_COMMON_H_
 
+#include <debug.h>
 #include <stdint.h>
 #include "pm_defs.h"
 

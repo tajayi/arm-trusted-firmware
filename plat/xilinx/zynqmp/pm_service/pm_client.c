@@ -41,6 +41,13 @@
 #include "pm_ipi.h"
 #include "../zynqmp_def.h"
 
+#define OCM_BANK_0	0xFFFC0000
+#define OCM_BANK_1	(OCM_BANK_0 + 0x10000)
+#define OCM_BANK_2	(OCM_BANK_1 + 0x10000)
+#define OCM_BANK_3	(OCM_BANK_2 + 0x10000)
+
+#define UNDEFINED_CPUID		(~0)
+
 /* Declaration of linker defined symbol */
 extern unsigned long __BL31_END__;
 extern const struct pm_ipi apu_ipi;
@@ -162,7 +169,7 @@ const struct pm_proc *primary_proc = &pm_procs_all[0];
 void pm_client_suspend(const struct pm_proc *const proc)
 {
 	/* Set powerdown request */
-	pm_write(APU_PWRCTL, pm_read(APU_PWRCTL) | proc->pwrdn_mask);
+	mmio_write_32(APU_PWRCTL, mmio_read_32(APU_PWRCTL) | proc->pwrdn_mask);
 }
 
 
@@ -177,8 +184,8 @@ void pm_client_abort_suspend(void)
 	/* Enable interrupts at processor level (for current cpu) */
 	arm_gic_cpuif_setup();
 	/* Clear powerdown request */
-	pm_write(APU_PWRCTL,
-		 pm_read(APU_PWRCTL) & ~primary_proc->pwrdn_mask);
+	mmio_write_32(APU_PWRCTL,
+		 mmio_read_32(APU_PWRCTL) & ~primary_proc->pwrdn_mask);
 }
 
 /**
@@ -193,8 +200,8 @@ void pm_client_wakeup(const struct pm_proc *const proc)
 
 	if (UNDEFINED_CPUID != cpuid) {
 		/* clear powerdown bit for affected cpu */
-		uint32_t val = pm_read(APU_PWRCTL);
+		uint32_t val = mmio_read_32(APU_PWRCTL);
 		val &= ~(proc->pwrdn_mask);
-		pm_write(APU_PWRCTL, val);
+		mmio_write_32(APU_PWRCTL, val);
 	}
 }
