@@ -33,8 +33,10 @@
  * for getting information about and changing state of the APU.
  */
 
+#include <arm_gic.h>
 #include <assert.h>
 #include <bl_common.h>
+#include <mmio.h>
 #include "pm_api_sys.h"
 #include "pm_client.h"
 #include "ipi_buffer.h"

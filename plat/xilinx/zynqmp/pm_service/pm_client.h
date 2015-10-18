@@ -37,11 +37,9 @@
 #define _PM_CLIENT_H_
 
 #include <arch_helpers.h>
-#include <arm_gic.h> /* plat_gic when becomes available */
 #include <bakery_lock.h>
 #include <debug.h>
 #include <platform.h>
-#include <mmio.h>
 
 #include "pm_defs.h"
 #include "pm_common.h"

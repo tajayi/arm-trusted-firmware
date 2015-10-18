@@ -33,16 +33,12 @@
  * IPI setup functions for communication with PMU.
  */
 
-#include <debug.h>
 #include <errno.h>
 #include <gic_v2.h>
 #include <runtime_svc.h>
 #include "pm_api_sys.h"
-#include "pm_common.h"
 #include "pm_client.h"
-#include "pm_svc_main.h"
 #include "ipi_buffer.h"
-#include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 
 /* PM Function identifiers  */
