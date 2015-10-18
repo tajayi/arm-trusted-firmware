@@ -44,8 +44,22 @@
 #include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 
-/* Global PM context structure. Contains data for power management */
-struct pm_context pm_ctx;
+/* PM Function identifiers  */
+#define PM_F_INIT			0xa01
+#define PM_F_GETARGS			0xa02
+
+/**
+ * pm_context - Structure which contains data for power management
+ * @api_version		version of PM API, must match with one on PMU side
+ * @callback_irq	registered interrupt number used for pm callback action
+ * @payload		payload array used to store received
+ * 			data from ipi buffer registers
+ */
+static struct {
+	uint32_t api_version;
+	uint32_t callback_irq;
+	uint32_t payload[PAYLOAD_ARG_CNT];
+} pm_ctx;
 
 /**
  * read_ipi_buffer() - Read from IPI buffer registers
