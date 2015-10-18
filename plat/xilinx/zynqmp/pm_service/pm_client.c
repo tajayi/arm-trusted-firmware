@@ -34,7 +34,6 @@
  */
 
 #include <arm_gic.h>
-#include <assert.h>
 #include <bl_common.h>
 #include <mmio.h>
 #include "pm_api_sys.h"
@@ -84,8 +83,6 @@ static const struct pm_proc const pm_procs_all[] = {
 enum pm_ret_status set_ocm_retention(void)
 {
 	enum pm_ret_status ret;
-
-	assert((unsigned long)&__BL31_END__ <= OCM_BANK_3 + 0xffff);
 
 	/* OCM_BANK_0 will always be occupied */
 	ret = pm_set_requirement(NODE_OCM_BANK_0, PM_CAP_CONTEXT, 0,
