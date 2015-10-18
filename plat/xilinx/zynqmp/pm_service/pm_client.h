@@ -74,11 +74,11 @@
 bakery_lock_t pm_secure_lock;
 
 /* Functions to be implemented by each PU */
-enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc);
-enum pm_ret_status pm_ipi_buff_read32(const struct pm_proc *const proc,
-					     uint32_t *value);
 enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
 				      uint32_t payload[PAYLOAD_ARG_CNT]);
+enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *const proc,
+				    uint32_t payload[PAYLOAD_ARG_CNT],
+				    uint32_t *val);
 void pm_client_suspend(const struct pm_proc *const proc);
 void pm_client_abort_suspend(void);
 void pm_client_wakeup(const struct pm_proc *const proc);

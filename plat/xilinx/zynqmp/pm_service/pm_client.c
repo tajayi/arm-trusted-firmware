@@ -205,11 +205,9 @@ void pm_client_wakeup(const struct pm_proc *const proc)
  * pm_ipi_wait() - wait for pmu to handle request
  * @proc	proc which is waiting for PMU to handle request
  */
-enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc)
+static enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc)
 {
 	uint32_t status;
-
-	bakery_lock_get(&pm_secure_lock);
 
 	/* Wait until previous interrupt is handled by PMU */
 	do {
@@ -219,21 +217,21 @@ enum pm_ret_status pm_ipi_wait(const struct pm_proc *const proc)
 		/* TODO: 2) Return PM_RET_ERR_TIMEOUT if this times out */
 	} while (status);
 
-	/* Message sent successfully to PMU */
-	bakery_lock_release(&pm_secure_lock);
-
 	return PM_RET_SUCCESS;
 }
 
 /**
- * pm_ipi_send() - Sends IPI request to the PMU
+ * pm_ipi_send_common() - Sends IPI request to the PMU
  * @proc	Pointer to the processor who is initiating request
  * @payload	API id and call arguments to be written in IPI buffer
  *
+ * Send an IPI request to the power controller. Caller needs to hold
+ * the 'pm_secure_lock' lock.
+ *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
-				      uint32_t payload[PAYLOAD_ARG_CNT])
+static enum pm_ret_status pm_ipi_send_common(const struct pm_proc *const proc,
+					     uint32_t payload[PAYLOAD_ARG_CNT])
 {
 	uint32_t i;
 	uint32_t offset = 0;
@@ -256,14 +254,38 @@ enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
 }
 
 /**
- * pm_ipi_buff_read32() - Reads IPI response after PMU has handled interrupt
+ * pm_ipi_send() - Sends IPI request to the PMU
+ * @proc	Pointer to the processor who is initiating request
+ * @payload	API id and call arguments to be written in IPI buffer
+ *
+ * Send an IPI request to the power controller.
+ *
+ * @return	Returns status, either success or error+reason
+ */
+enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
+			       uint32_t payload[PAYLOAD_ARG_CNT])
+{
+	enum pm_ret_status ret;
+
+	bakery_lock_get(&pm_secure_lock);
+
+	ret = pm_ipi_send_common(proc, payload);
+
+	bakery_lock_release(&pm_secure_lock);
+
+	return ret;
+}
+
+
+/**
+ * pm_ipi_buff_read() - Reads IPI response after PMU has handled interrupt
  * @proc	Pointer to the processor who is waiting and reading response
  * @value 	Used to return value from 2nd IPI buffer element (optional)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_ipi_buff_read32(const struct pm_proc *const proc,
-					     uint32_t *value)
+static enum pm_ret_status pm_ipi_buff_read(const struct pm_proc *const proc,
+					   uint32_t *value)
 {
 	uint32_t buffer_base = proc->ipi->buffer_base +
 		IPI_BUFFER_TARGET_PMU_OFFSET +
@@ -282,4 +304,35 @@ enum pm_ret_status pm_ipi_buff_read32(const struct pm_proc *const proc,
 		*value = pm_read(buffer_base + PAYLOAD_ARG_SIZE);
 
 	return pm_read(buffer_base);
+}
+
+/**
+ * pm_ipi_send_sync() - Sends IPI request to the PMU
+ * @proc	Pointer to the processor who is initiating request
+ * @payload	API id and call arguments to be written in IPI buffer
+ * @value 	Used to return value from 2nd IPI buffer element (optional)
+ *
+ * Send an IPI request to the power controller and wait for it to be handled.
+ *
+ * @return	Returns status, either success or error+reason and, optionally,
+ *		@value
+ */
+enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *const proc,
+				    uint32_t payload[PAYLOAD_ARG_CNT],
+				    uint32_t *value)
+{
+	enum pm_ret_status ret;
+
+	bakery_lock_get(&pm_secure_lock);
+
+	ret = pm_ipi_send_common(proc, payload);
+	if (ret != PM_RET_SUCCESS)
+		goto unlock;
+
+	ret = pm_ipi_buff_read(proc, value);
+
+unlock:
+	bakery_lock_release(&pm_secure_lock);
+
+	return ret;
 }
