@@ -110,6 +110,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				plat/xilinx/zynqmp/aarch64/zynqmp_helpers.S	\
 				plat/xilinx/zynqmp/pm_service/pm_svc_main.c	\
 				plat/xilinx/zynqmp/pm_service/pm_api_sys.c	\
+				plat/xilinx/zynqmp/pm_service/pm_ipi.c		\
 				plat/xilinx/zynqmp/pm_service/pm_client.c
 
 ifneq (${RESET_TO_BL31},1)

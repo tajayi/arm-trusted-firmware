@@ -37,7 +37,6 @@
 #define _PM_CLIENT_H_
 
 #include <arch_helpers.h>
-#include <bakery_lock.h>
 #include <debug.h>
 #include <platform.h>
 
@@ -48,11 +47,6 @@
 #define OCM_BANK_1	(OCM_BANK_0 + 0x10000)
 #define OCM_BANK_2	(OCM_BANK_1 + 0x10000)
 #define OCM_BANK_3	(OCM_BANK_2 + 0x10000)
-
-#define IPI_APU_MASK		1U
-
-#define IPI_TRIG_OFFSET		0
-#define IPI_OBS_OFFSET		4
 
 #define UNDEFINED_CPUID		(~0)
 
@@ -68,8 +62,6 @@
 #else
 	#define pm_dbg(MSG, ...)	{}
 #endif
-
-bakery_lock_t pm_secure_lock;
 
 /* Functions to be implemented by each PU */
 enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,

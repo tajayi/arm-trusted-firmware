@@ -28,30 +28,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _IPI_BUFFER_H_
-#define _IPI_BUFFER_H_
+#ifndef _PM_IPI_H_
+#define _PM_IPI_H_
 
-#define IPI_BUFFER_BASEADDR	0xFF990000U
+#include "pm_common.h"
 
-#define IPI_BUFFER_RPU_0_BASE	(IPI_BUFFER_BASEADDR + 0x0U)
-#define IPI_BUFFER_RPU_1_BASE	(IPI_BUFFER_BASEADDR + 0x200U)
-#define IPI_BUFFER_APU_BASE	(IPI_BUFFER_BASEADDR + 0x400U)
-#define IPI_BUFFER_PL_0_BASE	(IPI_BUFFER_BASEADDR + 0x600U)
-#define IPI_BUFFER_PL_1_BASE	(IPI_BUFFER_BASEADDR + 0x800U)
-#define IPI_BUFFER_PL_2_BASE	(IPI_BUFFER_BASEADDR + 0xA00U)
-#define IPI_BUFFER_PL_3_BASE	(IPI_BUFFER_BASEADDR + 0xC00U)
-#define IPI_BUFFER_PMU_BASE	(IPI_BUFFER_BASEADDR + 0xE00U)
+int32_t pm_ipi_init(int (*fiq_handler)(uint32_t *));
 
-#define IPI_BUFFER_TARGET_RPU_0_OFFSET	0x0U
-#define IPI_BUFFER_TARGET_RPU_1_OFFSET	0x40U
-#define IPI_BUFFER_TARGET_APU_OFFSET	0x80U
-#define IPI_BUFFER_TARGET_PL_0_OFFSET	0xC0U
-#define IPI_BUFFER_TARGET_PL_1_OFFSET	0x100U
-#define IPI_BUFFER_TARGET_PL_2_OFFSET	0x140U
-#define IPI_BUFFER_TARGET_PL_3_OFFSET	0x180U
-#define IPI_BUFFER_TARGET_PMU_OFFSET	0x1C0U
+enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
+			       uint32_t payload[PAYLOAD_ARG_CNT]);
+enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *const proc,
+				    uint32_t payload[PAYLOAD_ARG_CNT],
+				    uint32_t *value);
 
-#define IPI_BUFFER_REQ_OFFSET	0x0U
-#define IPI_BUFFER_RESP_OFFSET	0x20U
-
-#endif /* _IPI_BUFFER_H_ */
+#endif /* _PM_IPI_H_ */

@@ -36,18 +36,11 @@
 #ifndef _PM_COMMON_H_
 #define _PM_COMMON_H_
 
+#include <stdint.h>
 #include "pm_defs.h"
 
 #define PAYLOAD_ARG_CNT		6U
 #define PAYLOAD_ARG_SIZE	4U	/* size in bytes */
-
-/* Power Management IPI interrupt number */
-#define PM_INT_NUM		0
-#define IPI_PMU_PM_INT_BASE	(IPI_PMU_0_TRIG + (PM_INT_NUM * 0x1000))
-#define IPI_PMU_PM_INT_MASK	(IPI_APU_ISR_PMU_0_MASK << PM_INT_NUM)
-#if (PM_INT_NUM < 0 || PM_INT_NUM > 3)
-	#error PM_INT_NUM value out of range
-#endif
 
 /**
  * pm_ipi - struct for capturing IPI-channel specific info

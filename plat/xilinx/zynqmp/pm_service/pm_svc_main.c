@@ -36,9 +36,10 @@
 #include <errno.h>
 #include <gic_v2.h>
 #include <runtime_svc.h>
+#include <string.h>
 #include "pm_api_sys.h"
 #include "pm_client.h"
-#include "ipi_buffer.h"
+#include "pm_ipi.h"
 #include "../zynqmp_private.h"
 
 /* PM Function identifiers  */
@@ -59,29 +60,6 @@ static struct {
 } pm_ctx;
 
 /**
- * read_ipi_buffer() - Read from IPI buffer registers
- * @proc - Pointer to the processor who expected data
- * @pld - array of 5 elements
- *
- * Read value from ipi buffer registers (from PMU) and store
- * in PM context payload structure
- */
-void read_ipi_buffer(const struct pm_proc *const proc, uint32_t *pld)
-{
-	uint32_t i;
-	uint32_t offset = 0;
-	uint32_t buffer_base = proc->ipi->buffer_base +
-		IPI_BUFFER_TARGET_PMU_OFFSET +
-		IPI_BUFFER_RESP_OFFSET;
-
-	/* Read from IPI buffer and store into payload array */
-	for (i = 0; i < PAYLOAD_ARG_CNT; i++) {
-		pld[i] = pm_read(buffer_base + offset);
-		offset += PAYLOAD_ARG_SIZE;
-	}
-}
-
-/**
  * trigger_callback_irq() - Set interrupt for non-secure EL1/EL2
  * @irq_num - entrance in GIC
  *
@@ -97,12 +75,7 @@ static void trigger_callback_irq(uint32_t irq_num)
 
 /**
  * ipi_fiq_handler() - IPI Handler for PM-API callbacks
- * @id - 	number of the highest priority pending interrupt of the type
- *		that this handler was registered for
- * @flags - 	security state, bit[0]
- * @handler - 	pointer to 'cpu_context' structure of the current CPU for the
- * 	      	security state specified in the 'flags' parameter
- * @cookie  - 	unused
+ * @buf:	Pointer to a structure holding the IPI data
  *
  * Function registered as INTR_TYPE_EL3 interrupt handler
  *
@@ -114,58 +87,16 @@ static void trigger_callback_irq(uint32_t irq_num)
  * at registered entrance in GIC and informs that PMU responsed or demands
  * action
  */
-static uint64_t ipi_fiq_handler(uint32_t id,
-				uint32_t flags,
-				void *handle,
-				void *cookie)
+static int ipi_fiq_handler(uint32_t *buf)
 {
-	const struct pm_proc *proc = pm_get_proc(pm_this_cpuid());
-	uint32_t ipi_apu_isr_reg = pm_read(IPI_APU_ISR);
-
-	/* Read PM-API Arguments */
-	read_ipi_buffer(proc, pm_ctx.payload);
-
 	/*
 	 * Inform non-secure software layer (EL1/2) by setting the interrupt
 	 * at registered entrance in GIC, that PMU responsed or demands action
 	 */
+	memcpy(pm_ctx.payload, buf, sizeof(pm_ctx.payload));
 	trigger_callback_irq(pm_ctx.callback_irq);
 
-	/* Clear IPI_APU_ISR bit */
-	pm_write(IPI_APU_ISR, ipi_apu_isr_reg & IPI_PMU_PM_INT_MASK);
-
 	return 0;
-}
-
-/**
- * pm_ipi_init() - Initialize IPI peripheral for communication with PMU
- *
- * @return - 	On success, the initialization function must return 0.
- *		Any other return value will cause the framework to ignore
- *		the service
- *
- * Enable interrupts at registered entrance in IPI peripheral
- * Called from pm_setup initialization function
- */
-int32_t pm_ipi_init(void)
-{
-	int ret;
-
-	bakery_lock_init(&pm_secure_lock);
-
-	/* IPI Interrupts Clear & Disable */
-	pm_write(IPI_APU_ISR, 0xffffffff);
-	pm_write(IPI_APU_IDR, 0xffffffff);
-
-	/* Register IPI interrupt as INTR_TYPE_EL3 */
-	ret = request_intr_type_el3(IRQ_SEC_IPI_APU, ipi_fiq_handler);
-	if (ret)
-		return ret;
-
-	/* IPI Interrupts Enable */
-	pm_write(IPI_APU_IER, IPI_APU_IER_PMU_0_MASK);
-
-	return ret;
 }
 
 /**
@@ -190,7 +121,7 @@ int32_t pm_setup(void)
 		return -ENODEV;
 
 	/* initialize IPI interrupts */
-	status = pm_ipi_init();
+	status = pm_ipi_init(ipi_fiq_handler);
 
 	if (status == 0)
 		INFO("BL3-1: PM Service Init Complete: API v%d.%d\n",
