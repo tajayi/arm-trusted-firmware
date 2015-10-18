@@ -74,7 +74,6 @@ struct pm_proc {
 	const struct pm_ipi *const ipi;
 };
 
-const enum pm_node_id pm_get_subsystem_node(void);
 const struct pm_proc *pm_get_proc(const uint32_t cpuid);
 const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid);
 
