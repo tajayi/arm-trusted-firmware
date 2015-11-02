@@ -18,3 +18,11 @@ To build bl32 TSP you have to rebuild bl31 too:
 ```bash
 make DEBUG=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zynqmp SPD=tspd bl31 bl32
 ```
+
+# ATF Location
+On default the ATF is placed in OCM memory. Alternatively, the ATF can be
+placed in DRAM (at 0x30000000). To choose DRAM, add
+```
+ZYNQMP_ATF_LOCATION=tdram
+```
+to the make command line.
