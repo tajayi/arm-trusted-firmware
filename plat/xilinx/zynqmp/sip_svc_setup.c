@@ -48,15 +48,8 @@ DEFINE_SVC_UUID(zynqmp_sip_uid,
  */
 static int32_t sip_svc_setup(void)
 {
-	int ret;
-
 	/* PM implementation as SiP Service */
-	ret = pm_setup();
-	if (ret)
-		WARN("BL3-1: ZynqMP PM service init failed (%d), using no-PMUFW fall back.\n",
-		     ret);
-
-	return 0;
+	return pm_setup();
 }
 
 /**
