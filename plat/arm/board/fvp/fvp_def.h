@@ -58,13 +58,25 @@
 #define DEVICE1_BASE			0x2f000000
 #define DEVICE1_SIZE			0x200000
 
+/* Devices in the second GB */
+#define DEVICE2_BASE			0x7fe00000
+#define DEVICE2_SIZE			0x00200000
+
 #define NSRAM_BASE			0x2e000000
 #define NSRAM_SIZE			0x10000
 
 #define PCIE_EXP_BASE			0x40000000
 #define TZRNG_BASE			0x7fe60000
 #define TZNVCTR_BASE			0x7fe70000
-#define TZROOTKEY_BASE			0x7fe80000
+
+/* Keys */
+#define SOC_KEYS_BASE			0x7fe80000
+#define TZ_PUB_KEY_HASH_BASE		(SOC_KEYS_BASE + 0x0000)
+#define TZ_PUB_KEY_HASH_SIZE		32
+#define HU_KEY_BASE			(SOC_KEYS_BASE + 0x0020)
+#define HU_KEY_SIZE			16
+#define END_KEY_BASE			(SOC_KEYS_BASE + 0x0044)
+#define END_KEY_SIZE			32
 
 /* Constants to distinguish FVP type */
 #define HBI_BASE_FVP			0x020
@@ -83,6 +95,15 @@
 /* FVP Power controller base address*/
 #define PWRC_BASE			0x1c100000
 
+/* FVP SP804 timer frequency is 35 MHz*/
+#define SP804_TIMER_CLKMULT		1
+#define SP804_TIMER_CLKDIV		35
+
+/* SP810 controller. FVP specific flags */
+#define FVP_SP810_CTRL_TIM0_OV		(1 << 16)
+#define FVP_SP810_CTRL_TIM1_OV		(1 << 18)
+#define FVP_SP810_CTRL_TIM2_OV		(1 << 20)
+#define FVP_SP810_CTRL_TIM3_OV		(1 << 22)
 
 /*******************************************************************************
  * GIC-400 & interrupt handling related constants
@@ -100,7 +121,8 @@
 #define BASE_GICH_BASE			0x2c010000
 #define BASE_GICV_BASE			0x2c02f000
 
-#define IRQ_TZ_WDOG			56
+#define FVP_IRQ_TZ_WDOG			56
+#define FVP_IRQ_SEC_SYS_TIMER		57
 
 
 /*******************************************************************************
@@ -117,14 +139,5 @@
 /* NSAIDs used by devices in TZC filter 2 on FVP */
 #define FVP_NSAID_HDLCD0		2
 #define FVP_NSAID_CLCD			7
-
-/*******************************************************************************
- *  Shared Data
- ******************************************************************************/
-
-/* Entrypoint mailboxes */
-#define MBOX_BASE			ARM_SHARED_RAM_BASE
-#define MBOX_SIZE			0x200
-
 
 #endif /* __FVP_DEF_H__ */

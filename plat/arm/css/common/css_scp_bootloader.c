@@ -60,7 +60,7 @@ typedef struct {
  * Unlike the SCPI protocol, the boot protocol uses the same memory region
  * for both AP -> SCP and SCP -> AP transfers; define the address of this...
  */
-#define BOM_SHARED_MEM		(MHU_SECURE_BASE + 0x0080)
+#define BOM_SHARED_MEM		SCP_COM_SHARED_MEM_BASE
 #define BOM_CMD_HEADER		((bom_cmd_t *) BOM_SHARED_MEM)
 #define BOM_CMD_PAYLOAD		((void *) (BOM_SHARED_MEM + sizeof(bom_cmd_t)))
 
@@ -118,10 +118,10 @@ int scp_bootloader_transfer(void *image, unsigned int image_size)
 	cmd_info_payload_t *cmd_info_payload;
 	cmd_data_payload_t *cmd_data_payload;
 
-	assert((uintptr_t) image == BL30_BASE);
+	assert((uintptr_t) image == SCP_BL2_BASE);
 
 	if ((image_size == 0) || (image_size % 4 != 0)) {
-		ERROR("Invalid size for the BL3-0 image. Must be a multiple of "
+		ERROR("Invalid size for the SCP_BL2 image. Must be a multiple of "
 			"4 bytes and not zero (current size = 0x%x)\n",
 			image_size);
 		return -1;
@@ -134,7 +134,7 @@ int scp_bootloader_transfer(void *image, unsigned int image_size)
 
 	mhu_secure_init();
 
-	VERBOSE("Send info about the BL3-0 image to be transferred to SCP\n");
+	VERBOSE("Send info about the SCP_BL2 image to be transferred to SCP\n");
 
 	/*
 	 * Send information about the SCP firmware image about to be transferred
@@ -174,14 +174,14 @@ int scp_bootloader_transfer(void *image, unsigned int image_size)
 		return -1;
 	}
 
-	VERBOSE("Transferring BL3-0 image to SCP\n");
+	VERBOSE("Transferring SCP_BL2 image to SCP\n");
 
-	/* Transfer BL3-0 image to SCP */
+	/* Transfer SCP_BL2 image to SCP */
 	scp_boot_message_start();
 
 	BOM_CMD_HEADER->id = BOOT_CMD_DATA;
 	cmd_data_payload = BOM_CMD_PAYLOAD;
-	cmd_data_payload->offset = (uintptr_t) image - MHU_SECURE_BASE;
+	cmd_data_payload->offset = (uintptr_t) image - ARM_TRUSTED_SRAM_BASE;
 	cmd_data_payload->block_size = image_size;
 
 	scp_boot_message_send(sizeof(*cmd_data_payload));

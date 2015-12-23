@@ -31,12 +31,11 @@
 #include <arch.h>
 #include <asm_macros.S>
 #include <bl_common.h>
-#include <gic_v2.h>
+#include <gicv2.h>
 #include <platform_def.h>
 
 	.globl	plat_secondary_cold_boot_setup
 	.globl	platform_get_entrypoint
-	.globl	platform_mem_init
 	.globl	platform_is_primary_cpu
 
 	/* -----------------------------------------------------
@@ -130,29 +129,6 @@ exit:
 	ret	x9
 _panic:	b	_panic
 endfunc platform_get_entrypoint
-
-
-	/* -----------------------------------------------------
-	 * void platform_mem_init (void);
-	 *
-	 * Zero out the mailbox registers in the shared memory.
-	 * The mmu is turned off right now and only the primary can
-	 * ever execute this code. Secondaries will read the
-	 * mailboxes using SO accesses. In short, BL31 will
-	 * update the mailboxes after mapping the tzdram as
-	 * normal memory. It will flush its copy after update.
-	 * BL1 will always read the mailboxes with the MMU off
-	 * -----------------------------------------------------
-	 */
-func platform_mem_init
-	ldr	x0, =MBOX_BASE
-	mov	w1, #PLATFORM_CORE_COUNT
-loop:
-	str	xzr, [x0], #CACHE_WRITEBACK_GRANULE
-	subs	w1, w1, #1
-	b.gt	loop
-	ret
-endfunc platform_mem_init
 
 func platform_is_primary_cpu
 	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)

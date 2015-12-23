@@ -30,7 +30,6 @@
 
 #include <arch_helpers.h>
 #include <arm_config.h>
-#include <arm_gic.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
@@ -44,25 +43,26 @@
 #include "fvp_private.h"
 
 
-typedef volatile struct mailbox {
-	unsigned long value __aligned(CACHE_WRITEBACK_GRANULE);
-} mailbox_t;
-
-/*******************************************************************************
- * Private FVP function to program the mailbox for a cpu before it is released
- * from reset.
- ******************************************************************************/
-static void fvp_program_mailbox(uint64_t mpidr, uint64_t address)
-{
-	uint64_t linear_id;
-	mailbox_t *fvp_mboxes;
-
-	linear_id = platform_get_core_pos(mpidr);
-	fvp_mboxes = (mailbox_t *)MBOX_BASE;
-	fvp_mboxes[linear_id].value = address;
-	flush_dcache_range((unsigned long) &fvp_mboxes[linear_id],
-			   sizeof(unsigned long));
-}
+#if ARM_RECOM_STATE_ID_ENC
+/*
+ *  The table storing the valid idle power states. Ensure that the
+ *  array entries are populated in ascending order of state-id to
+ *  enable us to use binary search during power state validation.
+ *  The table must be terminated by a NULL entry.
+ */
+const unsigned int arm_pm_idle_states[] = {
+	/* State-id - 0x01 */
+	arm_make_pwrstate_lvl1(ARM_LOCAL_STATE_RUN, ARM_LOCAL_STATE_RET,
+			ARM_PWR_LVL0, PSTATE_TYPE_STANDBY),
+	/* State-id - 0x02 */
+	arm_make_pwrstate_lvl1(ARM_LOCAL_STATE_RUN, ARM_LOCAL_STATE_OFF,
+			ARM_PWR_LVL0, PSTATE_TYPE_POWERDOWN),
+	/* State-id - 0x22 */
+	arm_make_pwrstate_lvl1(ARM_LOCAL_STATE_OFF, ARM_LOCAL_STATE_OFF,
+			ARM_PWR_LVL1, PSTATE_TYPE_POWERDOWN),
+	0,
+};
+#endif
 
 /*******************************************************************************
  * Function which implements the common FVP specific operations to power down a
@@ -71,7 +71,7 @@ static void fvp_program_mailbox(uint64_t mpidr, uint64_t address)
 static void fvp_cpu_pwrdwn_common(void)
 {
 	/* Prevent interrupts from spuriously waking up this cpu */
-	arm_gic_cpuif_deactivate();
+	plat_arm_gic_cpuif_disable();
 
 	/* Program the power controller to power off this cpu. */
 	fvp_pwrc_write_ppoffr(read_mpidr_el1());
@@ -92,144 +92,19 @@ static void fvp_cluster_pwrdwn_common(void)
 	fvp_pwrc_write_pcoffr(mpidr);
 }
 
-/*******************************************************************************
- * FVP handler called when an affinity instance is about to enter standby.
- ******************************************************************************/
-void fvp_affinst_standby(unsigned int power_state)
-{
-	/*
-	 * Enter standby state
-	 * dsb is good practice before using wfi to enter low power states
-	 */
-	dsb();
-	wfi();
-}
-
-/*******************************************************************************
- * FVP handler called when an affinity instance is about to be turned on. The
- * level and mpidr determine the affinity instance.
- ******************************************************************************/
-int fvp_affinst_on(unsigned long mpidr,
-		   unsigned long sec_entrypoint,
-		   unsigned int afflvl,
-		   unsigned int state)
-{
-	int rc = PSCI_E_SUCCESS;
-	unsigned int psysr;
-
-	/*
-	 * It's possible to turn on only affinity level 0 i.e. a cpu
-	 * on the FVP. Ignore any other affinity level.
-	 */
-	if (afflvl != MPIDR_AFFLVL0)
-		return rc;
-
-	/*
-	 * Ensure that we do not cancel an inflight power off request
-	 * for the target cpu. That would leave it in a zombie wfi.
-	 * Wait for it to power off, program the jump address for the
-	 * target cpu and then program the power controller to turn
-	 * that cpu on
-	 */
-	do {
-		psysr = fvp_pwrc_read_psysr(mpidr);
-	} while (psysr & PSYSR_AFF_L0);
-
-	fvp_program_mailbox(mpidr, sec_entrypoint);
-	fvp_pwrc_write_pponr(mpidr);
-
-	return rc;
-}
-
-/*******************************************************************************
- * FVP handler called when an affinity instance is about to be turned off. The
- * level and mpidr determine the affinity instance. The 'state' arg. allows the
- * platform to decide whether the cluster is being turned off and take apt
- * actions.
- *
- * CAUTION: There is no guarantee that caches will remain turned on across calls
- * to this function as each affinity level is dealt with. So do not write & read
- * global variables across calls. It will be wise to do flush a write to the
- * global to prevent unpredictable results.
- ******************************************************************************/
-void fvp_affinst_off(unsigned int afflvl,
-		    unsigned int state)
-{
-	/* Determine if any platform actions need to be executed */
-	if (arm_do_affinst_actions(afflvl, state) == -EAGAIN)
-		return;
-
-	/*
-	 * If execution reaches this stage then this affinity level will be
-	 * suspended. Perform at least the cpu specific actions followed the
-	 * cluster specific operations if applicable.
-	 */
-	fvp_cpu_pwrdwn_common();
-
-	if (afflvl != MPIDR_AFFLVL0)
-		fvp_cluster_pwrdwn_common();
-
-}
-
-/*******************************************************************************
- * FVP handler called when an affinity instance is about to be suspended. The
- * level and mpidr determine the affinity instance. The 'state' arg. allows the
- * platform to decide whether the cluster is being turned off and take apt
- * actions.
- *
- * CAUTION: There is no guarantee that caches will remain turned on across calls
- * to this function as each affinity level is dealt with. So do not write & read
- * global variables across calls. It will be wise to do flush a write to the
- * global to prevent unpredictable results.
- ******************************************************************************/
-void fvp_affinst_suspend(unsigned long sec_entrypoint,
-			unsigned int afflvl,
-			unsigned int state)
+static void fvp_power_domain_on_finish_common(const psci_power_state_t *target_state)
 {
 	unsigned long mpidr;
 
-	/* Determine if any platform actions need to be executed. */
-	if (arm_do_affinst_actions(afflvl, state) == -EAGAIN)
-		return;
-
-	/* Get the mpidr for this cpu */
-	mpidr = read_mpidr_el1();
-
-	/* Program the jump address for the this cpu */
-	fvp_program_mailbox(mpidr, sec_entrypoint);
-
-	/* Program the power controller to enable wakeup interrupts. */
-	fvp_pwrc_set_wen(mpidr);
-
-	/* Perform the common cpu specific operations */
-	fvp_cpu_pwrdwn_common();
-
-	/* Perform the common cluster specific operations */
-	if (afflvl != MPIDR_AFFLVL0)
-		fvp_cluster_pwrdwn_common();
-}
-
-/*******************************************************************************
- * FVP handler called when an affinity instance has just been powered on after
- * being turned off earlier. The level and mpidr determine the affinity
- * instance. The 'state' arg. allows the platform to decide whether the cluster
- * was turned off prior to wakeup and do what's necessary to setup it up
- * correctly.
- ******************************************************************************/
-void fvp_affinst_on_finish(unsigned int afflvl,
-			  unsigned int state)
-{
-	unsigned long mpidr;
-
-	/* Determine if any platform actions need to be executed. */
-	if (arm_do_affinst_actions(afflvl, state) == -EAGAIN)
-		return;
+	assert(target_state->pwr_domain_state[ARM_PWR_LVL0] ==
+					ARM_LOCAL_STATE_OFF);
 
 	/* Get the mpidr for this cpu */
 	mpidr = read_mpidr_el1();
 
 	/* Perform the common cluster specific operations */
-	if (afflvl != MPIDR_AFFLVL0) {
+	if (target_state->pwr_domain_state[ARM_PWR_LVL1] ==
+					ARM_LOCAL_STATE_OFF) {
 		/*
 		 * This CPU might have woken up whilst the cluster was
 		 * attempting to power down. In this case the FVP power
@@ -250,28 +125,139 @@ void fvp_affinst_on_finish(unsigned int afflvl,
 	 * with a cpu power down unless the bit is set again
 	 */
 	fvp_pwrc_clr_wen(mpidr);
+}
 
-	/* Zero the jump address in the mailbox for this cpu */
-	fvp_program_mailbox(mpidr, 0);
 
-	/* Enable the gic cpu interface */
-	arm_gic_cpuif_setup();
+/*******************************************************************************
+ * FVP handler called when a CPU is about to enter standby.
+ ******************************************************************************/
+void fvp_cpu_standby(plat_local_state_t cpu_state)
+{
 
-	/* TODO: This setup is needed only after a cold boot */
-	arm_gic_pcpu_distif_setup();
+	assert(cpu_state == ARM_LOCAL_STATE_RET);
+
+	/*
+	 * Enter standby state
+	 * dsb is good practice before using wfi to enter low power states
+	 */
+	dsb();
+	wfi();
 }
 
 /*******************************************************************************
- * FVP handler called when an affinity instance has just been powered on after
- * having been suspended earlier. The level and mpidr determine the affinity
- * instance.
+ * FVP handler called when a power domain is about to be turned on. The
+ * mpidr determines the CPU to be turned on.
+ ******************************************************************************/
+int fvp_pwr_domain_on(u_register_t mpidr)
+{
+	int rc = PSCI_E_SUCCESS;
+	unsigned int psysr;
+
+	/*
+	 * Ensure that we do not cancel an inflight power off request for the
+	 * target cpu. That would leave it in a zombie wfi. Wait for it to power
+	 * off and then program the power controller to turn that CPU on.
+	 */
+	do {
+		psysr = fvp_pwrc_read_psysr(mpidr);
+	} while (psysr & PSYSR_AFF_L0);
+
+	fvp_pwrc_write_pponr(mpidr);
+	return rc;
+}
+
+/*******************************************************************************
+ * FVP handler called when a power domain is about to be turned off. The
+ * target_state encodes the power state that each level should transition to.
+ ******************************************************************************/
+void fvp_pwr_domain_off(const psci_power_state_t *target_state)
+{
+	assert(target_state->pwr_domain_state[ARM_PWR_LVL0] ==
+					ARM_LOCAL_STATE_OFF);
+
+	/*
+	 * If execution reaches this stage then this power domain will be
+	 * suspended. Perform at least the cpu specific actions followed
+	 * by the cluster specific operations if applicable.
+	 */
+	fvp_cpu_pwrdwn_common();
+
+	if (target_state->pwr_domain_state[ARM_PWR_LVL1] ==
+					ARM_LOCAL_STATE_OFF)
+		fvp_cluster_pwrdwn_common();
+
+}
+
+/*******************************************************************************
+ * FVP handler called when a power domain is about to be suspended. The
+ * target_state encodes the power state that each level should transition to.
+ ******************************************************************************/
+void fvp_pwr_domain_suspend(const psci_power_state_t *target_state)
+{
+	unsigned long mpidr;
+
+	/*
+	 * FVP has retention only at cpu level. Just return
+	 * as nothing is to be done for retention.
+	 */
+	if (target_state->pwr_domain_state[ARM_PWR_LVL0] ==
+					ARM_LOCAL_STATE_RET)
+		return;
+
+	assert(target_state->pwr_domain_state[ARM_PWR_LVL0] ==
+					ARM_LOCAL_STATE_OFF);
+
+	/* Get the mpidr for this cpu */
+	mpidr = read_mpidr_el1();
+
+	/* Program the power controller to enable wakeup interrupts. */
+	fvp_pwrc_set_wen(mpidr);
+
+	/* Perform the common cpu specific operations */
+	fvp_cpu_pwrdwn_common();
+
+	/* Perform the common cluster specific operations */
+	if (target_state->pwr_domain_state[ARM_PWR_LVL1] ==
+					ARM_LOCAL_STATE_OFF)
+		fvp_cluster_pwrdwn_common();
+}
+
+/*******************************************************************************
+ * FVP handler called when a power domain has just been powered on after
+ * being turned off earlier. The target_state encodes the low power state that
+ * each level has woken up from.
+ ******************************************************************************/
+void fvp_pwr_domain_on_finish(const psci_power_state_t *target_state)
+{
+	fvp_power_domain_on_finish_common(target_state);
+
+	/* Enable the gic cpu interface */
+	plat_arm_gic_pcpu_init();
+
+	/* Program the gic per-cpu distributor or re-distributor interface */
+	plat_arm_gic_cpuif_enable();
+}
+
+/*******************************************************************************
+ * FVP handler called when a power domain has just been powered on after
+ * having been suspended earlier. The target_state encodes the low power state
+ * that each level has woken up from.
  * TODO: At the moment we reuse the on finisher and reinitialize the secure
  * context. Need to implement a separate suspend finisher.
  ******************************************************************************/
-void fvp_affinst_suspend_finish(unsigned int afflvl,
-			       unsigned int state)
+void fvp_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 {
-	fvp_affinst_on_finish(afflvl, state);
+	/*
+	 * Nothing to be done on waking up from retention from CPU level.
+	 */
+	if (target_state->pwr_domain_state[ARM_PWR_LVL0] ==
+					ARM_LOCAL_STATE_RET)
+		return;
+
+	fvp_power_domain_on_finish_common(target_state);
+
+	/* Enable the gic cpu interface */
+	plat_arm_gic_cpuif_enable();
 }
 
 /*******************************************************************************
@@ -302,25 +288,18 @@ static void __dead2 fvp_system_reset(void)
 }
 
 /*******************************************************************************
- * Export the platform handlers to enable psci to invoke them
+ * Export the platform handlers via plat_arm_psci_pm_ops. The ARM Standard
+ * platform layer will take care of registering the handlers with PSCI.
  ******************************************************************************/
-static const plat_pm_ops_t fvp_plat_pm_ops = {
-	.affinst_standby = fvp_affinst_standby,
-	.affinst_on = fvp_affinst_on,
-	.affinst_off = fvp_affinst_off,
-	.affinst_suspend = fvp_affinst_suspend,
-	.affinst_on_finish = fvp_affinst_on_finish,
-	.affinst_suspend_finish = fvp_affinst_suspend_finish,
+const plat_psci_ops_t plat_arm_psci_pm_ops = {
+	.cpu_standby = fvp_cpu_standby,
+	.pwr_domain_on = fvp_pwr_domain_on,
+	.pwr_domain_off = fvp_pwr_domain_off,
+	.pwr_domain_suspend = fvp_pwr_domain_suspend,
+	.pwr_domain_on_finish = fvp_pwr_domain_on_finish,
+	.pwr_domain_suspend_finish = fvp_pwr_domain_suspend_finish,
 	.system_off = fvp_system_off,
 	.system_reset = fvp_system_reset,
-	.validate_power_state = arm_validate_power_state
+	.validate_power_state = arm_validate_power_state,
+	.validate_ns_entrypoint = arm_validate_ns_entrypoint
 };
-
-/*******************************************************************************
- * Export the platform specific power ops & initialize the fvp power controller
- ******************************************************************************/
-int platform_setup_pm(const plat_pm_ops_t **plat_ops)
-{
-	*plat_ops = &fvp_plat_pm_ops;
-	return 0;
-}

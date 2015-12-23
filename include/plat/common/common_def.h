@@ -30,6 +30,9 @@
 #ifndef __COMMON_DEF_H__
 #define __COMMON_DEF_H__
 
+#include <bl_common.h>
+#include <platform_def.h>
+
 /******************************************************************************
  * Required platform porting definitions that are expected to be common to
  * all platforms
@@ -47,46 +50,12 @@
  */
 #define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
 
-/* Trusted Boot Firmware BL2 */
-#define BL2_IMAGE_NAME			"bl2.bin"
-
-/* SCP Firmware BL3-0 */
-#define BL30_IMAGE_NAME			"bl30.bin"
-
-/* EL3 Runtime Firmware BL31 */
-#define BL31_IMAGE_NAME			"bl31.bin"
-
-/* Secure Payload BL32 (Trusted OS) */
-#define BL32_IMAGE_NAME			"bl32.bin"
-
-/* Non-Trusted Firmware BL33 */
-#define BL33_IMAGE_NAME			"bl33.bin"
-
-/* Firmware Image Package */
-#define FIP_IMAGE_NAME			"fip.bin"
-
-#if TRUSTED_BOARD_BOOT
-/* Certificates */
-# define BL2_CERT_NAME			"bl2.crt"
-# define TRUSTED_KEY_CERT_NAME		"trusted_key.crt"
-
-# define BL30_KEY_CERT_NAME		"bl30_key.crt"
-# define BL31_KEY_CERT_NAME		"bl31_key.crt"
-# define BL32_KEY_CERT_NAME		"bl32_key.crt"
-# define BL33_KEY_CERT_NAME		"bl33_key.crt"
-
-# define BL30_CERT_NAME			"bl30.crt"
-# define BL31_CERT_NAME			"bl31.crt"
-# define BL32_CERT_NAME			"bl32.crt"
-# define BL33_CERT_NAME			"bl33.crt"
-#endif /* TRUSTED_BOARD_BOOT */
-
 /*
  * Some of the platform porting definitions use the 'ull' suffix in order to
  * avoid subtle integer overflow errors due to implicit integer type promotion
  * when working with 32-bit values.
  *
- * The TSP linker script includes some of these definitions to define the BL3-2
+ * The TSP linker script includes some of these definitions to define the BL32
  * memory map, but the GNU LD does not support the 'ull' suffix, causing the
  * build process to fail. To solve this problem, the auxiliary macro MAKE_ULL(x)
  * will add the 'ull' suffix only when the macro __LINKER__  is not defined
@@ -101,6 +70,21 @@
   #define MAKE_ULL(x)			x
 #endif
 
+/*
+ * Macros to wrap declarations of deprecated APIs within Trusted Firmware.
+ * The callers of these APIs will continue to compile with a warning as long
+ * as the build flag ERROR_DEPRECATED is zero.
+ */
+#define __warn_deprecated	__attribute__ ((deprecated))
+
+#define BL2_IMAGE_DESC {				\
+	.image_id = BL2_IMAGE_ID,			\
+	.image_info.h.version = VERSION_1,		\
+	.image_info.h.attr = SET_EXEC_STATE(EXECUTABLE),\
+	.image_info.image_base = BL2_BASE,		\
+	.ep_info.h.attr = SET_SEC_STATE(SECURE),	\
+	.ep_info.pc = BL2_BASE				\
+}
 
 #endif /* __COMMON_DEF_H__ */
 

@@ -29,53 +29,54 @@
  */
 
 #include <arch_helpers.h>
+#include <arm_def.h>
+#include <arm_gic.h>
 #include <assert.h>
+#include <console.h>
 #include <errno.h>
+#include <plat_arm.h>
+#include <platform_def.h>
 #include <psci.h>
 
+/* Standard ARM platforms are expected to export plat_arm_psci_pm_ops */
+extern const plat_psci_ops_t plat_arm_psci_pm_ops;
 
-/*******************************************************************************
- * ARM standard platform utility function which is used to determine if any
- * platform actions should be performed for the specified affinity instance
- * given its state. Nothing needs to be done if the 'state' is not off or if
- * this is not the highest affinity level which will enter the 'state'.
- ******************************************************************************/
-int32_t arm_do_affinst_actions(unsigned int afflvl, unsigned int state)
-{
-	unsigned int max_phys_off_afflvl;
+#if ARM_RECOM_STATE_ID_ENC
+extern unsigned int arm_pm_idle_states[];
+#endif /* __ARM_RECOM_STATE_ID_ENC__ */
 
-	assert(afflvl <= MPIDR_AFFLVL1);
-
-	if (state != PSCI_STATE_OFF)
-		return -EAGAIN;
-
-	/*
-	 * Find the highest affinity level which will be suspended and postpone
-	 * all the platform specific actions until that level is hit.
-	 */
-	max_phys_off_afflvl = psci_get_max_phys_off_afflvl();
-	assert(max_phys_off_afflvl != PSCI_INVALID_DATA);
-	if (afflvl != max_phys_off_afflvl)
-		return -EAGAIN;
-
-	return 0;
-}
-
+#if !ARM_RECOM_STATE_ID_ENC
 /*******************************************************************************
  * ARM standard platform handler called to check the validity of the power state
  * parameter.
  ******************************************************************************/
-int arm_validate_power_state(unsigned int power_state)
+int arm_validate_power_state(unsigned int power_state,
+			    psci_power_state_t *req_state)
 {
+	int pstate = psci_get_pstate_type(power_state);
+	int pwr_lvl = psci_get_pstate_pwrlvl(power_state);
+	int i;
+
+	assert(req_state);
+
+	if (pwr_lvl > PLAT_MAX_PWR_LVL)
+		return PSCI_E_INVALID_PARAMS;
+
 	/* Sanity check the requested state */
-	if (psci_get_pstate_type(power_state) == PSTATE_TYPE_STANDBY) {
+	if (pstate == PSTATE_TYPE_STANDBY) {
 		/*
-		 * It's possible to enter standby only on affinity level 0
-		 * (i.e. a CPU on ARM standard platforms).
-		 * Ignore any other affinity level.
+		 * It's possible to enter standby only on power level 0
+		 * Ignore any other power level.
 		 */
-		if (psci_get_pstate_afflvl(power_state) != MPIDR_AFFLVL0)
+		if (pwr_lvl != ARM_PWR_LVL0)
 			return PSCI_E_INVALID_PARAMS;
+
+		req_state->pwr_domain_state[ARM_PWR_LVL0] =
+					ARM_LOCAL_STATE_RET;
+	} else {
+		for (i = ARM_PWR_LVL0; i <= pwr_lvl; i++)
+			req_state->pwr_domain_state[i] =
+					ARM_LOCAL_STATE_OFF;
 	}
 
 	/*
@@ -85,4 +86,129 @@ int arm_validate_power_state(unsigned int power_state)
 		return PSCI_E_INVALID_PARAMS;
 
 	return PSCI_E_SUCCESS;
+}
+
+#else
+/*******************************************************************************
+ * ARM standard platform handler called to check the validity of the power
+ * state parameter. The power state parameter has to be a composite power
+ * state.
+ ******************************************************************************/
+int arm_validate_power_state(unsigned int power_state,
+				psci_power_state_t *req_state)
+{
+	unsigned int state_id;
+	int i;
+
+	assert(req_state);
+
+	/*
+	 *  Currently we are using a linear search for finding the matching
+	 *  entry in the idle power state array. This can be made a binary
+	 *  search if the number of entries justify the additional complexity.
+	 */
+	for (i = 0; !!arm_pm_idle_states[i]; i++) {
+		if (power_state == arm_pm_idle_states[i])
+			break;
+	}
+
+	/* Return error if entry not found in the idle state array */
+	if (!arm_pm_idle_states[i])
+		return PSCI_E_INVALID_PARAMS;
+
+	i = 0;
+	state_id = psci_get_pstate_id(power_state);
+
+	/* Parse the State ID and populate the state info parameter */
+	while (state_id) {
+		req_state->pwr_domain_state[i++] = state_id &
+						ARM_LOCAL_PSTATE_MASK;
+		state_id >>= ARM_LOCAL_PSTATE_WIDTH;
+	}
+
+	return PSCI_E_SUCCESS;
+}
+#endif /* __ARM_RECOM_STATE_ID_ENC__ */
+
+/*******************************************************************************
+ * ARM standard platform handler called to check the validity of the non secure
+ * entrypoint.
+ ******************************************************************************/
+int arm_validate_ns_entrypoint(uintptr_t entrypoint)
+{
+	/*
+	 * Check if the non secure entrypoint lies within the non
+	 * secure DRAM.
+	 */
+	if ((entrypoint >= ARM_NS_DRAM1_BASE) && (entrypoint <
+			(ARM_NS_DRAM1_BASE + ARM_NS_DRAM1_SIZE)))
+		return PSCI_E_SUCCESS;
+	if ((entrypoint >= ARM_DRAM2_BASE) && (entrypoint <
+			(ARM_DRAM2_BASE + ARM_DRAM2_SIZE)))
+		return PSCI_E_SUCCESS;
+
+	return PSCI_E_INVALID_ADDRESS;
+}
+
+/******************************************************************************
+ * Helper function to resume the platform from system suspend. Reinitialize
+ * the system components which are not in the Always ON power domain.
+ * TODO: Unify the platform setup when waking up from cold boot and system
+ * resume in arm_bl31_platform_setup().
+ *****************************************************************************/
+void arm_system_pwr_domain_resume(void)
+{
+	console_init(PLAT_ARM_BL31_RUN_UART_BASE, PLAT_ARM_BL31_RUN_UART_CLK_IN_HZ,
+						ARM_CONSOLE_BAUDRATE);
+
+	/* Assert system power domain is available on the platform */
+	assert(PLAT_MAX_PWR_LVL >= ARM_PWR_LVL2);
+
+	/*
+	 * TODO: On GICv3 systems, figure out whether the core that wakes up
+	 * first from system suspend need to initialize the re-distributor
+	 * interface of all the other suspended cores.
+	 */
+	plat_arm_gic_init();
+	plat_arm_security_setup();
+	arm_configure_sys_timer();
+}
+
+/*******************************************************************************
+ * Private function to program the mailbox for a cpu before it is released
+ * from reset. This function assumes that the Trusted mail box base is within
+ * the ARM_SHARED_RAM region
+ ******************************************************************************/
+void arm_program_trusted_mailbox(uintptr_t address)
+{
+	uintptr_t *mailbox = (void *) PLAT_ARM_TRUSTED_MAILBOX_BASE;
+
+	*mailbox = address;
+
+	/*
+	 * Ensure that the PLAT_ARM_TRUSTED_MAILBOX_BASE is within
+	 * ARM_SHARED_RAM region.
+	 */
+	assert((PLAT_ARM_TRUSTED_MAILBOX_BASE >= ARM_SHARED_RAM_BASE) &&
+		((PLAT_ARM_TRUSTED_MAILBOX_BASE + sizeof(*mailbox)) <= \
+				(ARM_SHARED_RAM_BASE + ARM_SHARED_RAM_SIZE)));
+
+	/* Flush data cache if the mail box shared RAM is cached */
+#if PLAT_ARM_SHARED_RAM_CACHED
+	flush_dcache_range((uintptr_t) mailbox, sizeof(*mailbox));
+#endif
+}
+
+/*******************************************************************************
+ * The ARM Standard platform definition of platform porting API
+ * `plat_setup_psci_ops`.
+ ******************************************************************************/
+int plat_setup_psci_ops(uintptr_t sec_entrypoint,
+				const plat_psci_ops_t **psci_ops)
+{
+	*psci_ops = &plat_arm_psci_pm_ops;
+
+	/* Setup mailbox with entry point. */
+	arm_program_trusted_mailbox(sec_entrypoint);
+	return 0;
 }

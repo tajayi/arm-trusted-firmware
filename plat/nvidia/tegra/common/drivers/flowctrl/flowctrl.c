@@ -31,6 +31,7 @@
 #include <arch_helpers.h>
 #include <assert.h>
 #include <debug.h>
+#include <delay_timer.h>
 #include <mmio.h>
 #include <pmc.h>
 #include <cortex_a53.h>
@@ -97,9 +98,9 @@ static void tegra_fc_prepare_suspend(int cpu_id, uint32_t csr)
 }
 
 /*******************************************************************************
- * Suspend the current CPU
+ * Powerdn the current CPU
  ******************************************************************************/
-void tegra_fc_cpu_idle(uint32_t mpidr)
+void tegra_fc_cpu_powerdn(uint32_t mpidr)
 {
 	int cpu = mpidr & MPIDR_CPU_MASK;
 
@@ -230,10 +231,7 @@ void tegra_fc_reset_bpmp(void)
 		; /* wait till value reaches EVP_BPMP_RESET_VECTOR */
 
 	/* Wait for 2us before de-asserting the reset signal. */
-	val = mmio_read_32(TEGRA_TMRUS_BASE);
-	val += 2;
-	while (val > mmio_read_32(TEGRA_TMRUS_BASE))
-		; /* wait for 2us */
+	udelay(2);
 
 	/* De-assert BPMP reset */
 	mmio_write_32(TEGRA_CAR_RESET_BASE + CLK_RST_DEV_L_CLR, CLK_BPMP_RST);

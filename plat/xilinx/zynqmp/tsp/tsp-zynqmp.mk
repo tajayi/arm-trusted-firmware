@@ -29,9 +29,5 @@
 #
 
 # TSP source files specific to ZynqMP platform
-BL32_SOURCES		+=	drivers/arm/gic/arm_gic.c			\
-				drivers/arm/gic/gic_v2.c			\
-				plat/common/aarch64/platform_mp_stack.S		\
-				plat/common/plat_gic.c				\
-				plat/xilinx/zynqmp/aarch64/zynqmp_helpers.S		\
+BL32_SOURCES		+=	plat/common/aarch64/platform_mp_stack.S		\
 				plat/xilinx/zynqmp/tsp/tsp_plat_setup.c

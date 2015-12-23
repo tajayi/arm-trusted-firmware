@@ -33,6 +33,7 @@
 
 #include <arch.h>
 #include <common_def.h>
+#include <tegra_def.h>
 
 /*******************************************************************************
  * Generic platform constants
@@ -47,11 +48,17 @@
 
 #define TEGRA_PRIMARY_CPU		0x0
 
-#define PLATFORM_MAX_AFFLVL		MPIDR_AFFLVL2
-#define PLATFORM_CORE_COUNT		PLATFORM_MAX_CPUS_PER_CLUSTER
-#define PLATFORM_NUM_AFFS		((PLATFORM_CLUSTER_COUNT * \
-					  PLATFORM_CORE_COUNT) + \
-					  PLATFORM_CLUSTER_COUNT + 1)
+#define PLAT_MAX_PWR_LVL		MPIDR_AFFLVL2
+#define PLATFORM_CORE_COUNT		(PLATFORM_CLUSTER_COUNT * \
+					 PLATFORM_MAX_CPUS_PER_CLUSTER)
+#define PLAT_NUM_PWR_DOMAINS		(PLATFORM_CORE_COUNT + \
+					 PLATFORM_CLUSTER_COUNT + 1)
+
+/*******************************************************************************
+ * Platform power states
+ ******************************************************************************/
+#define PLAT_MAX_RET_STATE		1
+#define PLAT_MAX_OFF_STATE		(PSTATE_ID_SOC_POWERDN + 1)
 
 /*******************************************************************************
  * Platform console related constants
@@ -69,8 +76,11 @@
 /*******************************************************************************
  * BL31 specific defines.
  ******************************************************************************/
+#define BL31_SIZE			0x20000
 #define BL31_BASE			TZDRAM_BASE
-#define BL31_LIMIT			(TZDRAM_BASE + 0x11FFF)
+#define BL31_LIMIT			(TZDRAM_BASE + BL31_SIZE - 1)
+#define BL32_BASE			(TZDRAM_BASE + BL31_SIZE)
+#define BL32_LIMIT			TZDRAM_END
 
 /*******************************************************************************
  * Platform specific page table and MMU setup constants

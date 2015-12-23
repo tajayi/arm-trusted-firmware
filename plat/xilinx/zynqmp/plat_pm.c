@@ -29,7 +29,7 @@
  */
 
 #include <arch_helpers.h>
-#include <arm_gic.h>
+#include <gicv2.h>
 #include <assert.h>
 #include <debug.h>
 #include <mmio.h>
@@ -197,7 +197,7 @@ static void zynqmp_affinst_off(uint32_t afflvl, uint32_t state)
 		return;
 
 	/* Prevent interrupts from spuriously waking up this cpu */
-	arm_gic_cpuif_deactivate();
+	gicv2_cpuif_disable();
 
 	if (!zynqmp_is_pmu_up()) {
 		uint32_t r;
@@ -286,10 +286,10 @@ static void zynqmp_affinst_on_finish(uint32_t afflvl, uint32_t state)
 		return;
 
 	/* Enable the gic cpu interface */
-	arm_gic_cpuif_setup();
+	gicv2_cpuif_enable();
 
 	/* TODO: Is this setup only needed after a cold boot? */
-	arm_gic_pcpu_distif_setup();
+	gicv2_pcpu_distif_init();
 
 	/* Clear the mailbox for this cpu. */
 	zynqmp_program_mailbox(mpidr, 0);
@@ -316,7 +316,6 @@ static void zynqmp_affinst_suspend_finish(uint32_t afflvl, uint32_t state)
 		 * Initialize the gic cpu and distributor interfaces
 		 */
 		plat_arm_gic_init();
-		arm_gic_setup();
 	}
 
 	/* Clear the APU power control register for this cpu */

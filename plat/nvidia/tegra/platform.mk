@@ -28,7 +28,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-SOC_DIR		:=	plat/nvidia/tegra/soc/${TARGET_SOC}
+SOC_DIR			:=	plat/nvidia/tegra/soc/${TARGET_SOC}
+
+# Disable the PSCI platform compatibility layer
+ENABLE_PLAT_COMPAT	:=	0
 
 include plat/nvidia/tegra/common/tegra_common.mk
 include ${SOC_DIR}/platform_${TARGET_SOC}.mk
+
+# modify BUILD_PLAT to point to SoC specific build directory
+BUILD_PLAT	:=	${BUILD_BASE}/${PLAT}/${TARGET_SOC}/${BUILD_TYPE}

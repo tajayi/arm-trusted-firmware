@@ -39,6 +39,7 @@
 #include <openssl/x509v3.h>
 
 #include "cert.h"
+#include "cmd_opt.h"
 #include "debug.h"
 #include "key.h"
 #include "platform_oid.h"
@@ -98,9 +99,10 @@ int cert_add_ext(X509 *issuer, X509 *subject, int nid, char *value)
 
 int cert_new(cert_t *cert, int days, int ca, STACK_OF(X509_EXTENSION) * sk)
 {
-	EVP_PKEY *pkey = cert->key->key;
-	EVP_PKEY *ikey = cert->issuer->key->key;
-	X509 *issuer = cert->issuer->x;
+	EVP_PKEY *pkey = keys[cert->key].key;
+	cert_t *issuer_cert = &certs[cert->issuer];
+	EVP_PKEY *ikey = keys[issuer_cert->key].key;
+	X509 *issuer = issuer_cert->x;
 	X509 *x = NULL;
 	X509_EXTENSION *ex = NULL;
 	X509_NAME *name = NULL;
@@ -147,7 +149,7 @@ int cert_new(cert_t *cert, int days, int ca, STACK_OF(X509_EXTENSION) * sk)
 	/* Issuer name */
 	name = X509_get_issuer_name(x);
 	X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
-			(const unsigned char *)cert->issuer->cn, -1, -1, 0);
+			(const unsigned char *)issuer_cert->cn, -1, -1, 0);
 	X509_set_issuer_name(x, name);
 
 	/* Add various extensions: standard extensions */
@@ -177,4 +179,36 @@ int cert_new(cert_t *cert, int days, int ca, STACK_OF(X509_EXTENSION) * sk)
 
 	cert->x = x;
 	return 1;
+}
+
+int cert_init(void)
+{
+	cert_t *cert;
+	int rc = 0;
+	unsigned int i;
+
+	for (i = 0; i < num_certs; i++) {
+		cert = &certs[i];
+		rc = cmd_opt_add(cert->opt, required_argument, CMD_OPT_CERT);
+		if (rc != 0) {
+			break;
+		}
+	}
+
+	return rc;
+}
+
+cert_t *cert_get_by_opt(const char *opt)
+{
+	cert_t *cert = NULL;
+	unsigned int i;
+
+	for (i = 0; i < num_certs; i++) {
+		cert = &certs[i];
+		if (0 == strcmp(cert->opt, opt)) {
+			return cert;
+		}
+	}
+
+	return NULL;
 }

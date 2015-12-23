@@ -80,8 +80,8 @@
  * BL31 specific defines.
  ******************************************************************************/
 /*
- * Put BL3-1 at the top of the Trusted SRAM (just below the shared memory, if
- * present). BL31_BASE is calculated using the current BL3-1 debug size plus a
+ * Put BL31 at the top of the Trusted SRAM (just below the shared memory, if
+ * present). BL31_BASE is calculated using the current BL31 debug size plus a
  * little space for growth.
  */
 #if ZYNQMP_ATF_LOCATION_ID == ZYNQMP_IN_TRUSTED_SRAM
@@ -147,5 +147,24 @@
 #define CACHE_WRITEBACK_SHIFT   6
 #define CACHE_WRITEBACK_GRANULE (1 << CACHE_WRITEBACK_SHIFT)
 
+#define PLAT_ARM_GICD_BASE	BASE_GICD_BASE
+#define PLAT_ARM_GICC_BASE	BASE_GICC_BASE
+/*
+ * Define a list of Group 1 Secure and Group 0 interrupts as per GICv3
+ * terminology. On a GICv2 system or mode, the lists will be merged and treated
+ * as Group 0 interrupts.
+ */
+#define PLAT_ARM_G1S_IRQS	ARM_IRQ_SEC_PHY_TIMER,	\
+				IRQ_SEC_IPI_APU,	\
+				ARM_IRQ_SEC_SGI_0,	\
+				ARM_IRQ_SEC_SGI_1,	\
+				ARM_IRQ_SEC_SGI_2,	\
+				ARM_IRQ_SEC_SGI_3,	\
+				ARM_IRQ_SEC_SGI_4,	\
+				ARM_IRQ_SEC_SGI_5,	\
+				ARM_IRQ_SEC_SGI_6,	\
+				ARM_IRQ_SEC_SGI_7
+
+#define PLAT_ARM_G0_IRQS
 
 #endif /* __PLATFORM_DEF_H__ */

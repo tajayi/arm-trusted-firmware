@@ -31,7 +31,7 @@
 #include <arch.h>
 #include <arch_helpers.h>
 #include <arm_config.h>
-#include <arm_gic.h>
+#include <gicv2.h>
 #include <bl_common.h>
 #include <cci.h>
 #include <debug.h>
@@ -236,11 +236,6 @@ int zynqmp_config_setup(void)
 {
 	uint32_t val;
 
-	arm_config.gicd_base = BASE_GICD_BASE;
-	arm_config.gicc_base = BASE_GICC_BASE;
-	arm_config.gich_base = BASE_GICH_BASE;
-	arm_config.gicv_base = BASE_GICV_BASE;
-
 	zynqmp_discover_pmufw();
 	zynqmp_print_platform_name();
 
@@ -293,13 +288,4 @@ void fvp_cci_disable(void)
 {
 	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
 		cci_disable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
-}
-
-void plat_arm_gic_init(void)
-{
-	arm_gic_init(arm_config.gicc_base,
-		arm_config.gicd_base,
-		1,
-		irq_sec_array,
-		ARRAY_SIZE(irq_sec_array));
 }

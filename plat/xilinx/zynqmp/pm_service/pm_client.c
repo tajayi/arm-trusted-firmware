@@ -33,7 +33,7 @@
  * for getting information about and changing state of the APU.
  */
 
-#include <arm_gic.h>
+#include <gicv2.h>
 #include <bl_common.h>
 #include <mmio.h>
 #include "pm_api_sys.h"
@@ -182,7 +182,7 @@ void pm_client_suspend(const struct pm_proc *const proc)
 void pm_client_abort_suspend(void)
 {
 	/* Enable interrupts at processor level (for current cpu) */
-	arm_gic_cpuif_setup();
+	gicv2_cpuif_enable();
 	/* Clear powerdown request */
 	mmio_write_32(APU_PWRCTL,
 		 mmio_read_32(APU_PWRCTL) & ~primary_proc->pwrdn_mask);

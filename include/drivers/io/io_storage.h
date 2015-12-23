@@ -31,8 +31,10 @@
 #ifndef __IO_H__
 #define __IO_H__
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h> /* For ssize_t */
+#include <uuid.h>
 
 
 /* Device type which can be used to enable policy decisions about which device
@@ -67,6 +69,11 @@ typedef struct io_file_spec {
 	unsigned int mode;
 } io_file_spec_t;
 
+/* UUID specification - used to refer to data accessed using UUIDs (i.e. FIP
+ * images) */
+typedef struct io_uuid_spec {
+	const uuid_t uuid;
+} io_uuid_spec_t;
 
 /* Block specification - used to refer to data on a device supporting
  * block-like entities */
@@ -80,13 +87,6 @@ typedef struct io_block_spec {
 #define IO_MODE_INVALID (0)
 #define IO_MODE_RO	(1 << 0)
 #define IO_MODE_RW	(1 << 1)
-
-
-/* Return codes reported by 'io_*' APIs */
-#define IO_SUCCESS		(0)
-#define IO_FAIL			(-1)
-#define IO_NOT_SUPPORTED	(-2)
-#define IO_RESOURCES_EXHAUSTED	(-3)
 
 
 /* Open a connection to a device */

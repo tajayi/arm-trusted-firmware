@@ -33,28 +33,29 @@
 #include <cci400.h>
 #include <debug.h>
 #include <mmio.h>
+#include <stdint.h>
 
 #define MAX_CLUSTERS		2
 
-static unsigned long cci_base_addr;
+static uintptr_t cci_base_addr;
 static unsigned int cci_cluster_ix_to_iface[MAX_CLUSTERS];
 
 
-void cci_init(unsigned long cci_base,
+void cci_init(uintptr_t cci_base,
 		int slave_iface3_cluster_ix,
 		int slave_iface4_cluster_ix)
 {
 	/*
 	 * Check the passed arguments are valid. The cluster indices must be
 	 * less than MAX_CLUSTERS, not the same as each other and at least one
-	 * of them must be refer to a valid cluster index.
+	 * of them must refer to a valid cluster index.
 	 */
 	assert(cci_base);
 	assert(slave_iface3_cluster_ix < MAX_CLUSTERS);
 	assert(slave_iface4_cluster_ix < MAX_CLUSTERS);
 	assert(slave_iface3_cluster_ix != slave_iface4_cluster_ix);
 	assert((slave_iface3_cluster_ix >= 0) ||
-		(slave_iface3_cluster_ix >= 0));
+		(slave_iface4_cluster_ix >= 0));
 
 	WARN("Please migrate to common cci driver, This driver will be" \
 		" deprecated in future\n");

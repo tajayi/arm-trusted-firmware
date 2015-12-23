@@ -31,6 +31,14 @@
 #ifndef __CCI_400_H__
 #define __CCI_400_H__
 
+/**************************************************************
+ * THIS DRIVER IS DEPRECATED. Please use the driver in cci.h
+ **************************************************************/
+#if ERROR_DEPRECATED
+#error " The CCI-400 specific driver is deprecated."
+#endif
+
+
 /* Slave interface offsets from PERIPHBASE */
 #define SLAVE_IFACE4_OFFSET		0x5000
 #define SLAVE_IFACE3_OFFSET		0x4000
@@ -68,6 +76,9 @@
 
 #ifndef __ASSEMBLY__
 
+#include <common_def.h>
+#include <stdint.h>
+
 /* Function declarations */
 
 /*
@@ -79,12 +90,12 @@
  * affinity instance of the mpidr representing the cluster. A negative cluster
  * index indicates that no cluster is present on that slave interface.
  */
-void cci_init(unsigned long cci_base,
+void cci_init(uintptr_t cci_base,
 		int slave_iface3_cluster_ix,
-		int slave_iface4_cluster_ix);
+		int slave_iface4_cluster_ix) __warn_deprecated;
 
-void cci_enable_cluster_coherency(unsigned long mpidr);
-void cci_disable_cluster_coherency(unsigned long mpidr);
+void cci_enable_cluster_coherency(unsigned long mpidr) __warn_deprecated;
+void cci_disable_cluster_coherency(unsigned long mpidr) __warn_deprecated;
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CCI_400_H__ */

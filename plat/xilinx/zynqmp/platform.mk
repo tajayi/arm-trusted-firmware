@@ -76,9 +76,15 @@ PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 				-Iplat/xilinx/zynqmp/pm_service/
 
 PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
+				drivers/arm/gic/common/gic_common.c		\
+				drivers/arm/gic/v2/gicv2_main.c			\
+				drivers/arm/gic/v2/gicv2_helpers.c		\
 				plat/arm/common/aarch64/arm_common.c		\
 				plat/arm/common/aarch64/arm_helpers.S		\
+				plat/arm/common/arm_gicv2.c			\
+				plat/common/plat_gicv2.c			\
 				plat/common/aarch64/plat_common.c		\
+				plat/xilinx/zynqmp/aarch64/zynqmp_helpers.S	\
 				plat/xilinx/zynqmp/aarch64/zynqmp_common.c
 
 ZYNQMP_CONSOLE	?=	cadence
@@ -94,26 +100,20 @@ endif
 
 
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
-				drivers/arm/gic/arm_gic.c			\
-				drivers/arm/gic/gic_v2.c			\
-				drivers/arm/gic/gic_v3.c			\
 				drivers/arm/tzc400/tzc400.c			\
 				lib/cpus/aarch64/aem_generic.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
 				lib/cpus/aarch64/cortex_a57.S			\
-				plat/common/plat_gic.c				\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/xilinx/zynqmp/bl31_zynqmp_setup.c		\
 				plat/xilinx/zynqmp/plat_pm.c			\
 				plat/xilinx/zynqmp/plat_topology.c		\
 				plat/xilinx/zynqmp/sip_svc_setup.c		\
-				plat/xilinx/zynqmp/aarch64/zynqmp_helpers.S	\
 				plat/xilinx/zynqmp/pm_service/pm_svc_main.c	\
 				plat/xilinx/zynqmp/pm_service/pm_api_sys.c	\
 				plat/xilinx/zynqmp/pm_service/pm_ipi.c		\
 				plat/xilinx/zynqmp/pm_service/pm_client.c
 
 ifneq (${RESET_TO_BL31},1)
-  $(error "Using BL3-1 as the reset vector is only one option supported on ZynqMP. \
-  Please set RESET_TO_BL31 to 1.")
+  $(error "Using BL31 as the reset vector is only one option supported on ZynqMP. Please set RESET_TO_BL31 to 1.")
 endif

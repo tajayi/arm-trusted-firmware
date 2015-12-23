@@ -30,6 +30,7 @@
 #ifndef __ARM_CONFIG_H__
 #define __ARM_CONFIG_H__
 
+#include <stdint.h>
 
 enum arm_config_flags {
 	/* Whether Base memory map is in use */
@@ -41,12 +42,6 @@ enum arm_config_flags {
 };
 
 typedef struct arm_config {
-	unsigned int gicd_base;
-	unsigned int gicc_base;
-	unsigned int gich_base;
-	unsigned int gicv_base;
-	unsigned int max_aff0;
-	unsigned int max_aff1;
 	unsigned long flags;
 } arm_config_t;
 
@@ -54,7 +49,7 @@ typedef struct arm_config {
 /* If used, arm_config must be defined and populated in the platform port */
 extern arm_config_t arm_config;
 
-inline const arm_config_t *get_arm_config(void)
+static inline const arm_config_t *get_arm_config(void)
 {
 	return &arm_config;
 }

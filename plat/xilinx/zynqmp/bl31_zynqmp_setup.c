@@ -30,7 +30,7 @@
 
 #include <arch.h>
 #include <arch_helpers.h>
-#include <arm_gic.h>
+#include <gicv2.h>
 #include <assert.h>
 #include <bl_common.h>
 #include <bl31.h>
@@ -127,7 +127,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	 * present.
 	 */
 
-	/* Populate entry point information for BL3-2 and BL3-3 */
+	/* Populate entry point information for BL32 and BL33 */
 	SET_PARAM_HEAD(&bl32_image_ep_info,
 				PARAM_EP,
 				VERSION_1,
@@ -136,7 +136,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl32_image_ep_info.pc = BL32_BASE;
 	bl32_image_ep_info.spsr = arm_get_spsr_for_bl32_entry();
 
-	NOTICE("BL3-1: Secure code at 0x%lx\n", bl32_image_ep_info.pc);
+	NOTICE("BL31: Secure code at 0x%lx\n", bl32_image_ep_info.pc);
 
 	SET_PARAM_HEAD(&bl33_image_ep_info,
 				PARAM_EP,
@@ -150,7 +150,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl33_image_ep_info.spsr = SPSR_64(MODE_EL2, MODE_SP_ELX, DISABLE_ALL_EXCEPTIONS);
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr, NON_SECURE);
 
-	NOTICE("BL3-1: Non secure code at 0x%lx\n", bl33_image_ep_info.pc);
+	NOTICE("BL31: Non secure code at 0x%lx\n", bl33_image_ep_info.pc);
 }
 
 static interrupt_type_handler_t type_el3_interrupt_table[MAX_INTR_EL3];
@@ -198,14 +198,14 @@ static uint64_t rdo_el3_interrupt_handler(uint32_t id,
 void bl31_platform_setup(void)
 {
 	/* Initialize the gic cpu and distributor interfaces */
+	plat_arm_gic_driver_init();
 	plat_arm_gic_init();
-	arm_gic_setup();
 
 	/* Topologies are best known to the platform. */
 	plat_setup_topology();
 }
 
-void bl31_late_platform_setup(void)
+void bl31_plat_runtime_setup(void)
 {
 	uint64_t flags = 0;
 	uint64_t rc;

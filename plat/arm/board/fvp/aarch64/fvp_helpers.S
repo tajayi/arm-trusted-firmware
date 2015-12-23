@@ -30,16 +30,16 @@
 
 #include <arch.h>
 #include <asm_macros.S>
-#include <gic_v2.h>
+#include <gicv2.h>
+#include <gicv3.h>
 #include <platform_def.h>
 #include <v2m_def.h>
 #include "../drivers/pwrc/fvp_pwrc.h"
 #include "../fvp_def.h"
 
 	.globl	plat_secondary_cold_boot_setup
-	.globl	platform_get_entrypoint
-	.globl	platform_mem_init
-	.globl	platform_is_primary_cpu
+	.globl	plat_get_my_entrypoint
+	.globl	plat_is_my_cpu_primary
 
 	.macro	fvp_choose_gicmmap  param1, param2, x_tmp, w_tmp, res
 	ldr	\x_tmp, =V2M_SYSREGS_BASE + V2M_SYS_ID
@@ -61,6 +61,7 @@
 	 * -----------------------------------------------------
 	 */
 func plat_secondary_cold_boot_setup
+#ifndef EL3_PAYLOAD_BASE
 	/* ---------------------------------------------
 	 * Power down this cpu.
 	 * TODO: Do we need to worry about powering the
@@ -74,9 +75,26 @@ func plat_secondary_cold_boot_setup
 	str	w0, [x1, #PPOFFR_OFF]
 
 	/* ---------------------------------------------
-	 * Deactivate the gic cpu interface as well
+	 * Disable GIC bypass as well
 	 * ---------------------------------------------
 	 */
+	/* Check for GICv3 system register access */
+	mrs	x0, id_aa64pfr0_el1
+	ubfx	x0, x0, #ID_AA64PFR0_GIC_SHIFT, #ID_AA64PFR0_GIC_WIDTH
+	cmp	x0, #1
+	b.ne	gicv2_bypass_disable
+
+	/* Check for SRE enable */
+	mrs	x1, ICC_SRE_EL3
+	tst	x1, #ICC_SRE_SRE_BIT
+	b.eq	gicv2_bypass_disable
+
+	mrs	x2, ICC_SRE_EL3
+	orr	x2, x2, #(ICC_SRE_DIB_BIT | ICC_SRE_DFB_BIT)
+	msr	ICC_SRE_EL3, x2
+	b	secondary_cold_boot_wait
+
+gicv2_bypass_disable:
 	ldr	x0, =VE_GICC_BASE
 	ldr	x1, =BASE_GICC_BASE
 	fvp_choose_gicmmap	x0, x1, x2, w2, x1
@@ -84,6 +102,7 @@ func plat_secondary_cold_boot_setup
 	orr	w0, w0, #(IRQ_BYP_DIS_GRP0 | FIQ_BYP_DIS_GRP0)
 	str	w0, [x1, #GICC_CTLR]
 
+secondary_cold_boot_wait:
 	/* ---------------------------------------------
 	 * There is no sane reason to come out of this
 	 * wfi so panic if we do. This cpu will be pow-
@@ -94,87 +113,90 @@ func plat_secondary_cold_boot_setup
 	wfi
 cb_panic:
 	b	cb_panic
+#else
+	mov_imm	x0, PLAT_ARM_TRUSTED_MAILBOX_BASE
+
+	/* Wait until the entrypoint gets populated */
+poll_mailbox:
+	ldr	x1, [x0]
+	cbz	x1, 1f
+	br	x1
+1:
+	wfe
+	b	poll_mailbox
+#endif /* EL3_PAYLOAD_BASE */
 endfunc plat_secondary_cold_boot_setup
 
-
-	/* -----------------------------------------------------
-	 * void platform_get_entrypoint (unsigned int mpid);
+	/* ---------------------------------------------------------------------
+	 * unsigned long plat_get_my_entrypoint (void);
 	 *
-	 * Main job of this routine is to distinguish between
-	 * a cold and warm boot.
-	 * On a cold boot the secondaries first wait for the
-	 * platform to be initialized after which they are
-	 * hotplugged in. The primary proceeds to perform the
-	 * platform initialization.
-	 * On a warm boot, each cpu jumps to the address in its
-	 * mailbox.
+	 * Main job of this routine is to distinguish between a cold and warm
+	 * boot. On FVP, this information can be queried from the power
+	 * controller. The Power Control SYS Status Register (PSYSR) indicates
+	 * the wake-up reason for the CPU.
 	 *
-	 * TODO: Not a good idea to save lr in a temp reg
+	 * For a cold boot, return 0.
+	 * For a warm boot, read the mailbox and return the address it contains.
+	 *
 	 * TODO: PSYSR is a common register and should be
-	 * 	accessed using locks. Since its not possible
+	 * 	accessed using locks. Since it is not possible
 	 * 	to use locks immediately after a cold reset
 	 * 	we are relying on the fact that after a cold
 	 * 	reset all cpus will read the same WK field
-	 * -----------------------------------------------------
+	 * ---------------------------------------------------------------------
 	 */
-func platform_get_entrypoint
-	mov	x9, x30 // lr
-	mov	x2, x0
+func plat_get_my_entrypoint
+	/* ---------------------------------------------------------------------
+	 * When bit PSYSR.WK indicates either "Wake by PPONR" or "Wake by GIC
+	 * WakeRequest signal" then it is a warm boot.
+	 * ---------------------------------------------------------------------
+	 */
+	mrs	x2, mpidr_el1
 	ldr	x1, =PWRC_BASE
 	str	w2, [x1, #PSYSR_OFF]
 	ldr	w2, [x1, #PSYSR_OFF]
-	ubfx	w2, w2, #PSYSR_WK_SHIFT, #PSYSR_WK_MASK
+	ubfx	w2, w2, #PSYSR_WK_SHIFT, #PSYSR_WK_WIDTH
 	cmp	w2, #WKUP_PPONR
 	beq	warm_reset
 	cmp	w2, #WKUP_GICREQ
 	beq	warm_reset
-	mov	x0, #0
-	b	exit
-warm_reset:
-	/* ---------------------------------------------
-	 * A per-cpu mailbox is maintained in the tru-
-	 * sted DRAM. Its flushed out of the caches
-	 * after every update using normal memory so
-	 * its safe to read it here with SO attributes
-	 * ---------------------------------------------
-	 */
-	ldr	x10, =MBOX_BASE
-	bl	platform_get_core_pos
-	lsl	x0, x0, #ARM_CACHE_WRITEBACK_SHIFT
-	ldr	x0, [x10, x0]
-	cbz	x0, _panic
-exit:
-	ret	x9
-_panic:	b	_panic
-endfunc platform_get_entrypoint
 
+	/* Cold reset */
+	mov	x0, #0
+	ret
+
+warm_reset:
+	/* ---------------------------------------------------------------------
+	 * A mailbox is maintained in the trusted SRAM. It is flushed out of the
+	 * caches after every update using normal memory so it is safe to read
+	 * it here with SO attributes.
+	 * ---------------------------------------------------------------------
+	 */
+	mov_imm	x0, PLAT_ARM_TRUSTED_MAILBOX_BASE
+	ldr	x0, [x0]
+	cbz	x0, _panic
+	ret
+
+	/* ---------------------------------------------------------------------
+	 * The power controller indicates this is a warm reset but the mailbox
+	 * is empty. This should never happen!
+	 * ---------------------------------------------------------------------
+	 */
+_panic:
+	b	_panic
+endfunc plat_get_my_entrypoint
 
 	/* -----------------------------------------------------
-	 * void platform_mem_init (void);
+	 * unsigned int plat_is_my_cpu_primary (void);
 	 *
-	 * Zero out the mailbox registers in the shared memory.
-	 * The mmu is turned off right now and only the primary can
-	 * ever execute this code. Secondaries will read the
-	 * mailboxes using SO accesses. In short, BL31 will
-	 * update the mailboxes after mapping the tzdram as
-	 * normal memory. It will flush its copy after update.
-	 * BL1 will always read the mailboxes with the MMU off
+	 * Find out whether the current cpu is the primary
+	 * cpu.
 	 * -----------------------------------------------------
 	 */
-func platform_mem_init
-	ldr	x0, =MBOX_BASE
-	mov	w1, #PLATFORM_CORE_COUNT
-loop:
-	str	xzr, [x0], #CACHE_WRITEBACK_GRANULE
-	subs	w1, w1, #1
-	b.gt	loop
-	ret
-endfunc platform_mem_init
-
-
-func platform_is_primary_cpu
+func plat_is_my_cpu_primary
+	mrs	x0, mpidr_el1
 	and	x0, x0, #(MPIDR_CLUSTER_MASK | MPIDR_CPU_MASK)
 	cmp	x0, #FVP_PRIMARY_CPU
-	cset	x0, eq
+	cset	w0, eq
 	ret
-endfunc platform_is_primary_cpu
+endfunc plat_is_my_cpu_primary

@@ -30,6 +30,7 @@
 #include <asm_macros.S>
 
 	.globl	console_init
+	.globl	console_uninit
 	.globl	console_putc
 	.globl	console_getc
 
@@ -44,7 +45,7 @@
 	console_base: .quad 0x0
 
 	/* -----------------------------------------------
-	 * int console_init(unsigned long base_addr,
+	 * int console_init(uintptr_t base_addr,
 	 * unsigned int uart_clk, unsigned int baud_rate)
 	 * Function to initialize the console without a
 	 * C Runtime to print debug information. It saves
@@ -65,6 +66,20 @@ func console_init
 init_fail:
 	ret
 endfunc console_init
+
+	/* -----------------------------------------------
+	 * void console_uninit(void)
+	 * Function to finish the use of console driver.
+	 * It sets the console_base as NULL so that any
+	 * further invocation of `console_putc` or
+	 * `console_getc` APIs would return error.
+	 * -----------------------------------------------
+	 */
+func console_uninit
+	mov	x0, #0
+	adrp	x3, console_base
+	str	x0, [x3, :lo12:console_base]
+endfunc console_uninit
 
 	/* ---------------------------------------------
 	 * int console_putc(int c)

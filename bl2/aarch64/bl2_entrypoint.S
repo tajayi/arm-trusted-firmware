@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,13 +39,12 @@
 
 func bl2_entrypoint
 	/*---------------------------------------------
-	 * Store the extents of the tzram available to
-	 * BL2 for future use. Use the opcode param to
-	 * allow implement other functions if needed.
+	 * Save from x1 the extents of the tzram
+	 * available to BL2 for future use.
+	 * x0 is not currently used.
 	 * ---------------------------------------------
-	 */
-	mov	x20, x0
-	mov	x21, x1
+ 	 */
+ 	mov	x20, x1
 
 	/* ---------------------------------------------
 	 * Set the exception vector to something sane.
@@ -74,12 +73,18 @@ func bl2_entrypoint
 	isb
 
 	/* ---------------------------------------------
-	 * Check the opcodes out of paranoia.
+	 * Invalidate the RW memory used by the BL2
+	 * image. This includes the data and NOBITS
+	 * sections. This is done to safeguard against
+	 * possible corruption of this memory by dirty
+	 * cache lines in a system cache as a result of
+	 * use by an earlier boot loader stage.
 	 * ---------------------------------------------
 	 */
-	mov	x0, #RUN_IMAGE
-	cmp	x0, x20
-	b.ne	_panic
+	adr	x0, __RW_START__
+	adr	x1, __RW_END__
+	sub	x1, x1, x0
+	bl	inv_dcache_range
 
 	/* ---------------------------------------------
 	 * Zero out NOBITS sections. There are 2 of them:
@@ -105,15 +110,14 @@ func bl2_entrypoint
 	 * primary cpu is running at the moment.
 	 * --------------------------------------------
 	 */
-	mrs	x0, mpidr_el1
-	bl	platform_set_stack
+	bl	plat_set_my_stack
 
 	/* ---------------------------------------------
 	 * Perform early platform setup & platform
 	 * specific early arch. setup e.g. mmu setup
 	 * ---------------------------------------------
 	 */
-	mov	x0, x21
+	mov	x0, x20
 	bl	bl2_early_platform_setup
 	bl	bl2_plat_arch_setup
 

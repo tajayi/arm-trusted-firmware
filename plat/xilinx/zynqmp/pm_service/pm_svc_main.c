@@ -34,7 +34,7 @@
  */
 
 #include <errno.h>
-#include <gic_v2.h>
+#include <gic_common.h>
 #include <runtime_svc.h>
 #include <string.h>
 #include "pm_api_sys.h"
@@ -124,10 +124,10 @@ int32_t pm_setup(void)
 	status = pm_ipi_init(ipi_fiq_handler);
 
 	if (status == 0)
-		INFO("BL3-1: PM Service Init Complete: API v%d.%d\n",
+		INFO("BL31: PM Service Init Complete: API v%d.%d\n",
 		     PM_VERSION_MAJOR, PM_VERSION_MINOR);
 	else
-		INFO("BL3-1: PM Service Init Failed, Error Code %d!\n", status);
+		INFO("BL31: PM Service Init Failed, Error Code %d!\n", status);
 
 	return status;
 }
