@@ -109,7 +109,7 @@ static uint64_t ipi_fiq_handler(uint32_t id, uint32_t flags, void *handle,
 
 	if (usr_fiq_handler) {
 		uint32_t payload[PAYLOAD_ARG_CNT];
-		unsigned int cpuid = platform_get_core_pos(read_mpidr_el1());
+		unsigned int cpuid = plat_my_core_pos();
 		const struct pm_proc *proc = pm_get_proc(cpuid);
 
 		/* Read PM-API Arguments */

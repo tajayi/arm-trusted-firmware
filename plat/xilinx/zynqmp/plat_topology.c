@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,39 +31,9 @@
 #include <platform_def.h>
 #include <psci.h>
 
-/*******************************************************************************
- * This function tells PSCI how many units are present at each affinity level
- * At the cluster level (level-1) there's 4 CPUs, any level above that returns
- ******************************************************************************/
-unsigned int plat_get_aff_count(unsigned int aff_lvl,
-				unsigned long mpidr)
+const static unsigned char plat_power_domain_tree_desc[] = {1, 4};
+
+const unsigned char *plat_get_power_domain_tree_desc(void)
 {
-	/* Report 1 (absent) instance at levels higher than the cluster level */
-	if (aff_lvl > MPIDR_AFFLVL1)
-		return 1;
-
-	/* We have only a single cluster */
-	if (aff_lvl == MPIDR_AFFLVL1)
-		return PLATFORM_CLUSTER_COUNT;
-
-	return PLATFORM_CLUSTER0_CORE_COUNT;
-}
-
-/*******************************************************************************
- * This function tells PSCI which affinity levels are present
- ******************************************************************************/
-unsigned int plat_get_aff_state(unsigned int aff_lvl,
-				unsigned long mpidr)
-{
-	return aff_lvl <= MPIDR_AFFLVL1 ? PSCI_AFF_PRESENT : PSCI_AFF_ABSENT;
-}
-
-/*******************************************************************************
- * This function populates the ZynqMP specific topology information.
- * Currently only one fixed configuration (1 cluster containing 4 cpus) is
- * supported.
- ******************************************************************************/
-int plat_setup_topology(void)
-{
-	return 0;
+	return plat_power_domain_tree_desc;
 }

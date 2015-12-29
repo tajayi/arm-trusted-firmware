@@ -33,7 +33,7 @@
 
 /* Firmware Image Package */
 #define FIP_IMAGE_NAME			"fip.bin"
-#define ZYNQMP_PRIMARY_CPU			0x0
+#define ZYNQMP_PRIMARY_CPU		0
 
 /* Memory location options for Shared data and TSP in ZYNQMP */
 #define ZYNQMP_IN_TRUSTED_SRAM		0
@@ -96,8 +96,10 @@
 
 /* PMU registers and bitfields */
 #define PMU_GLOBAL_BASE		0xFFD80000
+#define PMU_GLOBAL_CNTRL		(PMU_GLOBAL_BASE + 0)
 #define PMU_GLOBAL_REQ_PWRUP_STATUS	(PMU_GLOBAL_BASE + 0x110)
 #define PMU_GLOBAL_REQ_PWRUP_EN		(PMU_GLOBAL_BASE + 0x118)
+#define PMU_GLOBAL_REQ_PWRUP_DIS	(PMU_GLOBAL_BASE + 0x11c)
 #define PMU_GLOBAL_REQ_PWRUP_TRIG	(PMU_GLOBAL_BASE + 0x120)
 
 /* 4KB shared memory */
@@ -134,63 +136,8 @@
 #define DRAM2_SIZE		0x780000000ull
 #define DRAM2_END		(DRAM2_BASE + DRAM2_SIZE - 1)
 
-#define PCIE_EXP_BASE		0x40000000
-#define TZRNG_BASE		0x7fe60000
-#define TZNVCTR_BASE		0x7fe70000
-#define TZROOTKEY_BASE		0x7fe80000
-
 /* Load address of BL33 in the ZYNQMP port */
 #define PLAT_ARM_NS_IMAGE_OFFSET	(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
-
-/* Special value used to verify platform parameters from BL2 to BL31 */
-#define ZYNQMP_BL31_PLAT_PARAM_VAL	0x0f1e2d3c4b5a6978ULL
-
-/*
- * V2M sysled bit definitions. The values written to this
- * register are defined in arch.h & runtime_svc.h. Only
- * used by the primary cpu to diagnose any cold boot issues.
- *
- * SYS_LED[0]   - Security state (S=0/NS=1)
- * SYS_LED[2:1] - Exception Level (EL3-EL0)
- * SYS_LED[7:3] - Exception Class (Sync/Async & origin)
- *
- */
-#define SYS_LED_SS_SHIFT		0x0
-#define SYS_LED_EL_SHIFT		0x1
-#define SYS_LED_EC_SHIFT		0x3
-
-#define SYS_LED_SS_MASK		0x1
-#define SYS_LED_EL_MASK		0x3
-#define SYS_LED_EC_MASK		0x1f
-
-/* V2M sysid register bits */
-#define SYS_ID_REV_SHIFT	28
-#define SYS_ID_HBI_SHIFT	16
-#define SYS_ID_BLD_SHIFT	12
-#define SYS_ID_ARCH_SHIFT	8
-#define SYS_ID_FPGA_SHIFT	0
-
-#define SYS_ID_REV_MASK	0xf
-#define SYS_ID_HBI_MASK	0xfff
-#define SYS_ID_BLD_MASK	0xf
-#define SYS_ID_ARCH_MASK	0xf
-#define SYS_ID_FPGA_MASK	0xff
-
-#define SYS_ID_BLD_LENGTH	4
-
-#define HBI_ZYNQMP_BASE		0x020
-#define REV_ZYNQMP_BASE_V0		0x0
-
-#define HBI_FOUNDATION		0x010
-#define REV_FOUNDATION_V2_0	0x0
-#define REV_FOUNDATION_V2_1	0x1
-
-#define BLD_GIC_VE_MMAP	0x0
-#define BLD_GIC_A53A57_MMAP	0x1
-
-/* ZYNQMP Power controller base address*/
-#define PWRC_BASE		0x1c100000
-
 
 /*******************************************************************************
  * CCI-400 related constants
@@ -239,11 +186,7 @@
  *  Shared Data
  ******************************************************************************/
 
-/* Entrypoint mailboxes */
-#define MBOX_BASE		ZYNQMP_SHARED_RAM_BASE
-#define MBOX_SIZE		0x200
-
 /* Base address where parameters to BL31 are stored */
-#define PARAMS_BASE		(MBOX_BASE + MBOX_SIZE)
+#define PARAMS_BASE		ZYNQMP_SHARED_RAM_BASE
 
 #endif /* __ZYNQMP_DEF_H__ */

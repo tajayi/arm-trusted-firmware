@@ -11,12 +11,12 @@ BL33 is the non-secure world software (U-Boot, Linux etc).
 
 To build:
 ```bash
-make DEBUG=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zynqmp bl31
+make ERROR_DEPRECATED=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zynqmp bl31
 ```
 
 To build bl32 TSP you have to rebuild bl31 too:
 ```bash
-make DEBUG=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zynqmp SPD=tspd bl31 bl32
+make ERROR_DEPRECATED=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zynqmp SPD=tspd bl31 bl32
 ```
 
 # ATF Location
@@ -26,3 +26,21 @@ placed in DRAM (at 0x30000000). To choose DRAM, add
 ZYNQMP_ATF_LOCATION=tdram
 ```
 to the make command line.
+
+# Power Domain Tree
+The following power domain tree represents the power domain model used by the
+ATF for ZynqMP:
+```
+                +-+
+                |0|
+                +-+
+     +-------+---+---+-------+
+     |       |       |       |
+     |       |       |       |
+     v       v       v       v
+    +-+     +-+     +-+     +-+
+    |0|     |1|     |2|     |3|
+    +-+     +-+     +-+     +-+
+```
+The 4 leaf power domains represent the individual A53 cores, while resources
+common to the cluster are grouped in the power domain on the top.

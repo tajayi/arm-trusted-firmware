@@ -30,7 +30,6 @@
 
 /* Top level SMC handler for SiP calls. Dispatch PM calls to PM SMC handler. */
 
-#include <debug.h>
 #include <runtime_svc.h>
 #include <uuid.h>
 #include "pm_svc_main.h"

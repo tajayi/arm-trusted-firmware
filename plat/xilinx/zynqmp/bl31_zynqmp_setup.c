@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,25 +28,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <arch.h>
-#include <arch_helpers.h>
-#include <gicv2.h>
 #include <assert.h>
 #include <bl_common.h>
 #include <bl31.h>
 #include <console.h>
-#include <mmio.h>
-#include <platform.h>
-#include <xlat_tables.h>
-#include <plat_arm.h>
-#include <stddef.h>
-#include "zynqmp_def.h"
-#include "zynqmp_private.h"
-
-#include <runtime_svc.h>
-#include <interrupt_mgmt.h>
 #include <debug.h>
 #include <errno.h>
+#include <gicv2.h>
+#include <plat_arm.h>
+#include <platform.h>
+#include "zynqmp_private.h"
 
 /*******************************************************************************
  * Declarations of linker defined symbols which will help us find the layout
@@ -108,7 +99,7 @@ entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
  * data
  ******************************************************************************/
 void bl31_early_platform_setup(bl31_params_t *from_bl2,
-				void *plat_params_from_bl2)
+			       void *plat_params_from_bl2)
 {
 	/* Initialize the console to provide early debug support */
 	console_init(RDO_UART0_BASE, zynqmp_get_uart_clk(), CADENCE_UART_BAUDRATE);
@@ -171,19 +162,13 @@ int request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
 	return 0;
 }
 
-static uint64_t rdo_el3_interrupt_handler(uint32_t id,
-					   uint32_t flags,
-					   void *handle,
-					   void *cookie)
+static uint64_t rdo_el3_interrupt_handler(uint32_t id, uint32_t flags,
+					  void *handle, void *cookie)
 {
 	uint32_t intr_id;
 	interrupt_type_handler_t handler;
 
-#if IMF_READ_INTERRUPT_ID
-	intr_id = id;
-#else
 	intr_id = plat_ic_get_pending_interrupt_id();
-#endif
 	handler = type_el3_interrupt_table[intr_id];
 	if (handler != NULL)
 		handler(intr_id, flags, handle, cookie);
@@ -200,9 +185,6 @@ void bl31_platform_setup(void)
 	/* Initialize the gic cpu and distributor interfaces */
 	plat_arm_gic_driver_init();
 	plat_arm_gic_init();
-
-	/* Topologies are best known to the platform. */
-	plat_setup_topology();
 }
 
 void bl31_plat_runtime_setup(void)
@@ -227,7 +209,7 @@ void bl31_plat_arch_setup(void)
 	zynqmp_cci_enable();
 
 	arm_configure_mmu_el3(BL31_RO_BASE,
-			      (BL31_COHERENT_RAM_LIMIT - BL31_RO_BASE),
+			      BL31_COHERENT_RAM_LIMIT - BL31_RO_BASE,
 			      BL31_RO_BASE,
 			      BL31_RO_LIMIT,
 			      BL31_COHERENT_RAM_BASE,

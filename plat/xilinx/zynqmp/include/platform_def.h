@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,6 @@
 #include <arch.h>
 #include "../zynqmp_def.h"
 
-
 /*******************************************************************************
  * Platform binary types for linking
  ******************************************************************************/
@@ -65,14 +64,12 @@
 /* Non-Trusted Firmware BL33 */
 #define BL33_IMAGE_NAME			"bl33.bin" /* e.g. UEFI */
 
-#define PLATFORM_CACHE_LINE_SIZE	64
 #define PLATFORM_CLUSTER_COUNT		1ull
-#define PLATFORM_CLUSTER0_CORE_COUNT	4
-#define PLATFORM_CORE_COUNT		(PLATFORM_CLUSTER0_CORE_COUNT)
-#define PLATFORM_MAX_CPUS_PER_CLUSTER	4
-#define PLATFORM_NUM_AFFS		(PLATFORM_CLUSTER_COUNT + \
-					 PLATFORM_CORE_COUNT)
-#define PLATFORM_MAX_AFFLVL		MPIDR_AFFLVL1
+#define PLATFORM_CORE_COUNT		4
+#define PLAT_NUM_POWER_DOMAINS		5
+#define PLAT_MAX_PWR_LVL		1
+#define PLAT_MAX_RET_STATE		1
+#define PLAT_MAX_OFF_STATE		2
 #define MAX_IO_DEVICES			3
 #define MAX_IO_HANDLES			4
 
@@ -135,15 +132,6 @@
 #define MAX_XLAT_TABLES			6
 #define MAX_MMAP_REGIONS		16
 
-/*******************************************************************************
- * Declarations and constants to access the mailboxes safely. Each mailbox is
- * aligned on the biggest cache line size in the platform. This is known only
- * to the platform as it might have a combination of integrated and external
- * caches. Such alignment ensures that two maiboxes do not sit on the same cache
- * line at any cache level. They could belong to different cpus/clusters &
- * get written while being protected by different locks causing corruption of
- * a valid mailbox address.
- ******************************************************************************/
 #define CACHE_WRITEBACK_SHIFT   6
 #define CACHE_WRITEBACK_GRANULE (1 << CACHE_WRITEBACK_SHIFT)
 

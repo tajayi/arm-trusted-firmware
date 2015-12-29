@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,18 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <arch.h>
 #include <arch_helpers.h>
 #include <arm_config.h>
-#include <gicv2.h>
-#include <bl_common.h>
 #include <cci.h>
 #include <debug.h>
+#include <gicv2.h>
 #include <mmio.h>
+#include <plat_arm.h>
 #include <platform.h>
 #include <xlat_tables.h>
-#include <plat_arm.h>
-#include "../zynqmp_def.h"
 #include "../zynqmp_private.h"
 
 /*******************************************************************************
@@ -67,23 +64,8 @@ const mmap_region_t plat_arm_mmap[] = {
 						MT_DEVICE | MT_RW | MT_SECURE },
 	{ APB_BASE,	APB_BASE,	APB_SIZE,
 						MT_DEVICE | MT_RW | MT_SECURE },
-	{ DRAM1_BASE,	DRAM1_BASE,	DRAM1_SIZE,
-						MT_MEMORY | MT_RW | MT_NS },
+	{ DRAM1_BASE,	DRAM1_BASE,	DRAM1_SIZE, MT_MEMORY | MT_RW | MT_NS },
 	{0}
-};
-
-/* Array of secure interrupts to be configured by the gic driver */
-const unsigned int irq_sec_array[] = {
-	ARM_IRQ_SEC_PHY_TIMER,
-	IRQ_SEC_IPI_APU,
-	ARM_IRQ_SEC_SGI_0,
-	ARM_IRQ_SEC_SGI_1,
-	ARM_IRQ_SEC_SGI_2,
-	ARM_IRQ_SEC_SGI_3,
-	ARM_IRQ_SEC_SGI_4,
-	ARM_IRQ_SEC_SGI_5,
-	ARM_IRQ_SEC_SGI_6,
-	ARM_IRQ_SEC_SGI_7
 };
 
 #define ZYNQMP_SILICON_VER_MASK   0xF000
@@ -179,7 +161,6 @@ static void zynqmp_print_platform_name(void)
 	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
 
-#define PMU_GLOBAL_CNTRL	0xFFD80000
 #define FW_IS_PRESENT		(1 << 4)
 
 /*
@@ -284,7 +265,7 @@ void zynqmp_cci_enable(void)
 		cci_enable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
 }
 
-void fvp_cci_disable(void)
+void zynqmp_cci_disable(void)
 {
 	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
 		cci_disable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));

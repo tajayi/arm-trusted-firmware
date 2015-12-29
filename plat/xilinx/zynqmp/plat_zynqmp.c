@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,27 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __ZYNQMP_PRIVATE_H__
-#define __ZYNQMP_PRIVATE_H__
+#include <plat_arm.h>
 
-#include <interrupt_mgmt.h>
+int plat_core_pos_by_mpidr(u_register_t mpidr)
+{
+	if (mpidr & MPIDR_CLUSTER_MASK)
+		return -1;
 
-int zynqmp_config_setup(void);
+	if ((mpidr & MPIDR_CPU_MASK) >= PLATFORM_CORE_COUNT)
+		return -1;
 
-void zynqmp_cci_init(void);
-void zynqmp_cci_enable(void);
-
-/* ZynqMP specific functions */
-uint32_t zynqmp_get_uart_clk(void);
-uint32_t zynqmp_is_pmu_up(void);
-
-/*
- * Register handler to specific GIC entrance
- * for INTR_TYPE_EL3 type of interrupt
- */
-int request_intr_type_el3(uint32_t, interrupt_type_handler_t);
-
-/* Declaration of function used as wake-up entrypoint */
-void bl31_entrypoint(void);
-
-#endif /* __ZYNQMP_PRIVATE_H__ */
+	return plat_arm_calc_core_pos(mpidr);
+}

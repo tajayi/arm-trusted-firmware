@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,8 @@
 #
 
 CFLAGS += -Wno-error=array-bounds
+ENABLE_PLAT_COMPAT := 0
+PSCI_EXTENDED_STATE_ID := 1
 
 ZYNQMP_ATF_LOCATION	?=	tsram
 ifeq (${ZYNQMP_ATF_LOCATION}, tsram)
@@ -106,9 +108,11 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				lib/cpus/aarch64/aem_generic.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
 				lib/cpus/aarch64/cortex_a57.S			\
+				plat/common/aarch64/plat_psci_common.c		\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/xilinx/zynqmp/bl31_zynqmp_setup.c		\
-				plat/xilinx/zynqmp/plat_pm.c			\
+				plat/xilinx/zynqmp/plat_psci.c			\
+				plat/xilinx/zynqmp/plat_zynqmp.c		\
 				plat/xilinx/zynqmp/plat_topology.c		\
 				plat/xilinx/zynqmp/sip_svc_setup.c		\
 				plat/xilinx/zynqmp/pm_service/pm_svc_main.c	\

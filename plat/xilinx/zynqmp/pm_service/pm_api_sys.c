@@ -89,7 +89,7 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
 				   const uint64_t address)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
-	unsigned int cpuid = platform_get_core_pos(read_mpidr_el1());
+	unsigned int cpuid = plat_my_core_pos();
 	const struct pm_proc *proc = pm_get_proc(cpuid);
 
 	/*
