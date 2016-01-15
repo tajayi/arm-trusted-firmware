@@ -34,7 +34,20 @@
 #include <runtime_svc.h>
 #include <uuid.h>
 #include "pm_svc_main.h"
-#include "sip_svc.h"
+
+/* SMC function IDs for SiP Service queries */
+#define ZYNQMP_SIP_SVC_CALL_COUNT	0x8200ff00
+#define ZYNQMP_SIP_SVC_UID		0x8200ff01
+#define ZYNQMP_SIP_SVC_VERSION		0x8200ff03
+
+/* SiP Service Calls version numbers */
+#define SIP_SVC_VERSION_MAJOR	0x0
+#define SIP_SVC_VERSION_MINOR	0x1
+
+/* These macros are used to identify PM calls from the SMC function ID */
+#define PM_FID_MASK	0xf000u
+#define PM_FID_VALUE	0u
+#define is_pm_fid(_fid) (((_fid) & PM_FID_MASK) == PM_FID_VALUE)
 
 /* SiP Service UUID */
 DEFINE_SVC_UUID(zynqmp_sip_uid,
