@@ -35,12 +35,6 @@
 #include "../zynqmp_def.h"
 
 /*******************************************************************************
- * Platform binary types for linking
- ******************************************************************************/
-#define PLATFORM_LINKER_FORMAT          "elf64-littleaarch64"
-#define PLATFORM_LINKER_ARCH            aarch64
-
-/*******************************************************************************
  * Generic platform constants
  ******************************************************************************/
 
@@ -52,8 +46,6 @@
 #elif IMAGE_BL32
 #define PLATFORM_STACK_SIZE 0x440
 #endif
-
-#define FIRMWARE_WELCOME_STR		"Booting Trusted Firmware\n"
 
 /* EL3 Runtime Firmware BL31 */
 #define BL31_IMAGE_NAME			"bl31.bin"

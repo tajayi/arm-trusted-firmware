@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,8 +31,9 @@
 #ifndef __ZYNQMP_DEF_H__
 #define __ZYNQMP_DEF_H__
 
+#include <common_def.h>
+
 /* Firmware Image Package */
-#define FIP_IMAGE_NAME			"fip.bin"
 #define ZYNQMP_PRIMARY_CPU		0
 
 /* Memory location options for Shared data and TSP in ZYNQMP */
@@ -49,18 +50,6 @@
 /* Location of trusted dram on the base zynqmp */
 #define ZYNQMP_TRUSTED_DRAM_BASE	0x30000000 /* Can't overlap TZROM area */
 #define ZYNQMP_TRUSTED_DRAM_SIZE	0x10000000
-
-#define FLASH0_BASE		0x08000000
-#define FLASH0_SIZE		TZROM_SIZE
-
-#define FLASH1_BASE		0x0c000000
-#define FLASH1_SIZE		0x04000000
-
-#define PSRAM_BASE		0x14000000
-#define PSRAM_SIZE		0x04000000
-
-#define VRAM_BASE		0x18000000
-#define VRAM_SIZE		0x02000000
 
 /* Aggregate of all devices in the first GB */
 #define DEVICE0_BASE		0xFF000000
@@ -91,11 +80,8 @@
 #define APU_2_PWRCTL_CPUPWRDWNREQ_MASK		4
 #define APU_3_PWRCTL_CPUPWRDWNREQ_MASK		8
 
-#define NSRAM_BASE		0x2e000000
-#define NSRAM_SIZE		0x10000
-
 /* PMU registers and bitfields */
-#define PMU_GLOBAL_BASE		0xFFD80000
+#define PMU_GLOBAL_BASE			0xFFD80000
 #define PMU_GLOBAL_CNTRL		(PMU_GLOBAL_BASE + 0)
 #define PMU_GLOBAL_REQ_PWRUP_STATUS	(PMU_GLOBAL_BASE + 0x110)
 #define PMU_GLOBAL_REQ_PWRUP_EN		(PMU_GLOBAL_BASE + 0x118)
@@ -127,14 +113,9 @@
 #define DRAM1_BASE		0x00000000ull
 #define DRAM1_SIZE		0x10000000ull
 #define DRAM1_END		(DRAM1_BASE + DRAM1_SIZE - 1)
-#define DRAM1_SEC_SIZE		0x01000000ull
 
 #define DRAM_BASE		DRAM1_BASE
 #define DRAM_SIZE		DRAM1_SIZE
-
-#define DRAM2_BASE		0x880000000ull
-#define DRAM2_SIZE		0x780000000ull
-#define DRAM2_END		(DRAM2_BASE + DRAM2_SIZE - 1)
 
 /* Load address of BL33 in the ZYNQMP port */
 #define PLAT_ARM_NS_IMAGE_OFFSET	(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
@@ -171,22 +152,15 @@
 /*******************************************************************************
  * UART related constants
  ******************************************************************************/
-#define RDO_UART0_BASE         0xFF000000
-#define RDO_UART1_BASE         0xFF001000
+#define RDO_UART0_BASE		0xFF000000
+#define RDO_UART1_BASE		0xFF001000
 
 #define PLAT_ARM_CRASH_UART_BASE	RDO_UART0_BASE
 /* impossible to call C routine how it is done now - hardcode any value */
 #define	PLAT_ARM_CRASH_UART_CLK_IN_HZ	25000000 /* FIXME */
 
 /* Must be non zero */
-#define CADENCE_UART_BAUDRATE (115200)
-
+#define CADENCE_UART_BAUDRATE	115200
 #define ARM_CONSOLE_BAUDRATE	CADENCE_UART_BAUDRATE
-/*******************************************************************************
- *  Shared Data
- ******************************************************************************/
-
-/* Base address where parameters to BL31 are stored */
-#define PARAMS_BASE		ZYNQMP_SHARED_RAM_BASE
 
 #endif /* __ZYNQMP_DEF_H__ */
