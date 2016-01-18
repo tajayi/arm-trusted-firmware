@@ -46,6 +46,9 @@
 #define PM_F_INIT			0xa01
 #define PM_F_GETARGS			0xa02
 
+/* 0 - UP, !0 - DOWN */
+static int32_t pm_down = !0;
+
 /**
  * pm_context - Structure which contains data for power management
  * @api_version		version of PM API, must match with one on PMU side
@@ -129,6 +132,8 @@ int32_t pm_setup(void)
 	else
 		INFO("BL31: PM Service Init Failed, Error Code %d!\n", status);
 
+	pm_down = status;
+
 	return status;
 }
 
@@ -160,6 +165,10 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 	enum pm_ret_status ret;
 
 	uint32_t pm_arg[4];
+
+	/* Handle case where PM wasn't initialized properly */
+	if (pm_down)
+		SMC_RET1(handle, SMC_UNK);
 
 	pm_arg[0] = (uint32_t)x1;
 	pm_arg[1] = (uint32_t)(x1 >> 32);
