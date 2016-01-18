@@ -177,7 +177,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 
 	switch (smc_fid & FUNCID_NUM_MASK) {
 	case PM_F_INIT:
-		VERBOSE("Initialize pm callback, irq: %d\n", x1);
+		VERBOSE("Initialize pm callback, irq: %lu\n", x1);
 
 		/* Save pm callback irq number */
 		pm_ctx.callback_irq = x1;
