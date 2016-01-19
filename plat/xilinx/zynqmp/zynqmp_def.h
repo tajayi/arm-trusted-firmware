@@ -58,11 +58,11 @@
 #define DEVICE1_SIZE		0x01000000
 
 /* For cpu reset APU space here too 0xFE5F1000 CRF_APB*/
-#define APB_BASE		0xFD1A0000
-#define APB_SIZE		0x00600000
+#define CRF_APB_BASE		0xFD1A0000
+#define CRF_APB_SIZE		0x00600000
 
 /* CRF registers and bitfields */
-#define CRF_APB_RST_FPD_APU	(APB_BASE + 0X00000104)
+#define CRF_APB_RST_FPD_APU	(CRF_APB_BASE + 0X00000104)
 
 #define CRF_APB_RST_FPD_APU_ACPU_RESET		(1 << 0)
 #define CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET	(1 << 10)
