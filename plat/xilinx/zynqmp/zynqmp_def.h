@@ -46,6 +46,9 @@
 
 #define ZYNQMP_TRUSTED_SRAM_BASE	0xFFFC0000
 #define ZYNQMP_TRUSTED_SRAM_SIZE	0x00040000
+#define ZYNQMP_TRUSTED_SRAM_LIMIT	(ZYNQMP_TRUSTED_SRAM_BASE + \
+					 ZYNQMP_TRUSTED_SRAM_SIZE)
+
 
 /* Location of trusted dram on the base zynqmp */
 #define ZYNQMP_TRUSTED_DRAM_BASE	0x30000000 /* Can't overlap TZROM area */
@@ -87,28 +90,6 @@
 #define PMU_GLOBAL_REQ_PWRUP_EN		(PMU_GLOBAL_BASE + 0x118)
 #define PMU_GLOBAL_REQ_PWRUP_DIS	(PMU_GLOBAL_BASE + 0x11c)
 #define PMU_GLOBAL_REQ_PWRUP_TRIG	(PMU_GLOBAL_BASE + 0x120)
-
-/* 4KB shared memory */
-#define ZYNQMP_SHARED_RAM_SIZE	0x1000
-
-/* Location of shared memory */
-#if (ZYNQMP_SHARED_DATA_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM)
-/* Shared memory at the base of Trusted DRAM */
-# define ZYNQMP_SHARED_RAM_BASE		ZYNQMP_TRUSTED_DRAM_BASE
-# define ZYNQMP_TRUSTED_SRAM_LIMIT		(ZYNQMP_TRUSTED_SRAM_BASE \
-					+ ZYNQMP_TRUSTED_SRAM_SIZE)
-#elif (ZYNQMP_SHARED_DATA_LOCATION_ID == ZYNQMP_IN_TRUSTED_SRAM)
-# if (ZYNQMP_TSP_RAM_LOCATION_ID == ZYNQMP_IN_TRUSTED_DRAM)
-#  error "Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported"
-# endif
-/* Shared memory at the top of the Trusted SRAM */
-# define ZYNQMP_SHARED_RAM_BASE		(ZYNQMP_TRUSTED_SRAM_BASE \
-					+ ZYNQMP_TRUSTED_SRAM_SIZE \
-					- ZYNQMP_SHARED_RAM_SIZE)
-# define ZYNQMP_TRUSTED_SRAM_LIMIT		ZYNQMP_SHARED_RAM_BASE
-#else
-# error "Unsupported ZYNQMP_SHARED_DATA_LOCATION_ID value"
-#endif
 
 #define DRAM1_BASE		0x00000000ull
 #define DRAM1_SIZE		0x10000000ull

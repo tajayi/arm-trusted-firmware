@@ -41,17 +41,6 @@ else
   $(error "Unsupported ZYNQMP_ATF_LOCATION value")
 endif
 
-# Shared memory may be allocated at the top of Trusted SRAM (tsram) or at the
-# base of Trusted SRAM (tdram)
-ZYNQMP_SHARED_DATA_LOCATION	?=	tsram
-ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tsram)
-  ZYNQMP_SHARED_DATA_LOCATION_ID := ZYNQMP_IN_TRUSTED_SRAM
-else ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tdram)
-  ZYNQMP_SHARED_DATA_LOCATION_ID := ZYNQMP_IN_TRUSTED_DRAM
-else
-  $(error "Unsupported ZYNQMP_SHARED_DATA_LOCATION value")
-endif
-
 # On ZYNQMP, the TSP can execute either from Trusted SRAM or Trusted DRAM.
 # Trusted SRAM is the default.
 ZYNQMP_TSP_RAM_LOCATION	?=	tsram
@@ -63,15 +52,8 @@ else
   $(error "Unsupported ZYNQMP_TSP_RAM_LOCATION value")
 endif
 
-ifeq (${ZYNQMP_SHARED_DATA_LOCATION}, tsram)
-  ifeq (${ZYNQMP_TSP_RAM_LOCATION}, tdram)
-    $(error Shared data in Trusted SRAM and TSP in Trusted DRAM is not supported)
-  endif
-endif
-
 # Process flags
 $(eval $(call add_define,ZYNQMP_ATF_LOCATION_ID))
-$(eval $(call add_define,ZYNQMP_SHARED_DATA_LOCATION_ID))
 $(eval $(call add_define,ZYNQMP_TSP_RAM_LOCATION_ID))
 
 PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\

@@ -54,8 +54,6 @@ arm_config_t arm_config;
  * configure_mmu_elx() will give the available subset of that,
  */
 const mmap_region_t plat_arm_mmap[] = {
-	{ ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_BASE,	ZYNQMP_SHARED_RAM_SIZE,
-						MT_MEMORY | MT_RW | MT_SECURE },
 	{ ZYNQMP_TRUSTED_DRAM_BASE, ZYNQMP_TRUSTED_DRAM_BASE,	ZYNQMP_TRUSTED_DRAM_SIZE,
 						MT_MEMORY | MT_RW | MT_SECURE },
 	{ DEVICE0_BASE,	DEVICE0_BASE,	DEVICE0_SIZE,
