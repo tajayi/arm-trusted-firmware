@@ -73,8 +73,8 @@ enum pm_ret_status pm_req_node(const enum pm_node_id nid,
 			       const uint32_t capabilities,
 			       const uint32_t qos,
 			       const enum pm_request_ack ack);
-enum pm_ret_status pm_release_node(const enum pm_node_id nid,
-				   const uint32_t latency);
+enum pm_ret_status pm_release_node(const enum pm_node_id nid);
+
 enum pm_ret_status pm_set_requirement(const enum pm_node_id nid,
 				      const uint32_t capabilities,
 				      const uint32_t qos,

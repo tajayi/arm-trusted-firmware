@@ -243,7 +243,7 @@ uint64_t pm_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_RELEASE_NODE:
-		ret = pm_release_node(pm_arg[0], pm_arg[1]);
+		ret = pm_release_node(pm_arg[0]);
 		SMC_RET1(handle, (uint64_t)ret);
 
 	case PM_SET_REQUIREMENT:

@@ -305,16 +305,14 @@ enum pm_ret_status pm_set_requirement(const enum pm_node_id nid,
 /**
  * pm_release_node() - PM call to release a node
  * @nid		Node id of the slave
- * @latency	Requested maximum wakeup latency
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_release_node(const enum pm_node_id nid,
-				   const uint32_t latency)
+enum pm_ret_status pm_release_node(const enum pm_node_id nid)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
-	PM_PACK_PAYLOAD3(payload, PM_RELEASE_NODE, nid, latency);
+	PM_PACK_PAYLOAD2(payload, PM_RELEASE_NODE, nid);
 	return pm_ipi_send(primary_proc, payload);
 }
 
