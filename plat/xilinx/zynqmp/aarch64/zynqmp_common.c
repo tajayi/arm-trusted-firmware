@@ -60,7 +60,6 @@ const mmap_region_t plat_arm_mmap[] = {
 						MT_DEVICE | MT_RW | MT_SECURE },
 	{ CRF_APB_BASE,	CRF_APB_BASE,	CRF_APB_SIZE,
 						MT_DEVICE | MT_RW | MT_SECURE },
-	{ DRAM1_BASE,	DRAM1_BASE,	DRAM1_SIZE, MT_MEMORY | MT_RW | MT_NS },
 	{0}
 };
 
