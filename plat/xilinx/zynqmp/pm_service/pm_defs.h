@@ -142,6 +142,11 @@ enum pm_node_id {
 	NODE_CAN_0,
 	NODE_CAN_1,
 	NODE_AFI,
+	NODE_APLL,
+	NODE_VPLL,
+	NODE_DPLL,
+	NODE_RPLL,
+	NODE_IOPLL,
 };
 
 enum pm_request_ack {
