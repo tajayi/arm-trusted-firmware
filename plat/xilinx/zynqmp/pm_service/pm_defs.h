@@ -147,6 +147,7 @@ enum pm_node_id {
 	NODE_DPLL,
 	NODE_RPLL,
 	NODE_IOPLL,
+	NODE_DDR,
 };
 
 enum pm_request_ack {
