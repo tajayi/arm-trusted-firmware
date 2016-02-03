@@ -72,6 +72,15 @@
 #define CRF_APB_RST_FPD_APU_ACPU_RESET		(1 << 0)
 #define CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET	(1 << 10)
 
+/* CRL registers and bitfields */
+#define CRL_APB_BASE			0xFF5E0000
+#define CRL_APB_RPLL_CTRL		(CRL_APB_BASE + 0x30)
+#define CRL_APB_RESET_CTRL		(CRL_APB_BASE + 0x218)
+
+#define CRL_APB_RPLL_CTRL_BYPASS	(1 << 3)
+
+#define CRL_APB_RESET_CTRL_SOFT_RESET	(1 << 4)
+
 /* APU registers and bitfields */
 #define APU_BASE		0xFD5C0000
 #define APU_CONFIG_0		(APU_BASE + 0x20)

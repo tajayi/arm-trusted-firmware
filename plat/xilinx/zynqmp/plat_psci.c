@@ -199,15 +199,26 @@ static void __dead2 zynqmp_system_off(void)
 
 static void __dead2 zynqmp_system_reset(void)
 {
-	if (zynqmp_is_pmu_up()) {
+	if (!zynqmp_is_pmu_up()) {
+		/*
+		 * This currently triggers a system reset. I.e. the whole
+		 * system will be reset! Including RPUs, PMU, PL, etc.
+		 */
+		/* bypass RPLL (needed on 1.0 silicon) */
+		uint32_t reg = mmio_read_32(CRL_APB_RPLL_CTRL);
+		reg |= CRL_APB_RPLL_CTRL_BYPASS;
+		mmio_write_32(CRL_APB_RPLL_CTRL, reg);
+
+		/* trigger system reset */
+		mmio_write_32(CRL_APB_RESET_CTRL,
+			      CRL_APB_RESET_CTRL_SOFT_RESET);
+	} else {
 		/* Send the system reset request to the PMU */
 		pm_system_shutdown(1);
-
-		wfi();
 	}
 
-	ERROR("ZynqMP System Reset: operation not handled.\n");
-	panic();
+	while (1)
+		wfi();
 }
 
 int zynqmp_validate_power_state(unsigned int power_state,
