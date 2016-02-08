@@ -39,11 +39,7 @@
  ******************************************************************************/
 
 /* Size of cacheable stacks */
-#if IMAGE_BL31
-#define PLATFORM_STACK_SIZE 0x400
-#elif IMAGE_BL32
 #define PLATFORM_STACK_SIZE 0x440
-#endif
 
 /* EL3 Runtime Firmware BL31 */
 #define BL31_IMAGE_NAME			"bl31.bin"
