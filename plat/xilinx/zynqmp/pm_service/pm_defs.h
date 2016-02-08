@@ -154,7 +154,6 @@ enum pm_request_ack {
 	REQ_ACK_NO = 1,
 	REQ_ACK_BLOCKING,
 	REQ_ACK_NON_BLOCKING,
-	REQ_ACK_CB_ERROR,
 };
 
 enum pm_abort_reason {
