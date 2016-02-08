@@ -153,7 +153,7 @@ enum pm_node_id {
 enum pm_request_ack {
 	REQ_ACK_NO = 1,
 	REQ_ACK_BLOCKING,
-	REQ_ACK_CB_STANDARD,
+	REQ_ACK_NON_BLOCKING,
 	REQ_ACK_CB_ERROR,
 };
 
