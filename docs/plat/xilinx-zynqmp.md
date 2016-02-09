@@ -29,6 +29,10 @@ make ERROR_DEPRECATED=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zyn
     -   `tsram` : bl32/spd will be located in OCM (default)
     -   `tdram` : bl32/spd will be located in DRAM (address: 0x30000000)
 
+*   `ZYNQMP_CONSOLE`: Select the console driver. Options:
+    -   `cadence` : Cadence UART
+    -   `dcc`     : ARM DCC JTAG UART
+
 # Power Domain Tree
 The following power domain tree represents the power domain model used by the
 ATF for ZynqMP:
