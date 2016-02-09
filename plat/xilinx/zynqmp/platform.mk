@@ -64,6 +64,7 @@ PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 				drivers/arm/gic/common/gic_common.c		\
 				drivers/arm/gic/v2/gicv2_main.c			\
 				drivers/arm/gic/v2/gicv2_helpers.c		\
+				drivers/console/console.S			\
 				plat/arm/common/aarch64/arm_common.c		\
 				plat/arm/common/aarch64/arm_helpers.S		\
 				plat/arm/common/arm_gicv2.c			\
@@ -77,7 +78,7 @@ ifeq (${ZYNQMP_CONSOLE}, cadence)
   PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S	\
 			    drivers/cadence/uart/cdns_common.c
 else ifeq (${ZYNQMP_CONSOLE}, dcc)
-  PLAT_BL_COMMON_SOURCES += drivers/console/console.S	\
+  PLAT_BL_COMMON_SOURCES += \
 			    drivers/arm/dcc/dcc_console.c
 else
   $(error "Please define ZYNQMP_CONSOLE")

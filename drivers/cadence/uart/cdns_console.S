@@ -31,16 +31,9 @@
 #include <asm_macros.S>
 #include <cadence/cdns_uart.h>
 
-/*
- * Pull in generic functions to provide backwards compatibility for
- * platform makefiles
- */
-#include "../../console/console.S"
-
         .globl  console_core_init
         .globl  console_core_putc
         .globl  console_core_getc
-
 
 	/* -----------------------------------------------
 	 * int console_core_init(unsigned long base_addr,
