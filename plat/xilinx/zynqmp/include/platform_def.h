@@ -41,23 +41,11 @@
 /* Size of cacheable stacks */
 #define PLATFORM_STACK_SIZE 0x440
 
-/* EL3 Runtime Firmware BL31 */
-#define BL31_IMAGE_NAME			"bl31.bin"
-
-/* Secure Payload BL32 (Trusted OS) */
-#define BL32_IMAGE_NAME			"bl32.bin"
-
-/* Non-Trusted Firmware BL33 */
-#define BL33_IMAGE_NAME			"bl33.bin" /* e.g. UEFI */
-
-#define PLATFORM_CLUSTER_COUNT		1ull
 #define PLATFORM_CORE_COUNT		4
 #define PLAT_NUM_POWER_DOMAINS		5
 #define PLAT_MAX_PWR_LVL		1
 #define PLAT_MAX_RET_STATE		1
 #define PLAT_MAX_OFF_STATE		2
-#define MAX_IO_DEVICES			3
-#define MAX_IO_HANDLES			4
 
 /*******************************************************************************
  * BL31 specific defines.
