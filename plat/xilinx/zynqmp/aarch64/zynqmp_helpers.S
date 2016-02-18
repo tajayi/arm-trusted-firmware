@@ -34,7 +34,6 @@
 
 	.globl	plat_secondary_cold_boot_setup
 	.globl	plat_is_my_cpu_primary
-	.globl	plat_get_my_entrypoint
 
 	/* -----------------------------------------------------
 	 * void plat_secondary_cold_boot_setup (void);
@@ -78,45 +77,6 @@ func plat_secondary_cold_boot_setup
 	wfi
 	b	1b
 endfunc plat_secondary_cold_boot_setup
-
-
-	/* -----------------------------------------------------
-	 * void platform_get_entrypoint (unsigned int mpid);
-	 *
-	 * Main job of this routine is to distinguish between
-	 * a cold and warm boot.
-	 * On a cold boot the secondaries first wait for the
-	 * platform to be initialized after which they are
-	 * hotplugged in. The primary proceeds to perform the
-	 * platform initialization.
-	 *
-	 * Check power down request bitfield for CPU cores
-	 * in APU_PWRCTL register.
-	 * Value different than 0 indicates CPU had previously
-	 * requested suspend.
-	 *
-	 * TODO: Not a good idea to save lr in a temp reg
-	 * -----------------------------------------------------
-	 */
-func plat_get_my_entrypoint
-	mov	x9, x30 // lr
-	bl	plat_my_core_pos
-	ldr	x10, =APU_PWRCTL
-	ldr	w11, [x10]
-	ldr	w12, =APU_0_PWRCTL_CPUPWRDWNREQ_MASK
-	lsl	x12, x12, x0
-	and	x0, x11, x12
-	cbnz	x0, warm_reset
-	mov	x0, xzr
-	b	done
-warm_reset:
-	bic	w11, w11, w12
-	str	w11, [x10] // clear APU_PWRCTL
-	ldr	x0, =zynqmp_sec_entry
-	ldr	x0, [x0]
-done:
-	ret	x9
-endfunc plat_get_my_entrypoint
 
 func plat_is_my_cpu_primary
 	mov	x9, x30
