@@ -49,116 +49,130 @@ void zynqmp_cpu_standby(plat_local_state_t cpu_state)
 	wfi();
 }
 
-static int32_t zynqmp_pwr_domain_on(u_register_t mpidr)
+static int32_t zynqmp_nopmu_pwr_domain_on(u_register_t mpidr)
 {
+	uint32_t r;
 	uint32_t cpu_id = plat_core_pos_by_mpidr(mpidr);
 
 	if (cpu_id == -1)
 		return PSCI_E_INTERN_FAIL;
 
-	if (!zynqmp_is_pmu_up()) {
-		uint32_t r;
+	/* program RVBAR */
+	mmio_write_32(APU_RVBAR_L_0 + (cpu_id << 3), zynqmp_sec_entry);
+	mmio_write_32(APU_RVBAR_H_0 + (cpu_id << 3), zynqmp_sec_entry >> 32);
 
-		/* program RVBAR */
-		mmio_write_32(APU_RVBAR_L_0 + (cpu_id << 3), zynqmp_sec_entry);
-		mmio_write_32(APU_RVBAR_H_0 + (cpu_id << 3),
-			      zynqmp_sec_entry >> 32);
+	/* clear VINITHI */
+	r = mmio_read_32(APU_CONFIG_0);
+	r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << cpu_id);
+	mmio_write_32(APU_CONFIG_0, r);
 
-		/* clear VINITHI */
-		r = mmio_read_32(APU_CONFIG_0);
-		r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << cpu_id);
-		mmio_write_32(APU_CONFIG_0, r);
+	/* clear power down request */
+	r = mmio_read_32(APU_PWRCTL);
+	r &= ~(1 << cpu_id);
+	mmio_write_32(APU_PWRCTL, r);
 
-		/* clear power down request */
-		r = mmio_read_32(APU_PWRCTL);
-		r &= ~(1 << cpu_id);
-		mmio_write_32(APU_PWRCTL, r);
+	/* power up island */
+	mmio_write_32(PMU_GLOBAL_REQ_PWRUP_EN, 1 << cpu_id);
+	mmio_write_32(PMU_GLOBAL_REQ_PWRUP_TRIG, 1 << cpu_id);
+	/* FIXME: we should have a way to break out */
+	while (mmio_read_32(PMU_GLOBAL_REQ_PWRUP_STATUS) & (1 << cpu_id))
+		;
 
-		/* power up island */
-		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_EN, 1 << cpu_id);
-		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_TRIG, 1 << cpu_id);
-		/* FIXME: we should have a way to break out */
-		while (mmio_read_32(PMU_GLOBAL_REQ_PWRUP_STATUS) & (1 << cpu_id))
-			;
-
-		/* release core reset */
-		r = mmio_read_32(CRF_APB_RST_FPD_APU);
-		r &= ~((CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET |
-				CRF_APB_RST_FPD_APU_ACPU_RESET) << cpu_id);
-		mmio_write_32(CRF_APB_RST_FPD_APU, r);
-	} else {
-		const struct pm_proc *proc = pm_get_proc(cpu_id);
-
-		/* Send request to PMU to wake up selected APU CPU core */
-		pm_req_wakeup(proc->node_id, 1, zynqmp_sec_entry, REQ_ACK_NO);
-	}
+	/* release core reset */
+	r = mmio_read_32(CRF_APB_RST_FPD_APU);
+	r &= ~((CRF_APB_RST_FPD_APU_ACPU_PWRON_RESET |
+			CRF_APB_RST_FPD_APU_ACPU_RESET) << cpu_id);
+	mmio_write_32(CRF_APB_RST_FPD_APU, r);
 
 	return PSCI_E_SUCCESS;
 }
 
-static void zynqmp_pwr_domain_off(const psci_power_state_t *target_state)
+static int32_t zynqmp_pwr_domain_on(u_register_t mpidr)
 {
+	uint32_t cpu_id = plat_core_pos_by_mpidr(mpidr);
+	const struct pm_proc *proc;
+
+	if (cpu_id == -1)
+		return PSCI_E_INTERN_FAIL;
+
+	proc = pm_get_proc(cpu_id);
+
+	/* Send request to PMU to wake up selected APU CPU core */
+	pm_req_wakeup(proc->node_id, 1, zynqmp_sec_entry, REQ_ACK_NO);
+
+	return PSCI_E_SUCCESS;
+}
+
+static void zynqmp_nopmu_pwr_domain_off(const psci_power_state_t *target_state)
+{
+	uint32_t r;
 	uint32_t cpu_id = plat_my_core_pos();
 
 	/* Prevent interrupts from spuriously waking up this cpu */
 	gicv2_cpuif_disable();
 
-	if (!zynqmp_is_pmu_up()) {
-		/* set power down request */
-		uint32_t r = mmio_read_32(APU_PWRCTL);
-		r |= (1 << cpu_id);
-		mmio_write_32(APU_PWRCTL, r);
-	} else {
-		const struct pm_proc *proc = pm_get_proc(cpu_id);
+	/* set power down request */
+	r = mmio_read_32(APU_PWRCTL);
+	r |= (1 << cpu_id);
+	mmio_write_32(APU_PWRCTL, r);
+}
 
-		/*
-		 * Send request to PMU to power down the appropriate APU CPU
-		 * core.
-		 * According to PSCI specification, CPU_off function does not
-		 * have resume address and CPU core can only be woken up
-		 * invoking CPU_on function, during which resume address will
-		 * be set.
-		 */
-		pm_self_suspend(proc->node_id, MAX_LATENCY, 0, 0);
-	}
+static void zynqmp_pwr_domain_off(const psci_power_state_t *target_state)
+{
+	uint32_t cpu_id = plat_my_core_pos();
+	const struct pm_proc *proc = pm_get_proc(cpu_id);
+
+	/* Prevent interrupts from spuriously waking up this cpu */
+	gicv2_cpuif_disable();
+
+	/*
+	 * Send request to PMU to power down the appropriate APU CPU
+	 * core.
+	 * According to PSCI specification, CPU_off function does not
+	 * have resume address and CPU core can only be woken up
+	 * invoking CPU_on function, during which resume address will
+	 * be set.
+	 */
+	pm_self_suspend(proc->node_id, MAX_LATENCY, 0, 0);
+}
+
+static void zynqmp_nopmu_pwr_domain_suspend(const psci_power_state_t *target_state)
+{
+	uint32_t r;
+	uint32_t cpu_id = plat_my_core_pos();
+
+	/* set power down request */
+	r = mmio_read_32(APU_PWRCTL);
+	r |= (1 << cpu_id);
+	mmio_write_32(APU_PWRCTL, r);
+
+	/* program RVBAR */
+	mmio_write_32(APU_RVBAR_L_0 + (cpu_id << 3), zynqmp_sec_entry);
+	mmio_write_32(APU_RVBAR_H_0 + (cpu_id << 3), zynqmp_sec_entry >> 32);
+
+	/* clear VINITHI */
+	r = mmio_read_32(APU_CONFIG_0);
+	r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << cpu_id);
+	mmio_write_32(APU_CONFIG_0, r);
+
+	/* enable power up on IRQ */
+	mmio_write_32(PMU_GLOBAL_REQ_PWRUP_EN, 1 << cpu_id);
 }
 
 static void zynqmp_pwr_domain_suspend(const psci_power_state_t *target_state)
 {
 	uint32_t cpu_id = plat_my_core_pos();
+	const struct pm_proc *proc = pm_get_proc(cpu_id);
 
-	if (!zynqmp_is_pmu_up()) {
-		/* set power down request */
-		uint32_t r = mmio_read_32(APU_PWRCTL);
-		r |= (1 << cpu_id);
-		mmio_write_32(APU_PWRCTL, r);
+	/* Send request to PMU to suspend this core */
+	pm_self_suspend(proc->node_id, MAX_LATENCY, 0, zynqmp_sec_entry);
 
-		/* program RVBAR */
-		mmio_write_32(APU_RVBAR_L_0 + (cpu_id << 3), zynqmp_sec_entry);
-		mmio_write_32(APU_RVBAR_H_0 + (cpu_id << 3),
-			      zynqmp_sec_entry >> 32);
-
-		/* clear VINITHI */
-		r = mmio_read_32(APU_CONFIG_0);
-		r &= ~(1 << APU_CONFIG_0_VINITHI_SHIFT << cpu_id);
-		mmio_write_32(APU_CONFIG_0, r);
-
-		/* enable power up on IRQ */
-		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_EN, 1 << cpu_id);
-	} else {
-		const struct pm_proc *proc = pm_get_proc(cpu_id);
-
-		/* Send request to PMU to suspend this core */
-		pm_self_suspend(proc->node_id, MAX_LATENCY, 0,
-				zynqmp_sec_entry);
-
-		/* APU is to be turned off */
-		if (target_state->pwr_domain_state[1] > PLAT_MAX_RET_STATE) {
-			/* Power down L2 cache */
-			pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
-			/* Send request for OCM retention state */
-			set_ocm_retention();
-		}
+	/* APU is to be turned off */
+	if (target_state->pwr_domain_state[1] > PLAT_MAX_RET_STATE) {
+		/* Power down L2 cache */
+		pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
+		/* Send request for OCM retention state */
+		set_ocm_retention();
 	}
 }
 
@@ -168,14 +182,24 @@ static void zynqmp_pwr_domain_on_finish(const psci_power_state_t *target_state)
 	gicv2_pcpu_distif_init();
 }
 
+static void zynqmp_nopmu_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
+{
+	uint32_t r;
+	uint32_t cpu_id = plat_my_core_pos();
+
+	/* disable power up on IRQ */
+	mmio_write_32(PMU_GLOBAL_REQ_PWRUP_DIS, 1 << cpu_id);
+
+	/* clear powerdown bit */
+	r = mmio_read_32(APU_PWRCTL);
+	r &= ~(1 << cpu_id);
+	mmio_write_32(APU_PWRCTL, r);
+}
+
 static void zynqmp_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 {
 	uint32_t cpu_id = plat_my_core_pos();
 	const struct pm_proc *proc = pm_get_proc(cpu_id);
-
-	/* disable power up on IRQ */
-	if (!zynqmp_is_pmu_up())
-		mmio_write_32(PMU_GLOBAL_REQ_PWRUP_DIS, 1 << cpu_id);
 
 	/* Clear the APU power control register for this cpu */
 	pm_client_wakeup(proc);
@@ -184,38 +208,43 @@ static void zynqmp_pwr_domain_suspend_finish(const psci_power_state_t *target_st
 /*******************************************************************************
  * ZynqMP handlers to shutdown/reboot the system
  ******************************************************************************/
-static void __dead2 zynqmp_system_off(void)
+static void __dead2 zynqmp_nopmu_system_off(void)
 {
-	if (zynqmp_is_pmu_up()) {
-		/* Send the power down request to the PMU */
-		pm_system_shutdown(0);
-
-		wfi();
-	}
-
 	ERROR("ZynqMP System Off: operation not handled.\n");
 	panic();
 }
 
+static void __dead2 zynqmp_system_off(void)
+{
+	/* Send the power down request to the PMU */
+	pm_system_shutdown(0);
+
+	while (1)
+		wfi();
+}
+
+static void __dead2 zynqmp_nopmu_system_reset(void)
+{
+	/*
+	 * This currently triggers a system reset. I.e. the whole
+	 * system will be reset! Including RPUs, PMU, PL, etc.
+	 */
+	/* bypass RPLL (needed on 1.0 silicon) */
+	uint32_t reg = mmio_read_32(CRL_APB_RPLL_CTRL);
+	reg |= CRL_APB_RPLL_CTRL_BYPASS;
+	mmio_write_32(CRL_APB_RPLL_CTRL, reg);
+
+	/* trigger system reset */
+	mmio_write_32(CRL_APB_RESET_CTRL, CRL_APB_RESET_CTRL_SOFT_RESET);
+
+	while (1)
+		wfi();
+}
+
 static void __dead2 zynqmp_system_reset(void)
 {
-	if (!zynqmp_is_pmu_up()) {
-		/*
-		 * This currently triggers a system reset. I.e. the whole
-		 * system will be reset! Including RPUs, PMU, PL, etc.
-		 */
-		/* bypass RPLL (needed on 1.0 silicon) */
-		uint32_t reg = mmio_read_32(CRL_APB_RPLL_CTRL);
-		reg |= CRL_APB_RPLL_CTRL_BYPASS;
-		mmio_write_32(CRL_APB_RPLL_CTRL, reg);
-
-		/* trigger system reset */
-		mmio_write_32(CRL_APB_RESET_CTRL,
-			      CRL_APB_RESET_CTRL_SOFT_RESET);
-	} else {
-		/* Send the system reset request to the PMU */
-		pm_system_shutdown(1);
-	}
+	/* Send the system reset request to the PMU */
+	pm_system_shutdown(1);
 
 	while (1)
 		wfi();
@@ -257,6 +286,20 @@ static const struct plat_psci_ops zynqmp_psci_ops = {
 	.get_sys_suspend_power_state	= zynqmp_get_sys_suspend_power_state,
 };
 
+static const struct plat_psci_ops zynqmp_nopmu_psci_ops = {
+	.cpu_standby			= zynqmp_cpu_standby,
+	.pwr_domain_on			= zynqmp_nopmu_pwr_domain_on,
+	.pwr_domain_off			= zynqmp_nopmu_pwr_domain_off,
+	.pwr_domain_suspend		= zynqmp_nopmu_pwr_domain_suspend,
+	.pwr_domain_on_finish		= zynqmp_pwr_domain_on_finish,
+	.pwr_domain_suspend_finish	= zynqmp_nopmu_pwr_domain_suspend_finish,
+	.system_off			= zynqmp_nopmu_system_off,
+	.system_reset			= zynqmp_nopmu_system_reset,
+	.validate_power_state		= zynqmp_validate_power_state,
+	.validate_ns_entrypoint		= zynqmp_validate_ns_entrypoint,
+	.get_sys_suspend_power_state	= zynqmp_get_sys_suspend_power_state,
+};
+
 /*******************************************************************************
  * Export the platform specific power ops.
  ******************************************************************************/
@@ -264,7 +307,11 @@ int plat_setup_psci_ops(uintptr_t sec_entrypoint,
 			const struct plat_psci_ops **psci_ops)
 {
 	zynqmp_sec_entry = sec_entrypoint;
-	*psci_ops = &zynqmp_psci_ops;
+
+	if (zynqmp_is_pmu_up())
+		*psci_ops = &zynqmp_psci_ops;
+	else
+		*psci_ops = &zynqmp_nopmu_psci_ops;
 
 	return 0;
 }
