@@ -74,7 +74,124 @@ const mmap_region_t plat_arm_mmap[] = {
 #define ZYNQMP_RTL_VER_SHIFT  4
 
 #define ZYNQMP_CSU_BASEADDR		0xFFCA0000
+#define ZYNQMP_CSU_IDCODE_OFFSET	0x40
+
+#define ZYNQMP_CSU_IDCODE_XILINX_ID_SHIFT	0
+#define ZYNQMP_CSU_IDCODE_XILINX_ID_MASK	(0xFFF << ZYNQMP_CSU_IDCODE_XILINX_ID_SHIFT)
+#define ZYNQMP_CSU_IDCODE_XILINX_ID		0x093
+
+#define ZYNQMP_CSU_IDCODE_SVD_SHIFT		12
+#define ZYNQMP_CSU_IDCODE_SVD_MASK		(0xE << ZYNQMP_CSU_IDCODE_SVD_SHIFT)
+#define ZYNQMP_CSU_IDCODE_DEVICE_CODE_SHIFT	15
+#define ZYNQMP_CSU_IDCODE_DEVICE_CODE_MASK	(0xF << ZYNQMP_CSU_IDCODE_DEVICE_CODE_SHIFT)
+#define ZYNQMP_CSU_IDCODE_SUB_FAMILY_SHIFT	19
+#define ZYNQMP_CSU_IDCODE_SUB_FAMILY_MASK	(0x3 << ZYNQMP_CSU_IDCODE_SUB_FAMILY_SHIFT)
+#define ZYNQMP_CSU_IDCODE_FAMILY_SHIFT		21
+#define ZYNQMP_CSU_IDCODE_FAMILY_MASK		(0x7F << ZYNQMP_CSU_IDCODE_FAMILY_SHIFT)
+#define ZYNQMP_CSU_IDCODE_FAMILY		0x23
+
+#define ZYNQMP_CSU_IDCODE_REVISION_SHIFT	28
+#define ZYNQMP_CSU_IDCODE_REVISION_MASK		(0xF << ZYNQMP_CSU_IDCODE_REVISION_SHIFT)
+#define ZYNQMP_CSU_IDCODE_REVISION		0
+
+
 #define ZYNQMP_CSU_VERSION_OFFSET	0x44
+
+static const struct {
+	uint32_t id;
+	char *name;
+} zynqmp_devices[] = {
+	{
+		.id = 0x10,
+		.name = "3EG",
+	},
+	{
+		.id = 0x11,
+		.name = "2EG",
+	},
+	{
+		.id = 0x20,
+		.name = "5EV",
+	},
+	{
+		.id = 0x21,
+		.name = "4EV",
+	},
+	{
+		.id = 0x30,
+		.name = "7EV",
+	},
+	{
+		.id = 0x38,
+		.name = "9EG",
+	},
+	{
+		.id = 0x39,
+		.name = "6EG",
+	},
+	{
+		.id = 0x40,
+		.name = "11EG",
+	},
+	{
+		.id = 0x50,
+		.name = "15EG",
+	},
+	{
+		.id = 0x58,
+		.name = "19EG",
+	},
+	{
+		.id = 0x59,
+		.name = "17EG",
+	},
+};
+
+static uint32_t zynqmp_get_silicon_id(void)
+{
+	uint32_t id;
+
+	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
+
+	id &= ZYNQMP_CSU_IDCODE_DEVICE_CODE_MASK | ZYNQMP_CSU_IDCODE_SVD_MASK;
+	id >>= ZYNQMP_CSU_IDCODE_SVD_SHIFT;
+
+	return id;
+}
+
+static char *zynqmp_get_silicon_idcode_name(void)
+{
+	uint32_t i, id;
+
+	id = zynqmp_get_silicon_id();
+	for (i = 0; i < ARRAY_SIZE(zynqmp_devices); i++) {
+		if (zynqmp_devices[i].id == id) {
+			return zynqmp_devices[i].name;
+		}
+	}
+	return "UNKN";
+}
+
+static char *zynqmp_print_silicon_idcode(void)
+{
+	uint32_t id, maskid, tmp;
+
+	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
+
+	tmp = id;
+	tmp &= ZYNQMP_CSU_IDCODE_XILINX_ID_MASK |
+	       ZYNQMP_CSU_IDCODE_FAMILY_MASK |
+	       ZYNQMP_CSU_IDCODE_REVISION_MASK;
+	maskid = ZYNQMP_CSU_IDCODE_XILINX_ID << ZYNQMP_CSU_IDCODE_XILINX_ID_SHIFT |
+	            ZYNQMP_CSU_IDCODE_FAMILY << ZYNQMP_CSU_IDCODE_FAMILY_SHIFT |
+	            ZYNQMP_CSU_IDCODE_REVISION << ZYNQMP_CSU_IDCODE_REVISION_SHIFT;
+	if (tmp != maskid) {
+		ERROR("Incorrect XILINX IDCODE 0x%x, maskid 0x%x\n", id, maskid);
+		return "UNKN";
+	}
+	VERBOSE("Xilinx IDCODE 0x%x\n", id);
+	return zynqmp_get_silicon_idcode_name();
+}
 
 static unsigned int zynqmp_get_silicon_ver(void)
 {
@@ -151,7 +268,8 @@ static void zynqmp_print_platform_name(void)
 		break;
 	}
 
-	NOTICE("ATF running on %s/RTL%d.%d at 0x%x%s\n", label,
+	NOTICE("ATF running on XCZU%s/%s/RTL%d.%d at 0x%x%s\n",
+	       zynqmp_print_silicon_idcode(), label,
 	       (rtl & 0xf0) >> 4, rtl & 0xf, BL31_BASE,
 	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
