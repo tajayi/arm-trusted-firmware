@@ -63,6 +63,50 @@ const mmap_region_t plat_arm_mmap[] = {
 	{0}
 };
 
+static unsigned int zynqmp_get_silicon_ver(void)
+{
+	uint32_t ver;
+
+	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
+	ver &= ZYNQMP_SILICON_VER_MASK;
+	ver >>= ZYNQMP_SILICON_VER_SHIFT;
+
+	return ver;
+}
+
+uint32_t zynqmp_get_uart_clk(void)
+{
+	uint32_t ver = zynqmp_get_silicon_ver();
+
+	switch (ver) {
+	case ZYNQMP_CSU_VERSION_VELOCE:
+		return 48000;
+	case ZYNQMP_CSU_VERSION_EP108:
+		return 25000000;
+	case ZYNQMP_CSU_VERSION_QEMU:
+		return 133000000;
+	}
+
+	return 100000000;
+}
+
+static unsigned int zynqmp_get_system_timer_freq(void)
+{
+	uint32_t ver = zynqmp_get_silicon_ver();
+
+	switch (ver) {
+	case ZYNQMP_CSU_VERSION_VELOCE:
+		return 10000;
+	case ZYNQMP_CSU_VERSION_EP108:
+		return 4000000;
+	case ZYNQMP_CSU_VERSION_QEMU:
+		return 50000000;
+	}
+
+	return 100000000;
+}
+
+#if LOG_LEVEL >= LOG_LEVEL_NOTICE
 static const struct {
 	uint32_t id;
 	char *name;
@@ -138,6 +182,17 @@ static char *zynqmp_get_silicon_idcode_name(void)
 	return "UNKN";
 }
 
+static uint32_t zynqmp_get_rtl_ver(void)
+{
+	uint32_t ver;
+
+	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
+	ver &= ZYNQMP_RTL_VER_MASK;
+	ver >>= ZYNQMP_RTL_VER_SHIFT;
+
+	return ver;
+}
+
 static char *zynqmp_print_silicon_idcode(void)
 {
 	uint32_t id, maskid, tmp;
@@ -157,60 +212,6 @@ static char *zynqmp_print_silicon_idcode(void)
 	}
 	VERBOSE("Xilinx IDCODE 0x%x\n", id);
 	return zynqmp_get_silicon_idcode_name();
-}
-
-static unsigned int zynqmp_get_silicon_ver(void)
-{
-	uint32_t ver;
-
-	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
-	ver &= ZYNQMP_SILICON_VER_MASK;
-	ver >>= ZYNQMP_SILICON_VER_SHIFT;
-
-	return ver;
-}
-
-static uint32_t zynqmp_get_rtl_ver(void)
-{
-	uint32_t ver;
-
-	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
-	ver &= ZYNQMP_RTL_VER_MASK;
-	ver >>= ZYNQMP_RTL_VER_SHIFT;
-
-	return ver;
-}
-
-uint32_t zynqmp_get_uart_clk(void)
-{
-	uint32_t ver = zynqmp_get_silicon_ver();
-
-	switch (ver) {
-	case ZYNQMP_CSU_VERSION_VELOCE:
-		return 48000;
-	case ZYNQMP_CSU_VERSION_EP108:
-		return 25000000;
-	case ZYNQMP_CSU_VERSION_QEMU:
-		return 133000000;
-	}
-
-	return 100000000;
-}
-
-static unsigned int zynqmp_get_system_timer_freq(void)
-{
-	uint32_t ver = zynqmp_get_silicon_ver();
-
-	switch (ver) {
-	case ZYNQMP_CSU_VERSION_VELOCE:
-		return 10000;
-	case ZYNQMP_CSU_VERSION_EP108:
-		return 4000000;
-	case ZYNQMP_CSU_VERSION_QEMU:
-		return 50000000;
-	}
-
-	return 100000000;
 }
 
 static void zynqmp_print_platform_name(void)
@@ -239,6 +240,9 @@ static void zynqmp_print_platform_name(void)
 	       (rtl & 0xf0) >> 4, rtl & 0xf, BL31_BASE,
 	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
+#else
+static inline void zynqmp_print_platform_name(void) { }
+#endif
 
 #define FW_IS_PRESENT		(1 << 4)
 
