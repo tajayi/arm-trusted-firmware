@@ -39,8 +39,8 @@ void zynqmp_cci_init(void);
 void zynqmp_cci_enable(void);
 
 /* ZynqMP specific functions */
-uint32_t zynqmp_get_uart_clk(void);
-uint32_t zynqmp_is_pmu_up(void);
+unsigned int zynqmp_get_uart_clk(void);
+unsigned int zynqmp_is_pmu_up(void);
 
 /*
  * Register handler to specific GIC entrance

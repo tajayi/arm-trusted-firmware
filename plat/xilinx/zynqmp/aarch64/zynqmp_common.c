@@ -65,7 +65,7 @@ const mmap_region_t plat_arm_mmap[] = {
 
 static unsigned int zynqmp_get_silicon_ver(void)
 {
-	uint32_t ver;
+	unsigned int ver;
 
 	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_SILICON_VER_MASK;
@@ -74,9 +74,9 @@ static unsigned int zynqmp_get_silicon_ver(void)
 	return ver;
 }
 
-uint32_t zynqmp_get_uart_clk(void)
+unsigned int zynqmp_get_uart_clk(void)
 {
-	uint32_t ver = zynqmp_get_silicon_ver();
+	unsigned int ver = zynqmp_get_silicon_ver();
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
@@ -92,7 +92,7 @@ uint32_t zynqmp_get_uart_clk(void)
 
 static unsigned int zynqmp_get_system_timer_freq(void)
 {
-	uint32_t ver = zynqmp_get_silicon_ver();
+	unsigned int ver = zynqmp_get_silicon_ver();
 
 	switch (ver) {
 	case ZYNQMP_CSU_VERSION_VELOCE:
@@ -108,7 +108,7 @@ static unsigned int zynqmp_get_system_timer_freq(void)
 
 #if LOG_LEVEL >= LOG_LEVEL_NOTICE
 static const struct {
-	uint32_t id;
+	unsigned int id;
 	char *name;
 } zynqmp_devices[] = {
 	{
@@ -157,9 +157,9 @@ static const struct {
 	},
 };
 
-static uint32_t zynqmp_get_silicon_id(void)
+static unsigned int zynqmp_get_silicon_id(void)
 {
-	uint32_t id;
+	unsigned int id;
 
 	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
 
@@ -171,7 +171,7 @@ static uint32_t zynqmp_get_silicon_id(void)
 
 static char *zynqmp_get_silicon_idcode_name(void)
 {
-	uint32_t i, id;
+	unsigned int i, id;
 
 	id = zynqmp_get_silicon_id();
 	for (i = 0; i < ARRAY_SIZE(zynqmp_devices); i++) {
@@ -182,9 +182,9 @@ static char *zynqmp_get_silicon_idcode_name(void)
 	return "UNKN";
 }
 
-static uint32_t zynqmp_get_rtl_ver(void)
+static unsigned int zynqmp_get_rtl_ver(void)
 {
-	uint32_t ver;
+	unsigned int ver;
 
 	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_RTL_VER_MASK;
@@ -195,7 +195,7 @@ static uint32_t zynqmp_get_rtl_ver(void)
 
 static char *zynqmp_print_silicon_idcode(void)
 {
-	uint32_t id, maskid, tmp;
+	unsigned int id, maskid, tmp;
 
 	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
 
@@ -227,8 +227,8 @@ static unsigned int zynqmp_get_ps_ver(void)
 
 static void zynqmp_print_platform_name(void)
 {
-	uint32_t ver = zynqmp_get_silicon_ver();
-	uint32_t rtl = zynqmp_get_rtl_ver();
+	unsigned int ver = zynqmp_get_silicon_ver();
+	unsigned int rtl = zynqmp_get_rtl_ver();
 	char *label = "Unknown";
 
 	switch (ver) {
@@ -262,7 +262,7 @@ static inline void zynqmp_print_platform_name(void) { }
  *   0 = No FW found
  *   non-zero = FW is present
  */
-static uint32_t zynqmp_pmufw_present;
+static unsigned int zynqmp_pmufw_present;
 
 /*
  * zynqmp_discover_pmufw - Discover presence of PMUFW
@@ -274,7 +274,7 @@ static uint32_t zynqmp_pmufw_present;
  *    (be it by error or intentionally)
  *  - XPPU/XMPU may restrict ATF's access to the PMU address space
  */
-static uint32_t zynqmp_discover_pmufw(void)
+static unsigned int zynqmp_discover_pmufw(void)
 {
 	zynqmp_pmufw_present = mmio_read_32(PMU_GLOBAL_CNTRL);
 	zynqmp_pmufw_present &= FW_IS_PRESENT;
@@ -287,7 +287,7 @@ static uint32_t zynqmp_discover_pmufw(void)
  *
  * Return 0 if firmware is not available, non 0 otherwise
  */
-uint32_t zynqmp_is_pmu_up(void)
+unsigned int zynqmp_is_pmu_up(void)
 {
 	return zynqmp_pmufw_present;
 }
@@ -309,7 +309,7 @@ uint32_t zynqmp_is_pmu_up(void)
  ******************************************************************************/
 int zynqmp_config_setup(void)
 {
-	uint32_t val;
+	unsigned int val;
 
 	zynqmp_discover_pmufw();
 	zynqmp_print_platform_name();
