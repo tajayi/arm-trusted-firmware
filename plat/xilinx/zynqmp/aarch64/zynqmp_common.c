@@ -214,6 +214,17 @@ static char *zynqmp_print_silicon_idcode(void)
 	return zynqmp_get_silicon_idcode_name();
 }
 
+static unsigned int zynqmp_get_ps_ver(void)
+{
+	unsigned int ver;
+
+	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
+	ver &= ZYNQMP_PS_VER_MASK;
+	ver >>= ZYNQMP_PS_VER_SHIFT;
+
+	return ver + 1;
+}
+
 static void zynqmp_print_platform_name(void)
 {
 	uint32_t ver = zynqmp_get_silicon_ver();
@@ -235,8 +246,8 @@ static void zynqmp_print_platform_name(void)
 		break;
 	}
 
-	NOTICE("ATF running on XCZU%s/%s/RTL%d.%d at 0x%x%s\n",
-	       zynqmp_print_silicon_idcode(), label,
+	NOTICE("ATF running on XCZU%s/%s v%d/RTL%d.%d at 0x%x%s\n",
+	       zynqmp_print_silicon_idcode(), label, zynqmp_get_ps_ver(),
 	       (rtl & 0xf0) >> 4, rtl & 0xf, BL31_BASE,
 	       zynqmp_is_pmu_up() ? ", with PMU firmware" : "");
 }
