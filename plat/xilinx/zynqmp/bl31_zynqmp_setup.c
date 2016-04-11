@@ -138,7 +138,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 static interrupt_type_handler_t type_el3_interrupt_table[MAX_INTR_EL3];
 
 /* Register INTR_TYPE_EL3 interrupt handler to specific GIC entrance */
-int zynqmp_request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
+int zynqmp_request_intr_type_el3(unsigned int id, interrupt_type_handler_t handler)
 {
 	/* Validate 'handler' and 'id' parameters */
 	if (!handler || id >= MAX_INTR_EL3)
@@ -161,7 +161,7 @@ static uint64_t zynqmp_el3_interrupt_handler(uint32_t id, uint32_t flags,
 
 	intr_id = plat_ic_get_pending_interrupt_id();
 	handler = type_el3_interrupt_table[intr_id];
-	if (handler != NULL)
+	if (handler)
 		handler(intr_id, flags, handle, cookie);
 
 	return 0;
