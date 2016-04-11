@@ -31,7 +31,7 @@
 #include <platform_def.h>
 #include <psci.h>
 
-const static unsigned char plat_power_domain_tree_desc[] = {1, 4};
+static const unsigned char plat_power_domain_tree_desc[] = {1, 4};
 
 const unsigned char *plat_get_power_domain_tree_desc(void)
 {

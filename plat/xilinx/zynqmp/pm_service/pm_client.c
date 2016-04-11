@@ -114,7 +114,7 @@ enum pm_ret_status set_ocm_retention(void)
  *
  * Return: pointer to a proc structure if proc is found, otherwise NULL
  */
-const struct pm_proc *pm_get_proc(const uint32_t cpuid)
+const struct pm_proc *pm_get_proc(unsigned int cpuid)
 {
 	if (cpuid < ARRAY_SIZE(pm_procs_all))
 		return &pm_procs_all[cpuid];
@@ -128,14 +128,11 @@ const struct pm_proc *pm_get_proc(const uint32_t cpuid)
  *
  * Return: pointer to a proc structure if proc is found, otherwise NULL
  */
-const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid)
+const struct pm_proc *pm_get_proc_by_node(enum pm_node_id nid)
 {
-	uint32_t i;
-
-	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
-		if (nid == pm_procs_all[i].node_id) {
+	for (size_t i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
+		if (nid == pm_procs_all[i].node_id)
 			return &pm_procs_all[i];
-		}
 	}
 	return NULL;
 }
@@ -146,14 +143,11 @@ const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid)
  *
  * Return: the cpu ID (starting from 0) for the subsystem
  */
-static uint32_t pm_get_cpuid(const enum pm_node_id nid)
+static unsigned int pm_get_cpuid(enum pm_node_id nid)
 {
-	uint32_t i;
-
-	for (i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
-		if (pm_procs_all[i].node_id == nid) {
+	for (size_t i = 0; i < ARRAY_SIZE(pm_procs_all); i++) {
+		if (pm_procs_all[i].node_id == nid)
 			return i;
-		}
 	}
 	return UNDEFINED_CPUID;
 }
@@ -166,7 +160,7 @@ const struct pm_proc *primary_proc = &pm_procs_all[0];
  * This function should contain any PU-specific actions
  * required prior to sending suspend request to PMU
  */
-void pm_client_suspend(const struct pm_proc *const proc)
+void pm_client_suspend(const struct pm_proc *proc)
 {
 	/* Set powerdown request */
 	mmio_write_32(APU_PWRCTL, mmio_read_32(APU_PWRCTL) | proc->pwrdn_mask);
@@ -194,14 +188,15 @@ void pm_client_abort_suspend(void)
  * This function should contain any PU-specific actions
  * required for waking up another APU core
  */
-void pm_client_wakeup(const struct pm_proc *const proc)
+void pm_client_wakeup(const struct pm_proc *proc)
 {
-	uint32_t cpuid = pm_get_cpuid(proc->node_id);
+	unsigned int cpuid = pm_get_cpuid(proc->node_id);
 
-	if (UNDEFINED_CPUID != cpuid) {
-		/* clear powerdown bit for affected cpu */
-		uint32_t val = mmio_read_32(APU_PWRCTL);
-		val &= ~(proc->pwrdn_mask);
-		mmio_write_32(APU_PWRCTL, val);
-	}
+	if (cpuid == UNDEFINED_CPUID)
+		return;
+
+	/* clear powerdown bit for affected cpu */
+	uint32_t val = mmio_read_32(APU_PWRCTL);
+	val &= ~(proc->pwrdn_mask);
+	mmio_write_32(APU_PWRCTL, val);
 }

@@ -186,6 +186,11 @@
 #define HCR_IMO_BIT		(1 << 4)
 #define HCR_FMO_BIT		(1 << 3)
 
+/* ISR definitions */
+#define ISR_A_SHIFT		8
+#define ISR_I_SHIFT		7
+#define ISR_F_SHIFT		6
+
 /* CNTHCTL_EL2 definitions */
 #define EVNTEN_BIT		(1 << 2)
 #define EL1PCEN_BIT		(1 << 1)
@@ -419,11 +424,11 @@
 #define AP_RW			(0x0 << 5)
 
 #define NS				(0x1 << 3)
-#define ATTR_SO_INDEX			0x2
+#define ATTR_NON_CACHEABLE_INDEX	0x2
 #define ATTR_DEVICE_INDEX		0x1
 #define ATTR_IWBWA_OWBWA_NTR_INDEX	0x0
 #define LOWER_ATTRS(x)			(((x) & 0xfff) << 2)
-#define ATTR_SO				(0x0)
+#define ATTR_NON_CACHEABLE		(0x44)
 #define ATTR_DEVICE			(0x4)
 #define ATTR_IWBWA_OWBWA_NTR		(0xff)
 #define MAIR_ATTR_SET(attr, index)	(attr << (index << 3))

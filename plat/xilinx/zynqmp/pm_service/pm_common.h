@@ -50,9 +50,9 @@
  * @buffer_base	base address for payload buffer
  */
 struct pm_ipi {
-	const uint32_t mask;
-	const uint32_t base;
-	const uint32_t buffer_base;
+	const unsigned int mask;
+	const uintptr_t base;
+	const uintptr_t buffer_base;
 };
 
 /**
@@ -64,11 +64,11 @@ struct pm_ipi {
  */
 struct pm_proc {
 	const enum pm_node_id node_id;
-	const uint32_t pwrdn_mask;
-	const struct pm_ipi *const ipi;
+	const unsigned int pwrdn_mask;
+	const struct pm_ipi *ipi;
 };
 
-const struct pm_proc *pm_get_proc(const uint32_t cpuid);
-const struct pm_proc *pm_get_proc_by_node(const enum pm_node_id nid);
+const struct pm_proc *pm_get_proc(unsigned int cpuid);
+const struct pm_proc *pm_get_proc_by_node(enum pm_node_id nid);
 
 #endif /* _PM_COMMON_H_ */

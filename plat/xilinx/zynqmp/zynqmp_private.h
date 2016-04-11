@@ -33,22 +33,16 @@
 
 #include <interrupt_mgmt.h>
 
-int zynqmp_config_setup(void);
-
-void zynqmp_cci_init(void);
-void zynqmp_cci_enable(void);
+void zynqmp_config_setup(void);
 
 /* ZynqMP specific functions */
 unsigned int zynqmp_get_uart_clk(void);
-unsigned int zynqmp_is_pmu_up(void);
+int zynqmp_is_pmu_up(void);
 
 /*
  * Register handler to specific GIC entrance
  * for INTR_TYPE_EL3 type of interrupt
  */
 int request_intr_type_el3(uint32_t, interrupt_type_handler_t);
-
-/* Declaration of function used as wake-up entrypoint */
-void bl31_entrypoint(void);
 
 #endif /* __ZYNQMP_PRIVATE_H__ */

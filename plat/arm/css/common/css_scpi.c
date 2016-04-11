@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,8 +37,9 @@
 #include "css_mhu.h"
 #include "css_scpi.h"
 
-#define SCPI_SHARED_MEM_SCP_TO_AP	SCP_COM_SHARED_MEM_BASE
-#define SCPI_SHARED_MEM_AP_TO_SCP	(SCP_COM_SHARED_MEM_BASE + 0x100)
+#define SCPI_SHARED_MEM_SCP_TO_AP	PLAT_CSS_SCP_COM_SHARED_MEM_BASE
+#define SCPI_SHARED_MEM_AP_TO_SCP	(PLAT_CSS_SCP_COM_SHARED_MEM_BASE \
+								 + 0x100)
 
 #define SCPI_CMD_HEADER_AP_TO_SCP		\
 	((scpi_cmd_t *) SCPI_SHARED_MEM_AP_TO_SCP)
@@ -55,10 +56,10 @@ static void scpi_secure_message_start(void)
 
 static void scpi_secure_message_send(size_t payload_size)
 {
-	/* Make sure payload can be seen by SCP */
-	if (MHU_PAYLOAD_CACHED)
-		flush_dcache_range(SCPI_SHARED_MEM_AP_TO_SCP,
-				   sizeof(scpi_cmd_t) + payload_size);
+	/* Ensure that any write to the SCPI payload area is seen by SCP before
+	 * we write to the MHU register. If these 2 writes were reordered by
+	 * the CPU then SCP would read stale payload data */
+	dmbst();
 
 	mhu_secure_message_send(SCPI_MHU_SLOT_ID);
 }
@@ -78,9 +79,10 @@ static void scpi_secure_message_receive(scpi_cmd_t *cmd)
 		panic();
 	}
 
-	/* Make sure we don't read stale data */
-	if (MHU_PAYLOAD_CACHED)
-		inv_dcache_range(SCPI_SHARED_MEM_SCP_TO_AP, sizeof(*cmd));
+	/* Ensure that any read to the SCPI payload area is done after reading
+	 * the MHU register. If these 2 reads were reordered then the CPU would
+	 * read invalid payload data */
+	dmbld();
 
 	memcpy(cmd, (void *) SCPI_SHARED_MEM_SCP_TO_AP, sizeof(*cmd));
 }

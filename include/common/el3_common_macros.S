@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -70,8 +70,16 @@
 	isb
 
 	/* ---------------------------------------------------------------------
-	 * Enable the SError interrupt now that the exception vectors have been
-	 * setup.
+	 * Early set RES1 bits in SCR_EL3. Set EA bit to catch both
+	 * External Aborts and SError Interrupts in EL3 and also the SIF bit
+	 * to disable instruction fetches from Non-secure memory.
+	 * ---------------------------------------------------------------------
+	 */
+	mov	x0, #(SCR_RES1_BITS | SCR_EA_BIT | SCR_SIF_BIT)
+	msr	scr_el3, x0
+	/* ---------------------------------------------------------------------
+	 * Enable External Aborts and SError Interrupts now that the exception
+	 * vectors have been setup.
 	 * ---------------------------------------------------------------------
 	 */
 	msr	daifclr, #DAIF_ABT_BIT
@@ -171,9 +179,19 @@
 	do_cold_boot:
 	.endif /* _warm_boot_mailbox */
 
+	/* ---------------------------------------------------------------------
+	 * It is a cold boot.
+	 * Perform any processor specific actions upon reset e.g. cache, TLB
+	 * invalidations etc.
+	 * ---------------------------------------------------------------------
+	 */
+	bl	reset_handler
+
+	el3_arch_init_common \_exception_vectors
+
 	.if \_secondary_cold_boot
 		/* -------------------------------------------------------------
-		 * It is a cold boot.
+		 * Check if this is a primary or secondary CPU cold boot.
 		 * The primary CPU will set up the platform while the
 		 * secondaries are placed in a platform-specific state until the
 		 * primary CPU performs the necessary actions to bring them out
@@ -186,20 +204,16 @@
 		/* This is a cold boot on a secondary CPU */
 		bl	plat_secondary_cold_boot_setup
 		/* plat_secondary_cold_boot_setup() is not supposed to return */
-	secondary_panic:
-		b	secondary_panic
+		bl	el3_panic
 
 	do_primary_cold_boot:
 	.endif /* _secondary_cold_boot */
 
 	/* ---------------------------------------------------------------------
-	 * Perform any processor specific actions upon reset e.g. cache, TLB
-	 * invalidations etc.
+	 * Initialize memory now. Secondary CPU initialization won't get to this
+	 * point.
 	 * ---------------------------------------------------------------------
 	 */
-	bl	reset_handler
-
-	el3_arch_init_common \_exception_vectors
 
 	.if \_init_memory
 		bl	platform_mem_init

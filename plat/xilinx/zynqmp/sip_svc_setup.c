@@ -40,8 +40,8 @@
 #define ZYNQMP_SIP_SVC_VERSION		0x8200ff03
 
 /* SiP Service Calls version numbers */
-#define SIP_SVC_VERSION_MAJOR	0x0
-#define SIP_SVC_VERSION_MINOR	0x1
+#define SIP_SVC_VERSION_MAJOR	0
+#define SIP_SVC_VERSION_MINOR	1
 
 /* These macros are used to identify PM calls from the SMC function ID */
 #define PM_FID_MASK	0xf000u
@@ -49,9 +49,9 @@
 #define is_pm_fid(_fid) (((_fid) & PM_FID_MASK) == PM_FID_VALUE)
 
 /* SiP Service UUID */
-DEFINE_SVC_UUID(zynqmp_sip_uid,
-		0x0, 0x0, 0x0, 0x0, 0x0,
-		0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+DEFINE_SVC_UUID(zynqmp_sip_uuid,
+		0x2a1d9b5c, 0x8605, 0x4023, 0xa6, 0x1b,
+		0xb9, 0x25, 0x82, 0x2d, 0xe3, 0xa5);
 
 /**
  * sip_svc_setup() - Setup SiP Service
@@ -89,18 +89,13 @@ uint64_t sip_svc_smc_handler(uint32_t smc_fid,
 
 	switch (smc_fid) {
 	case ZYNQMP_SIP_SVC_CALL_COUNT:
-		/*
-		 * Return the number of SiP Service Calls.
-		 * For now PM is the only SiP service implemented.
-		 */
-		SMC_RET1(handle, PM_API_MAX);
+		/* PM functions + default functions */
+		SMC_RET1(handle, PM_API_MAX + 2);
 
 	case ZYNQMP_SIP_SVC_UID:
-		/* Return UID to the caller */
-		SMC_UUID_RET(handle, zynqmp_sip_uid);
+		SMC_UUID_RET(handle, zynqmp_sip_uuid);
 
 	case ZYNQMP_SIP_SVC_VERSION:
-		/* Return the version of current implementation */
 		SMC_RET2(handle, SIP_SVC_VERSION_MAJOR, SIP_SVC_VERSION_MINOR);
 
 	default:

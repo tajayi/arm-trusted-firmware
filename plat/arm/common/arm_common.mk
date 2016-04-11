@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2015-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -72,6 +72,16 @@ endif
 $(eval $(call assert_boolean,ARM_DISABLE_TRUSTED_WDOG))
 $(eval $(call add_define,ARM_DISABLE_TRUSTED_WDOG))
 
+# Process ARM_CONFIG_CNTACR
+ARM_CONFIG_CNTACR		:=	1
+$(eval $(call assert_boolean,ARM_CONFIG_CNTACR))
+$(eval $(call add_define,ARM_CONFIG_CNTACR))
+
+# Process ARM_BL31_IN_DRAM flag
+ARM_BL31_IN_DRAM		:=	0
+$(eval $(call assert_boolean,ARM_BL31_IN_DRAM))
+$(eval $(call add_define,ARM_BL31_IN_DRAM))
+
 PLAT_INCLUDES		+=	-Iinclude/common/tbbr				\
 				-Iinclude/plat/arm/common			\
 				-Iinclude/plat/arm/common/aarch64
@@ -82,9 +92,7 @@ PLAT_BL_COMMON_SOURCES	+=	lib/aarch64/xlat_tables.c			\
 				plat/arm/common/aarch64/arm_helpers.S		\
 				plat/common/aarch64/plat_common.c
 
-BL1_SOURCES		+=	drivers/arm/cci/cci.c				\
-				drivers/arm/ccn/ccn.c				\
-				drivers/arm/sp805/sp805.c			\
+BL1_SOURCES		+=	drivers/arm/sp805/sp805.c			\
 				drivers/io/io_fip.c				\
 				drivers/io/io_memmap.c				\
 				drivers/io/io_storage.c				\
@@ -97,26 +105,18 @@ ifdef EL3_PAYLOAD_BASE
 BL1_SOURCES		+=	plat/arm/common/arm_pm.c
 endif
 
-BL2_SOURCES		+=	drivers/arm/tzc400/tzc400.c			\
-				drivers/io/io_fip.c				\
+BL2_SOURCES		+=	drivers/io/io_fip.c				\
 				drivers/io/io_memmap.c				\
 				drivers/io/io_storage.c				\
 				plat/arm/common/arm_bl2_setup.c			\
 				plat/arm/common/arm_io_storage.c		\
-				plat/arm/common/arm_security.c			\
 				plat/common/aarch64/platform_up_stack.S
 
-BL2U_SOURCES		+=	drivers/arm/tzc400/tzc400.c			\
-				plat/arm/common/arm_bl2u_setup.c		\
-				plat/arm/common/arm_security.c			\
+BL2U_SOURCES		+=	plat/arm/common/arm_bl2u_setup.c		\
 				plat/common/aarch64/platform_up_stack.S
 
-BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
-				drivers/arm/ccn/ccn.c				\
-				drivers/arm/tzc400/tzc400.c			\
-				plat/arm/common/arm_bl31_setup.c		\
+BL31_SOURCES		+=	plat/arm/common/arm_bl31_setup.c		\
 				plat/arm/common/arm_pm.c			\
-				plat/arm/common/arm_security.c			\
 				plat/arm/common/arm_topology.c			\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/common/aarch64/plat_psci_common.c
@@ -134,13 +134,13 @@ ifneq (${TRUSTED_BOARD_BOOT},0)
 
     PLAT_INCLUDES	+=	-Iinclude/bl1/tbbr
 
-    BL1_SOURCES		+=	${AUTH_SOURCES}			\
-				bl1/tbbr/tbbr_img_desc.c	\
+    BL1_SOURCES		+=	${AUTH_SOURCES}					\
+				bl1/tbbr/tbbr_img_desc.c			\
 				plat/arm/common/arm_bl1_fwu.c
 
     BL2_SOURCES		+=	${AUTH_SOURCES}
 
-    $(eval $(call FWU_FIP_ADD_IMG,NS_BL2U,--ns_bl2u))
+    $(eval $(call FWU_FIP_ADD_IMG,NS_BL2U,--fwu))
 
     MBEDTLS_KEY_ALG	:=	${KEY_ALG}
 

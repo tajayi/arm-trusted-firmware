@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -60,7 +60,7 @@ uint64_t plat_get_syscnt_freq(void);
 int plat_get_image_source(unsigned int image_id,
 			uintptr_t *dev_handle,
 			uintptr_t *image_spec);
-unsigned long plat_get_ns_image_entrypoint(void);
+uintptr_t plat_get_ns_image_entrypoint(void);
 unsigned int plat_my_core_pos(void);
 int plat_core_pos_by_mpidr(u_register_t mpidr);
 
@@ -83,6 +83,7 @@ void plat_report_exception(unsigned long);
 int plat_crash_console_init(void);
 int plat_crash_console_putc(int c);
 void plat_error_handler(int err) __dead2;
+void plat_panic_handler(void) __dead2;
 
 /*******************************************************************************
  * Mandatory BL1 functions
@@ -248,6 +249,8 @@ void bl32_plat_enable_mmu(uint32_t flags);
  ******************************************************************************/
 int plat_get_rotpk_info(void *cookie, void **key_ptr, unsigned int *key_len,
 			unsigned int *flags);
+int plat_get_nv_ctr(void *cookie, unsigned int *nv_ctr);
+int plat_set_nv_ctr(void *cookie, unsigned int nv_ctr);
 
 #if ENABLE_PLAT_COMPAT
 /*

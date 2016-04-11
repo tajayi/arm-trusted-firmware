@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,6 +34,11 @@ FVP_USE_GIC_DRIVER	:= FVP_GICV3_LEGACY
 # The FVP platform depends on this macro to build with correct GIC driver.
 $(eval $(call add_define,FVP_USE_GIC_DRIVER))
 
+# If FVP_CLUSTER_COUNT has been defined, pass it into the build system.
+ifdef FVP_CLUSTER_COUNT
+$(eval $(call add_define,FVP_CLUSTER_COUNT))
+endif
+
 # Choose the GIC sources depending upon the how the FVP will be invoked
 ifeq (${FVP_USE_GIC_DRIVER}, FVP_GICV3)
 FVP_GIC_SOURCES		:=	drivers/arm/gic/common/gic_common.c	\
@@ -57,21 +62,35 @@ else
 $(error "Incorrect GIC driver chosen on FVP port")
 endif
 
+FVP_INTERCONNECT_SOURCES	:= 	drivers/arm/cci/cci.c		\
+					plat/arm/common/arm_cci.c
+
+FVP_SECURITY_SOURCES	:=	drivers/arm/tzc/tzc400.c		\
+				plat/arm/board/fvp/fvp_security.c	\
+				plat/arm/common/arm_tzc400.c
+
+
 PLAT_INCLUDES		:=	-Iplat/arm/board/fvp/include
 
 
 PLAT_BL_COMMON_SOURCES	:=	plat/arm/board/fvp/aarch64/fvp_common.c
 
-BL1_SOURCES		+=	drivers/io/io_semihosting.c			\
-				lib/cpus/aarch64/aem_generic.S			\
+FVP_CPU_LIBS		:=	lib/cpus/aarch64/aem_generic.S			\
+				lib/cpus/aarch64/cortex_a35.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
 				lib/cpus/aarch64/cortex_a57.S			\
+				lib/cpus/aarch64/cortex_a72.S
+
+BL1_SOURCES		+=	drivers/io/io_semihosting.c			\
 				lib/semihosting/semihosting.c			\
 				lib/semihosting/aarch64/semihosting_call.S	\
 				plat/arm/board/fvp/aarch64/fvp_helpers.S	\
 				plat/arm/board/fvp/fvp_bl1_setup.c		\
 				plat/arm/board/fvp/fvp_err.c			\
-				plat/arm/board/fvp/fvp_io_storage.c
+				plat/arm/board/fvp/fvp_io_storage.c		\
+				${FVP_CPU_LIBS}					\
+				${FVP_INTERCONNECT_SOURCES}
+
 
 BL2_SOURCES		+=	drivers/arm/sp804/sp804_delay_timer.c		\
 				drivers/io/io_semihosting.c			\
@@ -81,21 +100,20 @@ BL2_SOURCES		+=	drivers/arm/sp804/sp804_delay_timer.c		\
 				plat/arm/board/fvp/fvp_bl2_setup.c		\
 				plat/arm/board/fvp/fvp_err.c			\
 				plat/arm/board/fvp/fvp_io_storage.c		\
-				plat/arm/board/fvp/fvp_security.c
+				${FVP_SECURITY_SOURCES}
 
 BL2U_SOURCES		+=	plat/arm/board/fvp/fvp_bl2u_setup.c		\
-				plat/arm/board/fvp/fvp_security.c
+				${FVP_SECURITY_SOURCES}
 
-BL31_SOURCES		+=	lib/cpus/aarch64/aem_generic.S			\
-				lib/cpus/aarch64/cortex_a53.S			\
-				lib/cpus/aarch64/cortex_a57.S			\
-				plat/arm/board/fvp/fvp_bl31_setup.c		\
+BL31_SOURCES		+=	plat/arm/board/fvp/fvp_bl31_setup.c		\
 				plat/arm/board/fvp/fvp_pm.c			\
-				plat/arm/board/fvp/fvp_security.c		\
 				plat/arm/board/fvp/fvp_topology.c		\
 				plat/arm/board/fvp/aarch64/fvp_helpers.S	\
 				plat/arm/board/fvp/drivers/pwrc/fvp_pwrc.c	\
-				${FVP_GIC_SOURCES}
+				${FVP_CPU_LIBS}					\
+				${FVP_GIC_SOURCES}				\
+				${FVP_INTERCONNECT_SOURCES}			\
+				${FVP_SECURITY_SOURCES}
 
 # Disable the PSCI platform compatibility layer
 ENABLE_PLAT_COMPAT	:= 	0

@@ -47,14 +47,14 @@
 #define PM_F_GETARGS			0xa02
 
 /* 0 - UP, !0 - DOWN */
-static int32_t pm_down = !0;
+static int pm_down = !0;
 
 /**
  * pm_context - Structure which contains data for power management
  * @api_version		version of PM API, must match with one on PMU side
  * @callback_irq	registered interrupt number used for pm callback action
  * @payload		payload array used to store received
- * 			data from ipi buffer registers
+ *			data from ipi buffer registers
  */
 static struct {
 	uint32_t api_version;
@@ -62,6 +62,9 @@ static struct {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 } pm_ctx;
 
+void gicd_set_isenabler(uintptr_t base, unsigned int id);
+void gicd_set_ispendr(uintptr_t base, unsigned int id);
+void gicd_set_isactiver(uintptr_t base, unsigned int id);
 /**
  * trigger_callback_irq() - Set interrupt for non-secure EL1/EL2
  * @irq_num - entrance in GIC
@@ -105,7 +108,7 @@ static int ipi_fiq_handler(uint32_t *buf)
 /**
  * pm_setup() - PM service setup
  *
- * @return - 	On success, the initialization function must return 0.
+ * @return	On success, the initialization function must return 0.
  *		Any other return value will cause the framework to ignore
  *		the service
  *
@@ -116,14 +119,13 @@ static int ipi_fiq_handler(uint32_t *buf)
  * rt_svc_init signature.
  *
  */
-int32_t pm_setup(void)
+int pm_setup(void)
 {
-	int32_t status;
+	int status;
 
 	if (!zynqmp_is_pmu_up())
 		return -ENODEV;
 
-	/* initialize IPI interrupts */
 	status = pm_ipi_init(ipi_fiq_handler);
 
 	if (status == 0)
@@ -148,19 +150,13 @@ int32_t pm_setup(void)
  *
  * Determines that smc_fid is valid and supported PM SMC Function ID from the
  * list of pm_api_ids, otherwise completes the request with
- * the Unknow SMC Function ID
+ * the unknown SMC Function ID
  *
  * The SMC calls for PM service are forwarded from SIP Service SMC handler
  * function with rt_svc_handle signature
  */
-uint64_t pm_smc_handler(uint32_t smc_fid,
-			uint64_t x1,
-			uint64_t x2,
-			uint64_t x3,
-			uint64_t x4,
-			void *cookie,
-			void *handle,
-			uint64_t flags)
+uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
+			uint64_t x4, void *cookie, void *handle, uint64_t flags)
 {
 	enum pm_ret_status ret;
 

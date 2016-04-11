@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,11 +25,11 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
 ENABLE_PLAT_COMPAT := 0
 PROGRAMMABLE_RESET_ADDRESS := 1
 PSCI_EXTENDED_STATE_ID := 1
+A53_DISABLE_NON_TEMPORAL_HINT := 0
 
 ZYNQMP_ATF_LOCATION	?=	tsram
 ifeq (${ZYNQMP_ATF_LOCATION}, tsram)
@@ -68,6 +67,7 @@ PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 				drivers/console/console.S			\
 				plat/arm/common/aarch64/arm_common.c		\
 				plat/arm/common/aarch64/arm_helpers.S		\
+				plat/arm/common/arm_cci.c			\
 				plat/arm/common/arm_gicv2.c			\
 				plat/common/plat_gicv2.c			\
 				plat/common/aarch64/plat_common.c		\
@@ -76,8 +76,7 @@ PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 
 ZYNQMP_CONSOLE	?=	cadence
 ifeq (${ZYNQMP_CONSOLE}, cadence)
-  PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S	\
-			    drivers/cadence/uart/cdns_common.c
+  PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S
 else ifeq (${ZYNQMP_CONSOLE}, dcc)
   PLAT_BL_COMMON_SOURCES += \
 			    drivers/arm/dcc/dcc_console.c
@@ -85,12 +84,9 @@ else
   $(error "Please define ZYNQMP_CONSOLE")
 endif
 
-
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
-				drivers/arm/tzc400/tzc400.c			\
 				lib/cpus/aarch64/aem_generic.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
-				lib/cpus/aarch64/cortex_a57.S			\
 				plat/common/aarch64/plat_psci_common.c		\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/xilinx/zynqmp/bl31_zynqmp_setup.c		\

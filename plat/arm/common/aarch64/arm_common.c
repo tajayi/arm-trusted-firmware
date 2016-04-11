@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,20 +29,16 @@
  */
 #include <arch.h>
 #include <arch_helpers.h>
-#include <cci.h>
 #include <mmio.h>
 #include <plat_arm.h>
 #include <platform_def.h>
 #include <xlat_tables.h>
 
-
-static const int cci_map[] = {
-	PLAT_ARM_CCI_CLUSTER0_SL_IFACE_IX,
-	PLAT_ARM_CCI_CLUSTER1_SL_IFACE_IX
-};
+extern const mmap_region_t plat_arm_mmap[];
 
 /* Weak definitions may be overridden in specific ARM standard platform */
 #pragma weak plat_get_ns_image_entrypoint
+#pragma weak plat_arm_get_mmap
 
 
 /*******************************************************************************
@@ -67,7 +63,7 @@ static const int cci_map[] = {
 		mmap_add_region(coh_start, coh_start,			\
 				coh_limit - coh_start,			\
 				MT_DEVICE | MT_RW | MT_SECURE);		\
-		mmap_add(plat_arm_mmap);				\
+		mmap_add(plat_arm_get_mmap());				\
 		init_xlat_tables();					\
 									\
 		enable_mmu_el##_el(0);					\
@@ -85,7 +81,7 @@ static const int cci_map[] = {
 		mmap_add_region(ro_start, ro_start,			\
 				ro_limit - ro_start,			\
 				MT_MEMORY | MT_RO | MT_SECURE);		\
-		mmap_add(plat_arm_mmap);				\
+		mmap_add(plat_arm_get_mmap());				\
 		init_xlat_tables();					\
 									\
 		enable_mmu_el##_el(0);					\
@@ -97,7 +93,7 @@ DEFINE_CONFIGURE_MMU_EL(1)
 DEFINE_CONFIGURE_MMU_EL(3)
 
 
-unsigned long plat_get_ns_image_entrypoint(void)
+uintptr_t plat_get_ns_image_entrypoint(void)
 {
 	return PLAT_ARM_NS_IMAGE_OFFSET;
 }
@@ -138,26 +134,32 @@ uint32_t arm_get_spsr_for_bl33_entry(void)
 	return spsr;
 }
 
-
-void arm_cci_init(void)
-{
-	cci_init(PLAT_ARM_CCI_BASE, cci_map, ARRAY_SIZE(cci_map));
-}
-
 /*******************************************************************************
  * Configures access to the system counter timer module.
  ******************************************************************************/
+#ifdef ARM_SYS_TIMCTL_BASE
 void arm_configure_sys_timer(void)
 {
 #ifdef ARM_SYS_TIMCTL_BASE
 	unsigned int reg_val;
 
+#if ARM_CONFIG_CNTACR
 	reg_val = (1 << CNTACR_RPCT_SHIFT) | (1 << CNTACR_RVCT_SHIFT);
 	reg_val |= (1 << CNTACR_RFRQ_SHIFT) | (1 << CNTACR_RVOFF_SHIFT);
 	reg_val |= (1 << CNTACR_RWVT_SHIFT) | (1 << CNTACR_RWPT_SHIFT);
 	mmio_write_32(ARM_SYS_TIMCTL_BASE + CNTACR_BASE(PLAT_ARM_NSTIMER_FRAME_ID), reg_val);
+#endif /* ARM_CONFIG_CNTACR */
 
 	reg_val = (1 << CNTNSAR_NS_SHIFT(PLAT_ARM_NSTIMER_FRAME_ID));
 	mmio_write_32(ARM_SYS_TIMCTL_BASE + CNTNSAR, reg_val);
 #endif
+}
+#endif /* ARM_SYS_TIMCTL_BASE */
+
+/*******************************************************************************
+ * Returns ARM platform specific memory map regions.
+ ******************************************************************************/
+const mmap_region_t *plat_arm_get_mmap(void)
+{
+	return plat_arm_mmap;
 }

@@ -30,7 +30,7 @@
 
 /*
  * Contains APU specific macros and macros to be defined depending on
- * the execution enviroment.
+ * the execution environment.
  */
 
 #ifndef _PM_CLIENT_H_
@@ -40,14 +40,14 @@
 #include "pm_common.h"
 
 /* Functions to be implemented by each PU */
-enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
-				      uint32_t payload[PAYLOAD_ARG_CNT]);
-enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *const proc,
+enum pm_ret_status pm_ipi_send(const struct pm_proc *proc,
+			       uint32_t payload[PAYLOAD_ARG_CNT]);
+enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *proc,
 				    uint32_t payload[PAYLOAD_ARG_CNT],
 				    uint32_t *val);
-void pm_client_suspend(const struct pm_proc *const proc);
+void pm_client_suspend(const struct pm_proc *proc);
 void pm_client_abort_suspend(void);
-void pm_client_wakeup(const struct pm_proc *const proc);
+void pm_client_wakeup(const struct pm_proc *proc);
 enum pm_ret_status set_ocm_retention(void);
 
 /* Global variables to be set in pm_client.c */

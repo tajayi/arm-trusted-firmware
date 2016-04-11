@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2015, Xilinx Inc.
- * Written by Michal Simek.
+ * Copyright (c) 2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,48 +27,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef __CCI_MACROS_S__
+#define __CCI_MACROS_S__
 
-#include <mmio.h>
-#include <stddef.h>
-#include <cadence/cdns_uart.h>
+#include <cci.h>
+#include <platform_def.h>
 
-void cadence_serial_setbrg(uint32_t base, uint32_t clock, uint32_t baudrate)
-{
-	/* Calculation results. */
-	uint32_t calc_bauderror, bdiv, bgen;
-	uint32_t calc_baud = 0;
-	uint32_t baud = baudrate;
+.section .rodata.cci_reg_name, "aS"
+cci_iface_regs:
+	.asciz "cci_snoop_ctrl_cluster0", "cci_snoop_ctrl_cluster1" , ""
 
-	/* Covering case where input clock is so slow */
-	if (clock < 1000000 && baudrate > 4800) {
-		baud = 4800;
-	}
-
-	/*                master clock
-	 * Baud rate = ------------------
-	 *              bgen * (bdiv + 1)
-	 *
-	 * Find acceptable values for baud generation.
+	/* ------------------------------------------------
+	 * The below required platform porting macro prints
+	 * out relevant interconnect registers whenever an
+	 * unhandled exception is taken in BL31.
+	 * Clobbers: x0 - x9, sp
+	 * ------------------------------------------------
 	 */
-	for (bdiv = 4; bdiv < 255; bdiv++) {
-		bgen = clock / (baud * (bdiv + 1));
-		if (bgen < 2 || bgen > 65535)
-			continue;
+	.macro plat_print_interconnect_regs
+	adr	x6, cci_iface_regs
+	/* Store in x7 the base address of the first interface */
+	mov_imm	x7, (PLAT_ARM_CCI_BASE + SLAVE_IFACE_OFFSET(	\
+			PLAT_ARM_CCI_CLUSTER0_SL_IFACE_IX))
+	ldr	w8, [x7, #SNOOP_CTRL_REG]
+	/* Store in x7 the base address of the second interface */
+	mov_imm	x7, (PLAT_ARM_CCI_BASE + SLAVE_IFACE_OFFSET(	\
+			PLAT_ARM_CCI_CLUSTER1_SL_IFACE_IX))
+	ldr	w9, [x7, #SNOOP_CTRL_REG]
+	/* Store to the crash buf and print to console */
+	bl	str_in_crash_buf_print
+	.endm
 
-		calc_baud = clock / (bgen * (bdiv + 1));
-
-		/*
-		 * Use first calculated baudrate with
-		 * an acceptable (<3%) error
-		 */
-		if (baud > calc_baud)
-			calc_bauderror = baud - calc_baud;
-		else
-			calc_bauderror = calc_baud - baud;
-		if (((calc_bauderror * 100) / baud) < 3)
-			break;
-	}
-
-	mmio_write_32(base + R_UART_BRD, bdiv);
-	mmio_write_32(base + R_UART_BRG, bgen);
-}
+#endif /* __CCI_MACROS_S__ */

@@ -1,7 +1,7 @@
-ARM Trusted Firmware for Xilinx Zynq MPSoC
-================================
+ARM Trusted Firmware for Xilinx Zynq UltraScale+ MPSoC
 
-ARM Trusted Firmware implements the EL3 firmware layer for Xilinx Zynq MPSoC.
+ARM Trusted Firmware implements the EL3 firmware layer for Xilinx Zynq
+UltraScale + MPSoC.
 The platform only uses the runtime part of ATF as ZynqMP already has a
 BootROM (BL1) and FSBL (BL2).
 

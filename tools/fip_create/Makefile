@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -28,38 +28,56 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-PROJECT = fip_create
-OBJECTS = fip_create.o
+MAKE_HELPERS_DIRECTORY := ../../make_helpers/
+include ${MAKE_HELPERS_DIRECTORY}build_macros.mk
+include ${MAKE_HELPERS_DIRECTORY}build_env.mk
 
-CFLAGS = -Wall -Werror -pedantic -std=c99
+PROJECT := fip_create${BIN_EXT}
+OBJECTS := fip_create.o
+COPIED_H_FILES := uuid.h firmware_image_package.h
+
+CFLAGS := -Wall -Werror -pedantic -std=c99
 ifeq (${DEBUG},1)
   CFLAGS += -g -O0 -DDEBUG
 else
   CFLAGS += -O2
 endif
 
-# Make soft links and include from local directory otherwise wrong headers
-# could get pulled in from firmware tree.
-INCLUDE_PATHS = -I.
+# Only include from local directory (see comment below).
+INCLUDE_PATHS := -I.
 
 CC := gcc
-RM := rm -rf
 
-.PHONY: all clean
+.PHONY: all clean distclean
 
 all: ${PROJECT}
 
 ${PROJECT}: ${OBJECTS} Makefile
 	@echo "  LD      $@"
 	${Q}${CC} ${OBJECTS} -o $@
-	@echo
+	@${ECHO_BLANK_LINE}
 	@echo "Built $@ successfully"
-	@echo
+	@${ECHO_BLANK_LINE}
 
-%.o: %.c %.h Makefile
+%.o: %.c %.h ${COPIED_H_FILES} Makefile
 	@echo "  CC      $<"
 	${Q}${CC} -c ${CFLAGS} ${INCLUDE_PATHS} $< -o $@
 
+#
+# Copy required library headers to a local directory so they can be included
+# by this project without adding the library directories to the system include
+# path. This avoids conflicts with definitions in the compiler standard
+# include path.
+#
+uuid.h : ../../include/stdlib/sys/uuid.h
+	$(call SHELL_COPY,$<,$@)
+
+firmware_image_package.h : ../../include/common/firmware_image_package.h
+	$(call SHELL_COPY,$<,$@)
+
 clean:
-	${Q}${RM} ${PROJECT}
-	${Q}${RM} ${OBJECTS}
+	$(call SHELL_DELETE_ALL, ${PROJECT} ${OBJECTS})
+
+distclean: clean
+	$(call SHELL_DELETE_ALL, ${COPIED_H_FILES})
+

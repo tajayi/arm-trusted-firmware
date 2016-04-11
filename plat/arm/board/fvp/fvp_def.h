@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2014-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,9 @@
 
 #include <arm_def.h>
 
-
+#ifndef FVP_CLUSTER_COUNT
+#define FVP_CLUSTER_COUNT		2
+#endif
 #define FVP_MAX_CPUS_PER_CLUSTER	4
 
 #define FVP_PRIMARY_CPU			0x0
@@ -67,7 +69,13 @@
 
 #define PCIE_EXP_BASE			0x40000000
 #define TZRNG_BASE			0x7fe60000
-#define TZNVCTR_BASE			0x7fe70000
+
+/* Non-volatile counters */
+#define TRUSTED_NVCTR_BASE		0x7fe70000
+#define TFW_NVCTR_BASE			(TRUSTED_NVCTR_BASE + 0x0000)
+#define TFW_NVCTR_SIZE			4
+#define NTFW_CTR_BASE			(TRUSTED_NVCTR_BASE + 0x0004)
+#define NTFW_CTR_SIZE			4
 
 /* Keys */
 #define SOC_KEYS_BASE			0x7fe80000

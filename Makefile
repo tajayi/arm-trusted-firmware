@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,9 @@ VERSION_MINOR			:= 2
 # Default goal is build all images
 .DEFAULT_GOAL			:= all
 
-include make_helpers/build_macros.mk
+MAKE_HELPERS_DIRECTORY := make_helpers/
+include ${MAKE_HELPERS_DIRECTORY}build_macros.mk
+include ${MAKE_HELPERS_DIRECTORY}build_env.mk
 
 ################################################################################
 # Default values for build configurations
@@ -110,10 +112,11 @@ CHECK_IGNORE		:=	--ignore COMPLEX_MACRO \
 				--ignore GIT_COMMIT_ID
 CHECKPATCH_ARGS		:=	--no-tree --no-signoff ${CHECK_IGNORE}
 CHECKCODE_ARGS		:=	--no-patch --no-tree --no-signoff ${CHECK_IGNORE}
-# Do not check the coding style on C library files
-CHECK_PATHS		:=	$(shell ls -I include -I lib) \
-				$(addprefix include/,$(shell ls -I stdlib include)) \
-				$(addprefix lib/,$(shell ls -I stdlib lib))
+# Do not check the coding style on C library files or documentation files
+INCLUDE_DIRS_TO_CHECK	:=	$(sort $(filter-out include/stdlib, $(wildcard include/*)))
+LIB_DIRS_TO_CHECK	:=	$(sort $(filter-out lib/stdlib, $(wildcard lib/*)))
+ROOT_DIRS_TO_CHECK	:=	$(sort $(filter-out lib include docs %.md, $(wildcard *)))
+CHECK_PATHS		:=	${ROOT_DIRS_TO_CHECK} ${INCLUDE_DIRS_TO_CHECK} ${LIB_DIRS_TO_CHECK}
 
 
 ################################################################################
@@ -122,10 +125,10 @@ CHECK_PATHS		:=	$(shell ls -I include -I lib) \
 
 # Verbose flag
 ifeq (${V},0)
-        Q=@
+        Q:=@
         CHECKCODE_ARGS	+=	--no-summary --terse
 else
-        Q=
+        Q:=
 endif
 export Q
 
@@ -196,8 +199,19 @@ BL_COMMON_SOURCES	+=	common/bl_common.c			\
 				common/aarch64/debug.S			\
 				lib/aarch64/cache_helpers.S		\
 				lib/aarch64/misc_helpers.S		\
-				lib/aarch64/xlat_helpers.c		\
-				lib/stdlib/std.c			\
+				lib/stdlib/abort.c			\
+				lib/stdlib/assert.c			\
+				lib/stdlib/exit.c			\
+				lib/stdlib/mem.c			\
+				lib/stdlib/printf.c			\
+				lib/stdlib/putchar.c			\
+				lib/stdlib/puts.c			\
+				lib/stdlib/sscanf.c			\
+				lib/stdlib/strchr.c			\
+				lib/stdlib/strcmp.c			\
+				lib/stdlib/strlen.c			\
+				lib/stdlib/strncmp.c			\
+				lib/stdlib/subr_prf.c			\
 				plat/common/aarch64/platform_helpers.S
 
 INCLUDES		+=	-Iinclude/bl1			\
@@ -223,17 +237,12 @@ INCLUDES		+=	-Iinclude/bl1			\
 # Generic definitions
 ################################################################################
 
+include ${MAKE_HELPERS_DIRECTORY}plat_helpers.mk
+
 BUILD_BASE		:=	./build
 BUILD_PLAT		:=	${BUILD_BASE}/${PLAT}/${BUILD_TYPE}
 
-PLAT_MAKEFILE		:=	platform.mk
-# Generate the platforms list by recursively searching for all directories
-# under /plat containing a PLAT_MAKEFILE. Append each platform with a `|`
-# char and strip out the final '|'.
-PLATFORMS		:=	$(shell find plat/ -name '${PLAT_MAKEFILE}' -print0 |			\
-					sed -r 's%[^\x00]*\/([^/]*)\/${PLAT_MAKEFILE}\x00%\1|%g' |	\
-					sed -r 's/\|$$//')
-SPDS			:=	$(shell ls -I none services/spd)
+SPDS			:=	$(sort $(filter-out none, $(patsubst services/spd/%,%,$(wildcard services/spd/*))))
 
 # Platforms providing their own TBB makefile may override this value
 INCLUDE_TBBR_MK		:=	1
@@ -249,7 +258,7 @@ ifdef EL3_PAYLOAD_BASE
         $(warning "The SPD and its BL32 companion will be present but ignored.")
 endif
         # We expect to locate an spd.mk under the specified SPD directory
-        SPD_MAKE	:=	$(shell m="services/spd/${SPD}/${SPD}.mk"; [ -f "$$m" ] && echo "$$m")
+        SPD_MAKE	:=	$(wildcard services/spd/${SPD}/${SPD}.mk)
 
         ifeq (${SPD_MAKE},)
                 $(error Error: No services/spd/${SPD}/${SPD}.mk located)
@@ -274,14 +283,6 @@ endif
 # makefile may use all previous definitions in this file)
 ################################################################################
 
-ifeq (${PLAT},)
-        $(error "Error: Unknown platform. Please use PLAT=<platform name> to specify the platform")
-endif
-PLAT_MAKEFILE_FULL	:=	$(shell find plat/ -wholename '*/${PLAT}/${PLAT_MAKEFILE}')
-ifeq ($(PLAT_MAKEFILE_FULL),)
-        $(error "Error: Invalid platform. The following platforms are available: ${PLATFORMS}")
-endif
-
 include ${PLAT_MAKEFILE_FULL}
 
 # If the platform has not defined ENABLE_PLAT_COMPAT, then enable it by default
@@ -294,10 +295,34 @@ ifneq (${ENABLE_PLAT_COMPAT}, 0)
 include plat/compat/plat_compat.mk
 endif
 
-# Include the CPU specific operations makefile. By default all CPU errata
-# workarounds and CPU specific optimisations are disabled. This can be
-# overridden by the platform.
+# Include the CPU specific operations makefile, which provides default
+# values for all CPU errata workarounds and CPU specific optimisations.
+# This can be overridden by the platform.
 include lib/cpus/cpu-ops.mk
+
+
+################################################################################
+# Check incompatible options
+################################################################################
+
+ifdef EL3_PAYLOAD_BASE
+        ifdef PRELOADED_BL33_BASE
+                $(warning "PRELOADED_BL33_BASE and EL3_PAYLOAD_BASE are \
+                incompatible build options. EL3_PAYLOAD_BASE has priority.")
+        endif
+endif
+
+ifeq (${NEED_BL33},yes)
+        ifdef EL3_PAYLOAD_BASE
+                $(warning "BL33 image is not needed when option \
+                BL33_PAYLOAD_BASE is used and won't be added to the FIP file.")
+        endif
+        ifdef PRELOADED_BL33_BASE
+                $(warning "BL33 image is not needed when option \
+                PRELOADED_BL33_BASE is used and won't be added to the FIP \
+                file.")
+        endif
+endif
 
 
 ################################################################################
@@ -313,12 +338,19 @@ endif
 # supplied for the FIP and Certificate generation tools. This flag can be
 # overridden by the platform.
 ifdef BL2_SOURCES
-ifndef EL3_PAYLOAD_BASE
-NEED_BL33		?=	yes
-else
-# The BL33 image is not needed when booting an EL3 payload.
-NEED_BL33		:=	no
-endif
+        ifdef EL3_PAYLOAD_BASE
+                # If booting an EL3 payload there is no need for a BL33 image
+                # in the FIP file.
+                NEED_BL33		:=	no
+        else
+                ifdef PRELOADED_BL33_BASE
+                        # If booting a BL33 preloaded image there is no need of
+                        # another one in the FIP file.
+                        NEED_BL33		:=	no
+                else
+                        NEED_BL33		?=	yes
+                endif
+        endif
 endif
 
 # Process TBB related flags
@@ -345,11 +377,11 @@ endif
 
 # Variables for use with Certificate Generation Tool
 CRTTOOLPATH		?=	tools/cert_create
-CRTTOOL			?=	${CRTTOOLPATH}/cert_create
+CRTTOOL			?=	${CRTTOOLPATH}/cert_create${BIN_EXT}
 
 # Variables for use with Firmware Image Package
 FIPTOOLPATH		?=	tools/fip_create
-FIPTOOL			?=	${FIPTOOLPATH}/fip_create
+FIPTOOL			?=	${FIPTOOLPATH}/fip_create${BIN_EXT}
 
 
 ################################################################################
@@ -383,6 +415,7 @@ $(eval $(call assert_boolean,PL011_GENERIC_UART))
 ################################################################################
 
 $(eval $(call add_define,PLAT_${PLAT}))
+$(eval $(call add_define,SPD_${SPD}))
 $(eval $(call add_define,NS_TIMER_SWITCH))
 $(eval $(call add_define,RESET_TO_BL31))
 $(eval $(call add_define,CTX_INCLUDE_FPREGS))
@@ -398,11 +431,17 @@ $(eval $(call add_define,PSCI_EXTENDED_STATE_ID))
 $(eval $(call add_define,ERROR_DEPRECATED))
 $(eval $(call add_define,ENABLE_PLAT_COMPAT))
 $(eval $(call add_define,SPIN_ON_BL1_EXIT))
+$(eval $(call add_define,PL011_GENERIC_UART))
 # Define the EL3_PAYLOAD_BASE flag only if it is provided.
 ifdef EL3_PAYLOAD_BASE
-$(eval $(call add_define,EL3_PAYLOAD_BASE))
+        $(eval $(call add_define,EL3_PAYLOAD_BASE))
+else
+        # Define the PRELOADED_BL33_BASE flag only if it is provided and
+        # EL3_PAYLOAD_BASE is not defined, as it has priority.
+        ifdef PRELOADED_BL33_BASE
+                $(eval $(call add_define,PRELOADED_BL33_BASE))
+        endif
 endif
-$(eval $(call add_define,PL011_GENERIC_UART))
 
 
 ################################################################################
@@ -457,34 +496,34 @@ $(eval $(call MAKE_BL,1))
 endif
 
 ifeq (${NEED_BL2},yes)
-$(if ${BL2}, $(eval $(call MAKE_TOOL_ARGS,2,${BL2},in_fip)),\
-	$(eval $(call MAKE_BL,2,in_fip)))
+$(if ${BL2}, $(eval $(call MAKE_TOOL_ARGS,2,${BL2},tb-fw)),\
+	$(eval $(call MAKE_BL,2,tb-fw)))
 endif
 
 ifeq (${NEED_BL31},yes)
 BL31_SOURCES += ${SPD_SOURCES}
-$(if ${BL31}, $(eval $(call MAKE_TOOL_ARGS,31,${BL31},in_fip)),\
-	$(eval $(call MAKE_BL,31,in_fip)))
+$(if ${BL31}, $(eval $(call MAKE_TOOL_ARGS,31,${BL31},soc-fw)),\
+	$(eval $(call MAKE_BL,31,soc-fw)))
 endif
 
 # If a BL32 image is needed but neither BL32 nor BL32_SOURCES is defined, the
 # build system will call FIP_ADD_IMG to print a warning message and abort the
 # process. Note that the dependency on BL32 applies to the FIP only.
 ifeq (${NEED_BL32},yes)
-$(if ${BL32}, $(eval $(call MAKE_TOOL_ARGS,32,${BL32},in_fip)),\
-	$(if ${BL32_SOURCES}, $(eval $(call MAKE_BL,32,in_fip)),\
-		$(eval $(call FIP_ADD_IMG,BL32,--bl32))))
+$(if ${BL32}, $(eval $(call MAKE_TOOL_ARGS,32,${BL32},tos-fw)),\
+	$(if ${BL32_SOURCES}, $(eval $(call MAKE_BL,32,tos-fw)),\
+		$(eval $(call FIP_ADD_IMG,BL32,--tos-fw))))
 endif
 
 # Add the BL33 image if required by the platform
 ifeq (${NEED_BL33},yes)
-$(eval $(call FIP_ADD_IMG,BL33,--bl33))
+$(eval $(call FIP_ADD_IMG,BL33,--nt-fw))
 endif
 
 ifeq (${NEED_BL2U},yes)
 BL2U_PATH	:= $(if ${BL2U},${BL2U},$(call IMG_BIN,2u))
 $(if ${BL2U}, ,$(eval $(call MAKE_BL,2u)))
-$(eval $(call FWU_FIP_ADD_PAYLOAD,${BL2U_PATH},--bl2u))
+$(eval $(call FWU_FIP_ADD_PAYLOAD,${BL2U_PATH},--ap-fwu-cfg))
 endif
 
 locate-checkpatch:
@@ -498,14 +537,14 @@ endif
 
 clean:
 	@echo "  CLEAN"
-	${Q}rm -rf ${BUILD_PLAT}
+	$(call SHELL_REMOVE_DIR,${BUILD_PLAT})
 	${Q}${MAKE} --no-print-directory -C ${FIPTOOLPATH} clean
 	${Q}${MAKE} PLAT=${PLAT} --no-print-directory -C ${CRTTOOLPATH} clean
 
 realclean distclean:
 	@echo "  REALCLEAN"
-	${Q}rm -rf ${BUILD_BASE}
-	${Q}rm -f ${CURDIR}/cscope.*
+	$(call SHELL_REMOVE_DIR,${BUILD_BASE})
+	$(call SHELL_DELETE_ALL, ${CURDIR}/cscope.*)
 	${Q}${MAKE} --no-print-directory -C ${FIPTOOLPATH} clean
 	${Q}${MAKE} PLAT=${PLAT} --no-print-directory -C ${CRTTOOLPATH} clean
 
@@ -526,24 +565,24 @@ certtool: ${CRTTOOL}
 .PHONY: ${CRTTOOL}
 ${CRTTOOL}:
 	${Q}${MAKE} PLAT=${PLAT} --no-print-directory -C ${CRTTOOLPATH}
-	@echo
+	@${ECHO_BLANK_LINE}
 	@echo "Built $@ successfully"
-	@echo
+	@${ECHO_BLANK_LINE}
 
 ifneq (${GENERATE_COT},0)
 certificates: ${CRT_DEPS} ${CRTTOOL}
 	${Q}${CRTTOOL} ${CRT_ARGS}
-	@echo
+	@${ECHO_BLANK_LINE}
 	@echo "Built $@ successfully"
 	@echo "Certificates can be found in ${BUILD_PLAT}"
-	@echo
+	@${ECHO_BLANK_LINE}
 endif
 
 ${BUILD_PLAT}/${FIP_NAME}: ${FIP_DEPS} ${FIPTOOL}
 	${Q}${FIPTOOL} --dump ${FIP_ARGS} $@
-	@echo
+	@${ECHO_BLANK_LINE}
 	@echo "Built $@ successfully"
-	@echo
+	@${ECHO_BLANK_LINE}
 
 ifneq (${GENERATE_COT},0)
 fwu_certificates: ${FWU_CRT_DEPS} ${CRTTOOL}
@@ -579,7 +618,7 @@ tags:
 	${Q}ctags -R ${CURDIR}
 
 help:
-	@echo "usage: ${MAKE} PLAT=<${PLATFORMS}> [OPTIONS] [TARGET]"
+	@echo "usage: ${MAKE} PLAT=<${PLATFORM_LIST}> [OPTIONS] [TARGET]"
 	@echo ""
 	@echo "PLAT is used to specify which platform you wish to build."
 	@echo "If no platform is specified, PLAT defaults to: ${DEFAULT_PLAT}"

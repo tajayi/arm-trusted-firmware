@@ -70,7 +70,8 @@ void tsp_early_platform_setup(void)
 	 * Initialize a different console than already in use to display
 	 * messages from TSP
 	 */
-	console_init(RDO_UART0_BASE, zynqmp_get_uart_clk(), CADENCE_UART_BAUDRATE);
+	console_init(ZYNQMP_UART0_BASE, zynqmp_get_uart_clk(),
+		     ZYNQMP_UART_BAUDRATE);
 
 	/* Initialize the platform config for future decision making */
 	zynqmp_config_setup();

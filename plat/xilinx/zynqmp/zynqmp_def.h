@@ -75,11 +75,21 @@
 /* CRL registers and bitfields */
 #define CRL_APB_BASE			0xFF5E0000
 #define CRL_APB_RPLL_CTRL		(CRL_APB_BASE + 0x30)
+#define CRL_APB_TIMESTAMP_REF_CTRL	(CRL_APB_BASE + 0x128)
 #define CRL_APB_RESET_CTRL		(CRL_APB_BASE + 0x218)
+
+#define CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT	(1 << 24)
 
 #define CRL_APB_RPLL_CTRL_BYPASS	(1 << 3)
 
 #define CRL_APB_RESET_CTRL_SOFT_RESET	(1 << 4)
+
+/* system counter registers and bitfields */
+#define IOU_SCNTRS_BASE			0xFF260000
+#define IOU_SCNTRS_CONTROL		(IOU_SCNTRS_BASE + 0)
+#define IOU_SCNTRS_BASEFREQ		(IOU_SCNTRS_BASE + 0x20)
+
+#define IOU_SCNTRS_CONTROL_EN		(1 << 0)
 
 /* APU registers and bitfields */
 #define APU_BASE		0xFD5C0000
@@ -101,6 +111,8 @@
 #define PMU_GLOBAL_REQ_PWRUP_EN		(PMU_GLOBAL_BASE + 0x118)
 #define PMU_GLOBAL_REQ_PWRUP_DIS	(PMU_GLOBAL_BASE + 0x11c)
 #define PMU_GLOBAL_REQ_PWRUP_TRIG	(PMU_GLOBAL_BASE + 0x120)
+
+#define PMU_GLOBAL_CNTRL_FW_IS_PRESENT	(1 << 4)
 
 #define DRAM1_BASE		0x00000000ull
 #define DRAM1_SIZE		0x10000000ull
@@ -144,30 +156,30 @@
 /*******************************************************************************
  * UART related constants
  ******************************************************************************/
-#define RDO_UART0_BASE		0xFF000000
-#define RDO_UART1_BASE		0xFF001000
+#define ZYNQMP_UART0_BASE		0xFF000000
+#define ZYNQMP_UART1_BASE		0xFF001000
 
-#define PLAT_ARM_CRASH_UART_BASE	RDO_UART0_BASE
+#define PLAT_ARM_CRASH_UART_BASE	ZYNQMP_UART0_BASE
 /* impossible to call C routine how it is done now - hardcode any value */
-#define	PLAT_ARM_CRASH_UART_CLK_IN_HZ	25000000 /* FIXME */
+#define	PLAT_ARM_CRASH_UART_CLK_IN_HZ	100000000 /* FIXME */
 
 /* Must be non zero */
-#define CADENCE_UART_BAUDRATE	115200
-#define ARM_CONSOLE_BAUDRATE	CADENCE_UART_BAUDRATE
+#define ZYNQMP_UART_BAUDRATE	115200
+#define ARM_CONSOLE_BAUDRATE	ZYNQMP_UART_BAUDRATE
 
 /* Silicon version detection */
-#define ZYNQMP_SILICON_VER_MASK   0xF000
-#define ZYNQMP_SILICON_VER_SHIFT  12
-#define ZYNQMP_CSU_VERSION_SILICON      0x0
-#define ZYNQMP_CSU_VERSION_EP108        0x1
-#define ZYNQMP_CSU_VERSION_VELOCE       0x2
-#define ZYNQMP_CSU_VERSION_QEMU         0x3
+#define ZYNQMP_SILICON_VER_MASK		0xF000
+#define ZYNQMP_SILICON_VER_SHIFT	12
+#define ZYNQMP_CSU_VERSION_SILICON	0
+#define ZYNQMP_CSU_VERSION_EP108	1
+#define ZYNQMP_CSU_VERSION_VELOCE	2
+#define ZYNQMP_CSU_VERSION_QEMU		3
 
-#define ZYNQMP_RTL_VER_MASK   0xFF0
-#define ZYNQMP_RTL_VER_SHIFT  4
+#define ZYNQMP_RTL_VER_MASK		0xFF0
+#define ZYNQMP_RTL_VER_SHIFT		4
 
-#define ZYNQMP_PS_VER_MASK   0xF
-#define ZYNQMP_PS_VER_SHIFT  0
+#define ZYNQMP_PS_VER_MASK		0xF
+#define ZYNQMP_PS_VER_SHIFT		0
 
 #define ZYNQMP_CSU_BASEADDR		0xFFCA0000
 #define ZYNQMP_CSU_IDCODE_OFFSET	0x40

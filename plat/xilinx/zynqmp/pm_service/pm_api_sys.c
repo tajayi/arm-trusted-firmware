@@ -79,14 +79,14 @@
  * @address	Resume address
  *
  * This is a blocking call, it will return only once PMU has responded.
- * On a wakeup, resume address will be automaticaly set by PMU.
+ * On a wakeup, resume address will be automatically set by PMU.
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
-				   const uint32_t latency,
-				   const uint8_t state,
-				   const uint64_t address)
+enum pm_ret_status pm_self_suspend(enum pm_node_id nid,
+				   unsigned int latency,
+				   unsigned int state,
+				   uintptr_t address)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 	unsigned int cpuid = plat_my_core_pos();
@@ -113,15 +113,15 @@ enum pm_ret_status pm_self_suspend(const enum pm_node_id nid,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_req_suspend(const enum pm_node_id target,
-				  const enum pm_request_ack ack,
-				  const uint32_t latency, const uint8_t state)
+enum pm_ret_status pm_req_suspend(enum pm_node_id target,
+				  enum pm_request_ack ack,
+				  unsigned int latency, unsigned int state)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
 	PM_PACK_PAYLOAD5(payload, PM_REQ_SUSPEND, target, ack, latency, state);
-	if (REQ_ACK_BLOCKING == ack)
+	if (ack == REQ_ACK_BLOCKING)
 		return pm_ipi_send_sync(primary_proc, payload, NULL);
 	else
 		return pm_ipi_send(primary_proc, payload);
@@ -133,20 +133,20 @@ enum pm_ret_status pm_req_suspend(const enum pm_node_id target,
  * @target	Node id of the processor or subsystem to wake up
  * @ack		Flag to specify whether acknowledge requested
  * @set_address	Resume address presence indicator
- * 				1 resume address specified, 0 otherwise
+ *				1 resume address specified, 0 otherwise
  * @address	Resume address
  *
  * This API function is either used to power up another APU core for SMP
  * (by PSCI) or to power up an entirely different PU or subsystem, such
  * as RPU0, RPU, or PL_CORE_xx. Resume address for the target PU will be
- * automaticaly set by PMU.
+ * automatically set by PMU.
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_req_wakeup(const enum pm_node_id target,
-				 const uint32_t set_address,
-				 const uint64_t address,
-				 const enum pm_request_ack ack)
+enum pm_ret_status pm_req_wakeup(enum pm_node_id target,
+				 unsigned int set_address,
+				 uintptr_t address,
+				 enum pm_request_ack ack)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 	uint64_t encoded_address;
@@ -163,7 +163,7 @@ enum pm_ret_status pm_req_wakeup(const enum pm_node_id target,
 	PM_PACK_PAYLOAD5(payload, PM_REQ_WAKEUP, target, encoded_address,
 			 encoded_address >> 32, ack);
 
-	if (REQ_ACK_BLOCKING == ack)
+	if (ack == REQ_ACK_BLOCKING)
 		return pm_ipi_send_sync(primary_proc, payload, NULL);
 	else
 		return pm_ipi_send(primary_proc, payload);
@@ -177,15 +177,15 @@ enum pm_ret_status pm_req_wakeup(const enum pm_node_id target,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_force_powerdown(const enum pm_node_id target,
-				      const enum pm_request_ack ack)
+enum pm_ret_status pm_force_powerdown(enum pm_node_id target,
+				      enum pm_request_ack ack)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	/* Send request to the PMU */
 	PM_PACK_PAYLOAD3(payload, PM_FORCE_POWERDOWN, target, ack);
 
-	if (REQ_ACK_BLOCKING == ack)
+	if (ack == REQ_ACK_BLOCKING)
 		return pm_ipi_send_sync(primary_proc, payload, NULL);
 	else
 		return pm_ipi_send(primary_proc, payload);
@@ -201,7 +201,7 @@ enum pm_ret_status pm_force_powerdown(const enum pm_node_id target,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_abort_suspend(const enum pm_abort_reason reason)
+enum pm_ret_status pm_abort_suspend(enum pm_abort_reason reason)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -225,11 +225,12 @@ enum pm_ret_status pm_abort_suspend(const enum pm_abort_reason reason)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_set_wakeup_source(const enum pm_node_id target,
-					const enum pm_node_id wkup_node,
-					const uint8_t enable)
+enum pm_ret_status pm_set_wakeup_source(enum pm_node_id target,
+					enum pm_node_id wkup_node,
+					unsigned int enable)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
+
 	PM_PACK_PAYLOAD4(payload, PM_SET_WAKEUP_SOURCE, target, wkup_node,
 			 enable);
 	return pm_ipi_send(primary_proc, payload);
@@ -241,7 +242,7 @@ enum pm_ret_status pm_set_wakeup_source(const enum pm_node_id target,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_system_shutdown(const uint8_t restart)
+enum pm_ret_status pm_system_shutdown(unsigned int restart)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -252,7 +253,7 @@ enum pm_ret_status pm_system_shutdown(const uint8_t restart)
 /* APIs for managing PM slaves: */
 
 /**
- * pm_req_node() - PM call to request a node with specifc capabilities
+ * pm_req_node() - PM call to request a node with specific capabilities
  * @nid		Node id of the slave
  * @capabilities Requested capabilities of the slave
  * @qos		Quality of service (not supported)
@@ -260,16 +261,16 @@ enum pm_ret_status pm_system_shutdown(const uint8_t restart)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_req_node(const enum pm_node_id nid,
-			       const uint32_t capabilities,
-			       const uint32_t qos,
-			       const enum pm_request_ack ack)
+enum pm_ret_status pm_req_node(enum pm_node_id nid,
+			       unsigned int capabilities,
+			       unsigned int qos,
+			       enum pm_request_ack ack)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	PM_PACK_PAYLOAD5(payload, PM_REQ_NODE, nid, capabilities, qos, ack);
 
-	if (REQ_ACK_BLOCKING == ack)
+	if (ack == REQ_ACK_BLOCKING)
 		return pm_ipi_send_sync(primary_proc, payload, NULL);
 	else
 		return pm_ipi_send(primary_proc, payload);
@@ -286,17 +287,17 @@ enum pm_ret_status pm_req_node(const enum pm_node_id nid,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_set_requirement(const enum pm_node_id nid,
-				      const uint32_t capabilities,
-				      const uint32_t qos,
-				      const enum pm_request_ack ack)
+enum pm_ret_status pm_set_requirement(enum pm_node_id nid,
+				      unsigned int capabilities,
+				      unsigned int qos,
+				      enum pm_request_ack ack)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
 	PM_PACK_PAYLOAD5(payload, PM_SET_REQUIREMENT, nid, capabilities, qos,
 			 ack);
 
-	if (REQ_ACK_BLOCKING == ack)
+	if (ack == REQ_ACK_BLOCKING)
 		return pm_ipi_send_sync(primary_proc, payload, NULL);
 	else
 		return pm_ipi_send(primary_proc, payload);
@@ -308,7 +309,7 @@ enum pm_ret_status pm_set_requirement(const enum pm_node_id nid,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_release_node(const enum pm_node_id nid)
+enum pm_ret_status pm_release_node(enum pm_node_id nid)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -323,8 +324,8 @@ enum pm_ret_status pm_release_node(const enum pm_node_id nid)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_set_max_latency(const enum pm_node_id nid,
-				      const uint32_t latency)
+enum pm_ret_status pm_set_max_latency(enum pm_node_id nid,
+				      unsigned int latency)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -340,7 +341,7 @@ enum pm_ret_status pm_set_max_latency(const enum pm_node_id nid,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_get_api_version(uint32_t *version)
+enum pm_ret_status pm_get_api_version(unsigned int *version)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -355,7 +356,7 @@ enum pm_ret_status pm_get_api_version(uint32_t *version)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_set_configuration(const uint32_t phys_addr)
+enum pm_ret_status pm_set_configuration(unsigned int phys_addr)
 {
 	return PM_RET_ERROR_NOTSUPPORTED;
 }
@@ -366,7 +367,7 @@ enum pm_ret_status pm_set_configuration(const uint32_t phys_addr)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_get_node_status(const enum pm_node_id nid)
+enum pm_ret_status pm_get_node_status(enum pm_node_id nid)
 {
 	/* TODO: Add power state argument!! */
 	uint32_t payload[PAYLOAD_ARG_CNT];
@@ -384,24 +385,24 @@ enum pm_ret_status pm_get_node_status(const enum pm_node_id nid)
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_register_notifier(const enum pm_node_id nid,
-					const uint32_t event,
-					const uint8_t wake,
-					const uint8_t enable)
+enum pm_ret_status pm_register_notifier(enum pm_node_id nid,
+					unsigned int event,
+					unsigned int wake,
+					unsigned int enable)
 {
 	return PM_RET_ERROR_NOTSUPPORTED;
 }
 
 /**
  * pm_get_op_characteristic() - PM call to get a particular operating
- * 				characteristic of a node
+ *				characteristic of a node
  * @nid	Node ID
  * @type	Operating characterstic type to be returned
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_get_op_characteristic(const enum pm_node_id nid,
-					    const enum pm_opchar_type type)
+enum pm_ret_status pm_get_op_characteristic(enum pm_node_id nid,
+					    enum pm_opchar_type type)
 {
 	return PM_RET_ERROR_NOTSUPPORTED;
 }
@@ -415,8 +416,8 @@ enum pm_ret_status pm_get_op_characteristic(const enum pm_node_id nid,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_reset_assert(const uint32_t reset,
-				   const uint8_t assert)
+enum pm_ret_status pm_reset_assert(unsigned int reset,
+				   unsigned int assert)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -432,8 +433,8 @@ enum pm_ret_status pm_reset_assert(const uint32_t reset,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_reset_get_status(const uint32_t reset,
-				       uint32_t *reset_status)
+enum pm_ret_status pm_reset_get_status(unsigned int reset,
+				       unsigned int *reset_status)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -453,9 +454,9 @@ enum pm_ret_status pm_reset_get_status(const uint32_t reset,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_mmio_write(const uint32_t address,
-				 const uint32_t mask,
-				 const uint32_t value)
+enum pm_ret_status pm_mmio_write(uintptr_t address,
+				 unsigned int mask,
+				 unsigned int value)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 
@@ -474,7 +475,7 @@ enum pm_ret_status pm_mmio_write(const uint32_t address,
  *
  * @return	Returns status, either success or error+reason
  */
-enum pm_ret_status pm_mmio_read(const uint32_t address, uint32_t *value)
+enum pm_ret_status pm_mmio_read(uintptr_t address, unsigned int *value)
 {
 	uint32_t payload[PAYLOAD_ARG_CNT];
 

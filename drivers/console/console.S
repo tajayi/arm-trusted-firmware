@@ -54,7 +54,7 @@
 	 *     w1 - Uart clock in Hz
 	 *     w2 - Baud rate
 	 * out: return 1 on success else 0 on error
-	 * Clobber list : x1 - x3
+	 * Clobber list : x1 - x4
 	 * -----------------------------------------------
 	 */
 func console_init
@@ -79,6 +79,7 @@ func console_uninit
 	mov	x0, #0
 	adrp	x3, console_base
 	str	x0, [x3, :lo12:console_base]
+	ret
 endfunc console_uninit
 
 	/* ---------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2015-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,11 +36,6 @@
 #include <cpu_data.h>
 #include <stdint.h>
 #include <xlat_tables.h>
-
-/*
- * Extern declarations common to ARM standard platforms
- */
-extern const mmap_region_t plat_arm_mmap[];
 
 #define ARM_CASSERT_MMAP						\
 	CASSERT((ARRAY_SIZE(plat_arm_mmap) + ARM_BL_REGIONS)		\
@@ -131,14 +126,13 @@ void arm_configure_mmu_el3(unsigned long total_base,
 #endif /* __ARM_RECOM_STATE_ID_ENC__ */
 
 
-/* CCI utility functions */
-void arm_cci_init(void);
-
 /* IO storage utility functions */
 void arm_io_setup(void);
 
 /* Security utility functions */
-void arm_tzc_setup(void);
+void arm_tzc400_setup(void);
+struct tzc_dmc500_driver_data;
+void arm_tzc_dmc500_setup(struct tzc_dmc500_driver_data *plat_driver_data);
 
 /* Systimer utility function */
 void arm_configure_sys_timer(void);
@@ -187,6 +181,7 @@ int arm_io_is_toc_valid(void);
 /*
  * Mandatory functions required in ARM standard platforms
  */
+unsigned int plat_arm_get_cluster_core_count(u_register_t mpidr);
 void plat_arm_gic_driver_init(void);
 void plat_arm_gic_init(void);
 void plat_arm_gic_cpuif_enable(void);
@@ -194,6 +189,9 @@ void plat_arm_gic_cpuif_disable(void);
 void plat_arm_gic_pcpu_init(void);
 void plat_arm_security_setup(void);
 void plat_arm_pwrc_setup(void);
+void plat_arm_interconnect_init(void);
+void plat_arm_interconnect_enter_coherency(void);
+void plat_arm_interconnect_exit_coherency(void);
 
 /*
  * Optional functions required in ARM standard platforms
@@ -204,6 +202,6 @@ int plat_arm_get_alt_image_source(
 	uintptr_t *dev_handle,
 	uintptr_t *image_spec);
 unsigned int plat_arm_calc_core_pos(u_register_t mpidr);
-
+const mmap_region_t *plat_arm_get_mmap(void);
 
 #endif /* __PLAT_ARM_H__ */

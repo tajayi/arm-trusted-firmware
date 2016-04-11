@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2014, Xilinx Inc.
- * Written by Edgar E. Iglesias.
+ * Copyright (c) 2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,40 +34,17 @@
 /* This is very minimalistic and will only work in QEMU.  */
 
 /* CADENCE Registers */
-#define R_UART_CR	(0x00)
-#define R_UART_CR_TX_EN	0x00000010 /* TX enabled */
-#define R_UART_CR_RX_EN	0x00000004 /* RX enabled */
-#define R_UART_CR_TXRST	0x00000002 /* TX logic reset */
-#define R_UART_CR_RXRST	0x00000001 /* RX logic reset */
+#define R_UART_CR	0
+#define R_UART_CR_RXRST	(1 << 0) /* RX logic reset */
+#define R_UART_CR_TXRST	(1 << 1) /* TX logic reset */
+#define R_UART_CR_RX_EN	(1 << 2) /* RX enabled */
+#define R_UART_CR_TX_EN	(1 << 4) /* TX enabled */
 
-#define R_UART_MR	(0x04)
-#define R_UART_MR_PARITY_NONE	0x00000020  /* No parity mode */
-
-#define R_UART_IER	(0x08)
-#define R_UART_IDR	(0x0C)
-#define R_UART_IMR	(0x10)
-#define R_UART_CISR	(0x14)
-#define R_UART_BRG	(0x18)
-#define R_UART_RTRIG	(0x20)
-#define R_UART_SR	(0x2C)
-
-/* We don't deduce the MASK from the BIT to allow this to
-   be included in assembly files.  */
-#define UART_SR_INTR_RTRIG_BIT	0
-#define UART_SR_INTR_RTRIG	0x00000001
+#define R_UART_SR		0x2C
 #define UART_SR_INTR_REMPTY_BIT	1
-#define UART_SR_INTR_REMPTY	0x00000002
-#define UART_SR_INTR_TEMPTY_BIT	3
-#define UART_SR_INTR_TEMPTY	0x00000008
 #define UART_SR_INTR_TFUL_BIT	4
-#define UART_SR_INTR_TFUL	0x00000010
 
-#define R_UART_TX	(0x30)
-#define R_UART_RX	(0x30)
-#define R_UART_BRD	(0x34)
-
-#ifndef __ASSEMBLY__
-void cadence_serial_setbrg(uint32_t base, uint32_t clock, uint32_t baudrate);
-#endif
+#define R_UART_TX	0x30
+#define R_UART_RX	0x30
 
 #endif

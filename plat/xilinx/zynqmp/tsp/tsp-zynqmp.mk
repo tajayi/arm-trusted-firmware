@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2014, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,7 +25,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
 # TSP source files specific to ZynqMP platform
 BL32_SOURCES		+=	plat/common/aarch64/platform_mp_stack.S		\

@@ -29,7 +29,6 @@
  */
 
 #include <arch_helpers.h>
-#include <arm_config.h>
 #include <cci.h>
 #include <debug.h>
 #include <gicv2.h>
@@ -39,27 +38,15 @@
 #include <xlat_tables.h>
 #include "../zynqmp_private.h"
 
-/*******************************************************************************
- * plat_config holds the characteristics of the differences between the three
- * ZYNQMP platforms (Base, A53_A57 & Foundation). It will be populated during cold
- * boot at each boot stage by the primary before enabling the MMU (to allow cci
- * configuration) & used thereafter. Each BL will have its own copy to allow
- * independent operation.
- ******************************************************************************/
-arm_config_t arm_config;
-
 /*
  * Table of regions to map using the MMU.
  * This doesn't include TZRAM as the 'mem_layout' argument passed to
  * configure_mmu_elx() will give the available subset of that,
  */
 const mmap_region_t plat_arm_mmap[] = {
-	{ DEVICE0_BASE,	DEVICE0_BASE,	DEVICE0_SIZE,
-						MT_DEVICE | MT_RW | MT_SECURE },
-	{ DEVICE1_BASE,	DEVICE1_BASE,	DEVICE1_SIZE,
-						MT_DEVICE | MT_RW | MT_SECURE },
-	{ CRF_APB_BASE,	CRF_APB_BASE,	CRF_APB_SIZE,
-						MT_DEVICE | MT_RW | MT_SECURE },
+	{ DEVICE0_BASE, DEVICE0_BASE, DEVICE0_SIZE, MT_DEVICE | MT_RW | MT_SECURE },
+	{ DEVICE1_BASE, DEVICE1_BASE, DEVICE1_SIZE, MT_DEVICE | MT_RW | MT_SECURE },
+	{ CRF_APB_BASE, CRF_APB_BASE, CRF_APB_SIZE, MT_DEVICE | MT_RW | MT_SECURE },
 	{0}
 };
 
@@ -159,7 +146,7 @@ static const struct {
 
 static unsigned int zynqmp_get_silicon_id(void)
 {
-	unsigned int id;
+	uint32_t id;
 
 	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
 
@@ -171,20 +158,19 @@ static unsigned int zynqmp_get_silicon_id(void)
 
 static char *zynqmp_get_silicon_idcode_name(void)
 {
-	unsigned int i, id;
+	unsigned int id;
 
 	id = zynqmp_get_silicon_id();
-	for (i = 0; i < ARRAY_SIZE(zynqmp_devices); i++) {
-		if (zynqmp_devices[i].id == id) {
+	for (size_t i = 0; i < ARRAY_SIZE(zynqmp_devices); i++) {
+		if (zynqmp_devices[i].id == id)
 			return zynqmp_devices[i].name;
-		}
 	}
 	return "UNKN";
 }
 
 static unsigned int zynqmp_get_rtl_ver(void)
 {
-	unsigned int ver;
+	uint32_t ver;
 
 	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_RTL_VER_MASK;
@@ -195,7 +181,7 @@ static unsigned int zynqmp_get_rtl_ver(void)
 
 static char *zynqmp_print_silicon_idcode(void)
 {
-	unsigned int id, maskid, tmp;
+	uint32_t id, maskid, tmp;
 
 	id = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_IDCODE_OFFSET);
 
@@ -204,8 +190,8 @@ static char *zynqmp_print_silicon_idcode(void)
 	       ZYNQMP_CSU_IDCODE_FAMILY_MASK |
 	       ZYNQMP_CSU_IDCODE_REVISION_MASK;
 	maskid = ZYNQMP_CSU_IDCODE_XILINX_ID << ZYNQMP_CSU_IDCODE_XILINX_ID_SHIFT |
-	            ZYNQMP_CSU_IDCODE_FAMILY << ZYNQMP_CSU_IDCODE_FAMILY_SHIFT |
-	            ZYNQMP_CSU_IDCODE_REVISION << ZYNQMP_CSU_IDCODE_REVISION_SHIFT;
+		 ZYNQMP_CSU_IDCODE_FAMILY << ZYNQMP_CSU_IDCODE_FAMILY_SHIFT |
+		 ZYNQMP_CSU_IDCODE_REVISION << ZYNQMP_CSU_IDCODE_REVISION_SHIFT;
 	if (tmp != maskid) {
 		ERROR("Incorrect XILINX IDCODE 0x%x, maskid 0x%x\n", id, maskid);
 		return "UNKN";
@@ -216,9 +202,8 @@ static char *zynqmp_print_silicon_idcode(void)
 
 static unsigned int zynqmp_get_ps_ver(void)
 {
-	unsigned int ver;
+	uint32_t ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 
-	ver = mmio_read_32(ZYNQMP_CSU_BASEADDR + ZYNQMP_CSU_VERSION_OFFSET);
 	ver &= ZYNQMP_PS_VER_MASK;
 	ver >>= ZYNQMP_PS_VER_SHIFT;
 
@@ -255,14 +240,12 @@ static void zynqmp_print_platform_name(void)
 static inline void zynqmp_print_platform_name(void) { }
 #endif
 
-#define FW_IS_PRESENT		(1 << 4)
-
 /*
  * Indicator for PMUFW discovery:
  *   0 = No FW found
  *   non-zero = FW is present
  */
-static unsigned int zynqmp_pmufw_present;
+static int zynqmp_pmufw_present;
 
 /*
  * zynqmp_discover_pmufw - Discover presence of PMUFW
@@ -274,12 +257,12 @@ static unsigned int zynqmp_pmufw_present;
  *    (be it by error or intentionally)
  *  - XPPU/XMPU may restrict ATF's access to the PMU address space
  */
-static unsigned int zynqmp_discover_pmufw(void)
+static int zynqmp_discover_pmufw(void)
 {
 	zynqmp_pmufw_present = mmio_read_32(PMU_GLOBAL_CNTRL);
-	zynqmp_pmufw_present &= FW_IS_PRESENT;
+	zynqmp_pmufw_present &= PMU_GLOBAL_CNTRL_FW_IS_PRESENT;
 
-	return zynqmp_pmufw_present;
+	return !!zynqmp_pmufw_present;
 }
 
 /*
@@ -287,51 +270,31 @@ static unsigned int zynqmp_discover_pmufw(void)
  *
  * Return 0 if firmware is not available, non 0 otherwise
  */
-unsigned int zynqmp_is_pmu_up(void)
+int zynqmp_is_pmu_up(void)
 {
 	return zynqmp_pmufw_present;
 }
 
-#define ZYNQMP_CRL_APB_BASEADDR				0xFF5E0000
-#define ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET	0x128
-#define ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT	(1 << 24)
-
-#define ZYNQMP_IOU_SCNTRS_BASEADDR		0xFF260000
-#define ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET	0x0
-#define ZYNQMP_IOU_SCNTRS_CONTROL_EN		(1 << 0)
-#define ZYNQMP_IOU_SCNTRS_BASEFREQ_OFFSET	0x20
-/*******************************************************************************
+/*
  * A single boot loader stack is expected to work on both the Foundation ZYNQMP
  * models and the two flavours of the Base ZYNQMP models (AEMv8 & Cortex). The
  * SYS_ID register provides a mechanism for detecting the differences between
  * these platforms. This information is stored in a per-BL array to allow the
  * code to take the correct path.Per BL platform configuration.
- ******************************************************************************/
-int zynqmp_config_setup(void)
+ */
+void zynqmp_config_setup(void)
 {
-	unsigned int val;
-
 	zynqmp_discover_pmufw();
 	zynqmp_print_platform_name();
 
 	/* Global timer init - Program time stamp reference clk */
-	val = mmio_read_32(ZYNQMP_CRL_APB_BASEADDR +
-			   ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET);
-	val |= ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT;
-	mmio_write_32(ZYNQMP_CRL_APB_BASEADDR +
-		      ZYNQMP_CRL_APB_TIMESTAMP_REF_CTRL_OFFSET, val);
+	uint32_t val = mmio_read_32(CRL_APB_TIMESTAMP_REF_CTRL);
+	val |= CRL_APB_TIMESTAMP_REF_CTRL_CLKACT_BIT;
+	mmio_write_32(CRL_APB_TIMESTAMP_REF_CTRL, val);
 
-	/* Program freq register in System counter  and enable system counter. */
-	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
-		      ZYNQMP_IOU_SCNTRS_BASEFREQ_OFFSET,
-		      zynqmp_get_system_timer_freq());
-	mmio_write_32(ZYNQMP_IOU_SCNTRS_BASEADDR +
-	              ZYNQMP_IOU_SCNTRS_CONTROL_OFFSET,
-		      ZYNQMP_IOU_SCNTRS_CONTROL_EN);
-
-	arm_config.flags |= ARM_CONFIG_HAS_CCI;
-
-	return 0;
+	/* Program freq register in System counter and enable system counter. */
+	mmio_write_32(IOU_SCNTRS_BASEFREQ, zynqmp_get_system_timer_freq());
+	mmio_write_32(IOU_SCNTRS_CONTROL, IOU_SCNTRS_CONTROL_EN);
 }
 
 uint64_t plat_get_syscnt_freq(void)
@@ -342,25 +305,4 @@ uint64_t plat_get_syscnt_freq(void)
 	counter_base_frequency = zynqmp_get_system_timer_freq();
 
 	return counter_base_frequency;
-}
-
-void zynqmp_cci_init(void)
-{
-	/*
-	 * Initialize CCI-400 driver
-	 */
-	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
-		arm_cci_init();
-}
-
-void zynqmp_cci_enable(void)
-{
-	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
-		cci_enable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
-}
-
-void zynqmp_cci_disable(void)
-{
-	if (arm_config.flags & ARM_CONFIG_HAS_CCI)
-		cci_disable_snoop_dvm_reqs(MPIDR_AFFLVL1_VAL(read_mpidr()));
 }

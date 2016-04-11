@@ -33,12 +33,12 @@
 
 #include "pm_common.h"
 
-int32_t pm_ipi_init(int (*fiq_handler)(uint32_t *));
+int pm_ipi_init(int (*fiq_handler)(uint32_t *));
 
-enum pm_ret_status pm_ipi_send(const struct pm_proc *const proc,
+enum pm_ret_status pm_ipi_send(const struct pm_proc *proc,
 			       uint32_t payload[PAYLOAD_ARG_CNT]);
-enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *const proc,
+enum pm_ret_status pm_ipi_send_sync(const struct pm_proc *proc,
 				    uint32_t payload[PAYLOAD_ARG_CNT],
-				    uint32_t *value);
+				    unsigned int *value);
 
 #endif /* _PM_IPI_H_ */

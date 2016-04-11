@@ -47,35 +47,21 @@
 	 * -----------------------------------------------------
 	 */
 func plat_secondary_cold_boot_setup
-	/* ---------------------------------------------
-	 * Power down this cpu.
-	 * TODO: Do we need to worry about powering the
-	 * cluster down as well here. That will need
-	 * locks which we won't have unless an elf-
-	 * loader zeroes out the zi section.
-	 * ---------------------------------------------
-	 */
 	mrs	x0, mpidr_el1
 
-	/* ---------------------------------------------
-	 * Deactivate the gic cpu interface as well
-	 * ---------------------------------------------
-	 */
+	/* Deactivate the gic cpu interface */
 	ldr	x1, =BASE_GICC_BASE
 	mov	w0, #(IRQ_BYP_DIS_GRP1 | FIQ_BYP_DIS_GRP1)
 	orr	w0, w0, #(IRQ_BYP_DIS_GRP0 | FIQ_BYP_DIS_GRP0)
 	str	w0, [x1, #GICC_CTLR]
 
-	/* ---------------------------------------------
-	 * There is no sane reason to come out of this
-	 * wfi so panic if we do. This cpu will be pow-
-	 * ered on and reset by the cpu_on pm api
-	 * ---------------------------------------------
+	/*
+	 * There is no sane reason to come out of this wfi. This
+	 * cpu will be powered on and reset by the cpu_on pm api
 	 */
 	dsb	sy
 1:
-	wfi
-	b	1b
+	bl	plat_panic_handler
 endfunc plat_secondary_cold_boot_setup
 
 func plat_is_my_cpu_primary

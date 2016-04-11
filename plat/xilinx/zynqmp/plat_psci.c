@@ -45,14 +45,18 @@ uintptr_t zynqmp_sec_entry;
 
 void zynqmp_cpu_standby(plat_local_state_t cpu_state)
 {
+	VERBOSE("%s: cpu_state: 0x%x\n", __func__, cpu_state);
+
 	dsb();
 	wfi();
 }
 
-static int32_t zynqmp_nopmu_pwr_domain_on(u_register_t mpidr)
+static int zynqmp_nopmu_pwr_domain_on(u_register_t mpidr)
 {
 	uint32_t r;
-	uint32_t cpu_id = plat_core_pos_by_mpidr(mpidr);
+	unsigned int cpu_id = plat_core_pos_by_mpidr(mpidr);
+
+	VERBOSE("%s: mpidr: 0x%lx\n", __func__, mpidr);
 
 	if (cpu_id == -1)
 		return PSCI_E_INTERN_FAIL;
@@ -87,10 +91,12 @@ static int32_t zynqmp_nopmu_pwr_domain_on(u_register_t mpidr)
 	return PSCI_E_SUCCESS;
 }
 
-static int32_t zynqmp_pwr_domain_on(u_register_t mpidr)
+static int zynqmp_pwr_domain_on(u_register_t mpidr)
 {
-	uint32_t cpu_id = plat_core_pos_by_mpidr(mpidr);
+	unsigned int cpu_id = plat_core_pos_by_mpidr(mpidr);
 	const struct pm_proc *proc;
+
+	VERBOSE("%s: mpidr: 0x%lx\n", __func__, mpidr);
 
 	if (cpu_id == -1)
 		return PSCI_E_INTERN_FAIL;
@@ -106,7 +112,11 @@ static int32_t zynqmp_pwr_domain_on(u_register_t mpidr)
 static void zynqmp_nopmu_pwr_domain_off(const psci_power_state_t *target_state)
 {
 	uint32_t r;
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* Prevent interrupts from spuriously waking up this cpu */
 	gicv2_cpuif_disable();
@@ -119,8 +129,12 @@ static void zynqmp_nopmu_pwr_domain_off(const psci_power_state_t *target_state)
 
 static void zynqmp_pwr_domain_off(const psci_power_state_t *target_state)
 {
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
 	const struct pm_proc *proc = pm_get_proc(cpu_id);
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* Prevent interrupts from spuriously waking up this cpu */
 	gicv2_cpuif_disable();
@@ -139,7 +153,11 @@ static void zynqmp_pwr_domain_off(const psci_power_state_t *target_state)
 static void zynqmp_nopmu_pwr_domain_suspend(const psci_power_state_t *target_state)
 {
 	uint32_t r;
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* set power down request */
 	r = mmio_read_32(APU_PWRCTL);
@@ -161,8 +179,12 @@ static void zynqmp_nopmu_pwr_domain_suspend(const psci_power_state_t *target_sta
 
 static void zynqmp_pwr_domain_suspend(const psci_power_state_t *target_state)
 {
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
 	const struct pm_proc *proc = pm_get_proc(cpu_id);
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* Send request to PMU to suspend this core */
 	pm_self_suspend(proc->node_id, MAX_LATENCY, 0, zynqmp_sec_entry);
@@ -173,11 +195,17 @@ static void zynqmp_pwr_domain_suspend(const psci_power_state_t *target_state)
 		pm_set_requirement(NODE_L2, 0, 0, REQ_ACK_NO);
 		/* Send request for OCM retention state */
 		set_ocm_retention();
+		/* disable coherency */
+		plat_arm_interconnect_exit_coherency();
 	}
 }
 
 static void zynqmp_pwr_domain_on_finish(const psci_power_state_t *target_state)
 {
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
+
 	gicv2_cpuif_enable();
 	gicv2_pcpu_distif_init();
 }
@@ -185,7 +213,11 @@ static void zynqmp_pwr_domain_on_finish(const psci_power_state_t *target_state)
 static void zynqmp_nopmu_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 {
 	uint32_t r;
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* disable power up on IRQ */
 	mmio_write_32(PMU_GLOBAL_REQ_PWRUP_DIS, 1 << cpu_id);
@@ -198,11 +230,18 @@ static void zynqmp_nopmu_pwr_domain_suspend_finish(const psci_power_state_t *tar
 
 static void zynqmp_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 {
-	uint32_t cpu_id = plat_my_core_pos();
+	unsigned int cpu_id = plat_my_core_pos();
 	const struct pm_proc *proc = pm_get_proc(cpu_id);
+
+	for (size_t i = 0; i <= PLAT_MAX_PWR_LVL; i++)
+		VERBOSE("%s: target_state->pwr_domain_state[%lu]=%x\n",
+			__func__, i, target_state->pwr_domain_state[i]);
 
 	/* Clear the APU power control register for this cpu */
 	pm_client_wakeup(proc);
+
+	/* enable coherency */
+	plat_arm_interconnect_enter_coherency();
 }
 
 /*******************************************************************************
@@ -211,11 +250,18 @@ static void zynqmp_pwr_domain_suspend_finish(const psci_power_state_t *target_st
 static void __dead2 zynqmp_nopmu_system_off(void)
 {
 	ERROR("ZynqMP System Off: operation not handled.\n");
+
+	/* disable coherency */
+	plat_arm_interconnect_exit_coherency();
+
 	panic();
 }
 
 static void __dead2 zynqmp_system_off(void)
 {
+	/* disable coherency */
+	plat_arm_interconnect_exit_coherency();
+
 	/* Send the power down request to the PMU */
 	pm_system_shutdown(0);
 
@@ -229,6 +275,10 @@ static void __dead2 zynqmp_nopmu_system_reset(void)
 	 * This currently triggers a system reset. I.e. the whole
 	 * system will be reset! Including RPUs, PMU, PL, etc.
 	 */
+
+	/* disable coherency */
+	plat_arm_interconnect_exit_coherency();
+
 	/* bypass RPLL (needed on 1.0 silicon) */
 	uint32_t reg = mmio_read_32(CRL_APB_RPLL_CTRL);
 	reg |= CRL_APB_RPLL_CTRL_BYPASS;
@@ -243,6 +293,9 @@ static void __dead2 zynqmp_nopmu_system_reset(void)
 
 static void __dead2 zynqmp_system_reset(void)
 {
+	/* disable coherency */
+	plat_arm_interconnect_exit_coherency();
+
 	/* Send the system reset request to the PMU */
 	pm_system_shutdown(1);
 
@@ -253,13 +306,17 @@ static void __dead2 zynqmp_system_reset(void)
 int zynqmp_validate_power_state(unsigned int power_state,
 				psci_power_state_t *req_state)
 {
-	// FIXME: populate req_state
+	VERBOSE("%s: power_state: 0x%x\n", __func__, power_state);
+
+	/* FIXME: populate req_state */
 	return PSCI_E_SUCCESS;
 }
 
 int zynqmp_validate_ns_entrypoint(unsigned long ns_entrypoint)
 {
-	// FIXME: Actually validate
+	VERBOSE("%s: ns_entrypoint: 0x%lx\n", __func__, ns_entrypoint);
+
+	/* FIXME: Actually validate */
 	return PSCI_E_SUCCESS;
 }
 

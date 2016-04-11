@@ -10,10 +10,11 @@ Contents :
 5.  [Building the Trusted Firmware](#5--building-the-trusted-firmware)
 6.  [Building the rest of the software stack](#6--building-the-rest-of-the-software-stack)
 7.  [EL3 payloads alternative boot flow](#7--el3-payloads-alternative-boot-flow)
-8.  [Preparing the images to run on FVP](#8--preparing-the-images-to-run-on-fvp)
-9.  [Running the software on FVP](#9--running-the-software-on-fvp)
-10. [Running the software on Juno](#10--running-the-software-on-juno)
-11. [Changes required for booting Linux on FVP in GICv3 mode](#11--changes-required-for-booting-linux-on-fvp-in-gicv3-mode)
+8.  [Preloaded BL33 alternative boot flow](#8--preloaded-bl33-alternative-boot-flow)
+9.  [Preparing the images to run on FVP](#9--preparing-the-images-to-run-on-fvp)
+10. [Running the software on FVP](#10--running-the-software-on-fvp)
+11. [Running the software on Juno](#11--running-the-software-on-juno)
+12. [Changes required for booting Linux on FVP in GICv3 mode](#12--changes-required-for-booting-linux-on-fvp-in-gicv3-mode)
 
 
 1.  Introduction
@@ -40,6 +41,9 @@ RAM.  For best performance, use a machine with a quad-core processor running at
 The software has been tested on Ubuntu 14.04 LTS (64-bit). Packages used for
 building the software were installed from that distribution unless otherwise
 specified.
+
+The software has also been built on Windows 7 Enterprise SP1, using CMD.EXE,
+Cygwin, and Msys (MinGW) shells, using version 4.9.1 of the GNU toolchain.
 
 3.  Tools
 ---------
@@ -407,11 +411,39 @@ performed.
     payload. Please refer to the "Booting an EL3 payload" section for more
     details.
 
+*   `PRELOADED_BL33_BASE`: This option enables booting a preloaded BL33 image
+    instead of the normal boot flow. When defined, it must specify the entry
+    point address for the preloaded BL33 image. This option is incompatible with
+    `EL3_PAYLOAD_BASE`. If both are defined, `EL3_PAYLOAD_BASE` has priority
+    over `PRELOADED_BL33_BASE`.
+
 *   `PL011_GENERIC_UART`: Boolean option to indicate the PL011 driver that
     the underlying hardware is not a full PL011 UART but a minimally compliant
     generic UART, which is a subset of the PL011. The driver will not access
     any register that is not part of the SBSA generic UART specification.
     Default value is 0 (a full PL011 compliant UART is present).
+
+*   `CTX_INCLUDE_FPREGS`: Boolean option that, when set to 1, will cause the FP
+    registers to be included when saving and restoring the CPU context. Default
+    is 0.
+
+*   `DISABLE_PEDANTIC`: When set to 1 it will disable the -pedantic option in
+    the GCC command line. Default is 0.
+
+*   `BUILD_STRING`: Input string for VERSION_STRING, which allows the TF build
+    to be uniquely identified. Defaults to the current git commit id.
+
+*   `VERSION_STRING`: String used in the log output for each TF image. Defaults
+    to a string formed by concatenating the version number, build type and build
+    string.
+
+*   `BUILD_MESSAGE_TIMESTAMP`: String used to identify the time and date of the
+    compilation of each build. It must be set to a C string (including quotes
+    where applicable). Defaults to a string that contains the time and date of
+    the compilation.
+
+*   `HANDLE_EA_EL3_FIRST`: When defined External Aborts and SError Interrupts
+    will be always trapped in EL3 i.e. in BL31 at runtime.
 
 #### ARM development platform specific build options
 
@@ -456,6 +488,25 @@ map is explained in the [Firmware Design].
     Trusted Watchdog may be disabled at build time for testing or development
     purposes.
 
+*   `ARM_CONFIG_CNTACR`: boolean option to unlock access to the CNTBase<N>
+    frame registers by setting the CNTCTLBase.CNTACR<N> register bits. The
+    frame number <N> is defined by 'PLAT_ARM_NSTIMER_FRAME_ID', which should
+    match the frame used by the Non-Secure image (normally the Linux kernel).
+    Default is true (access to the frame is allowed).
+
+*   `ARM_BOARD_OPTIMISE_MMAP`: Boolean option to enable or disable optimisation
+    of page table and MMU related macros `PLAT_ARM_MMAP_ENTRIES` and
+    `MAX_XLAT_TABLES`. By default this flag is 0, which means it uses the
+    default unoptimised values for these macros. ARM development platforms
+    that wish to optimise memory usage for page tables need to set this flag to 1
+    and must override the related macros.
+
+*   'ARM_BL31_IN_DRAM': Boolean option to select loading of BL31 in TZC secured
+    DRAM. By default, BL31 is in the secure SRAM. Set this flag to 1 to load
+    BL31 in TZC secured DRAM. If TSP is present, then setting this option also
+    sets the TSP location to DRAM and ignores the `ARM_TSP_RAM_LOCATION` build
+    flag.
+
 #### ARM CSS platform specific build options
 
 *   `CSS_DETECT_PRE_1_7_0_SCP`: Boolean flag to detect SCP version
@@ -464,6 +515,10 @@ map is explained in the [Firmware Design].
     Trusted Firmware no longer supports earlier SCP versions. If this option is
     set to 1 then Trusted Firmware will detect if an earlier version is in use.
     Default is 1.
+
+*   `CSS_LOAD_SCP_IMAGES`: Boolean flag, which when set, adds SCP_BL2 and
+    SCP_BL2U to the FIP and FWU_FIP respectively, and enables them to be loaded
+    during boot. Default is 1.
 
 #### ARM FVP platform specific build options
 
@@ -475,6 +530,11 @@ map is explained in the [Firmware Design].
     Note that if the FVP is configured for legacy VE memory map, then ARM
     Trusted Firmware must be compiled with GICv2 only driver using
     `FVP_USE_GIC_DRIVER=FVP_GICV2` build option.
+
+*   `FVP_CLUSTER_COUNT`    : Configures the cluster count to be used to
+     build the topology tree within Trusted Firmware. By default the
+     Trusted Firmware is configured for dual cluster topology and this option
+     can be used to override the default value.
 
 ### Creating a Firmware Image Package
 
@@ -495,7 +555,7 @@ Create a Firmware package that contains existing BL2 and BL31 images:
     # fip_create --help to print usage information
     # fip_create <fip_name> <images to add> [--dump to show result]
     ./tools/fip_create/fip_create fip.bin --dump \
-       --bl2 build/<platform>/debug/bl2.bin --bl31 build/<platform>/debug/bl31.bin
+       --tb-fw build/<platform>/debug/bl2.bin --soc-fw build/<platform>/debug/bl31.bin
 
      Firmware Image Package ToC:
     ---------------------------
@@ -520,7 +580,7 @@ Existing package entries can be individually updated:
 
     # Change the BL2 from Debug to Release version
     ./tools/fip_create/fip_create fip.bin --dump \
-      --bl2 build/<platform>/release/bl2.bin
+      --tb-fw build/<platform>/release/bl2.bin
 
     Firmware Image Package ToC:
     ---------------------------
@@ -853,8 +913,134 @@ flow. In particular:
 *   MMU disabled;
 *   Caches disabled.
 
+### Booting an EL3 payload
 
-8.  Preparing the images to run on FVP
+The EL3 payload image is a standalone image and is not part of the FIP. It is
+not loaded by the Trusted Firmware. Therefore, there are 2 possible scenarios:
+
+*   The EL3 payload may reside in non-volatile memory (NVM) and execute in
+    place. In this case, booting it is just a matter of specifying the right
+    address in NVM through `EL3_PAYLOAD_BASE` when building the TF.
+
+*   The EL3 payload needs to be loaded in volatile memory (e.g. DRAM) at
+    run-time.
+
+To help in the latter scenario, the `SPIN_ON_BL1_EXIT=1` build option can be
+used. The infinite loop that it introduces in BL1 stops execution at the right
+moment for a debugger to take control of the target and load the payload (for
+example, over JTAG).
+
+It is expected that this loading method will work in most cases, as a debugger
+connection is usually available in a pre-production system. The user is free to
+use any other platform-specific mechanism to load the EL3 payload, though.
+
+#### Booting an EL3 payload on FVP
+
+The EL3 payloads boot flow requires the CPU's mailbox to be cleared at reset for
+the secondary CPUs holding pen to work properly. Unfortunately, its reset value
+is undefined on the FVP platform and the FVP platform code doesn't clear it.
+Therefore, one must modify the way the model is normally invoked in order to
+clear the mailbox at start-up.
+
+One way to do that is to create an 8-byte file containing all zero bytes using
+the following command:
+
+    dd if=/dev/zero of=mailbox.dat bs=1 count=8
+
+and pre-load it into the FVP memory at the mailbox address (i.e. `0x04000000`)
+using the following model parameters:
+
+    --data cluster0.cpu0=mailbox.dat@0x04000000   [Base FVPs]
+    --data=mailbox.dat@0x04000000                 [Foundation FVP]
+
+To provide the model with the EL3 payload image, the following methods may be
+used:
+
+1.  If the EL3 payload is able to execute in place, it may be programmed into
+    flash memory. On Base Cortex and AEM FVPs, the following model parameter
+    loads it at the base address of the NOR FLASH1 (the NOR FLASH0 is already
+    used for the FIP):
+
+        -C bp.flashloader1.fname="/path/to/el3-payload"
+
+    On Foundation FVP, there is no flash loader component and the EL3 payload
+    may be programmed anywhere in flash using method 3 below.
+
+2.  When using the `SPIN_ON_BL1_EXIT=1` loading method, the following DS-5
+    command may be used to load the EL3 payload ELF image over JTAG:
+
+        load /path/to/el3-payload.elf
+
+3.  The EL3 payload may be pre-loaded in volatile memory using the following
+    model parameters:
+
+        --data cluster0.cpu0="/path/to/el3-payload"@address  [Base FVPs]
+        --data="/path/to/el3-payload"@address                [Foundation FVP]
+
+    The address provided to the FVP must match the `EL3_PAYLOAD_BASE` address
+    used when building the Trusted Firmware.
+
+#### Booting an EL3 payload on Juno
+
+If the EL3 payload is able to execute in place, it may be programmed in flash
+memory by adding an entry in the `SITE1/HBI0262x/images.txt` configuration file
+on the Juno SD card (where `x` depends on the revision of the Juno board).
+Refer to the [Juno Getting Started Guide], section 2.3 "Flash memory
+programming" for more information.
+
+Alternatively, the same DS-5 command mentioned in the FVP section above can
+be used to load the EL3 payload's ELF file over JTAG on Juno.
+
+
+8.  Preloaded BL33 alternative boot flow
+----------------------------------------
+
+Some platforms have the ability to preload BL33 into memory instead of relying
+on Trusted Firmware to load it. This may simplify packaging of the normal world
+code and improve performance in a development environment. When secure world
+cold boot is complete, Trusted Firmware simply jumps to a BL33 base address
+provided at build time.
+
+For this option to be used, the `PRELOADED_BL33_BASE` build option has to be
+used when compiling the Trusted Firmware. For example, the following command
+will create a FIP without a BL33 and prepare to jump to a BL33 image loaded at
+address 0x80000000:
+
+    CROSS_COMPILE=<path-to>/bin/aarch64-linux-gnu- \
+    make PRELOADED_BL33_BASE=0x80000000 PLAT=fvp all fip
+
+#### Boot of a preloaded bootwrapped kernel image on Base FVP
+
+The following example uses the AArch64 boot wrapper. This simplifies normal
+world booting while also making use of TF features. It can be obtained from its
+repository with:
+
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/mark/boot-wrapper-aarch64.git
+
+After compiling it, an ELF file is generated. It can be loaded with the
+following command:
+
+    <path-to>/FVP_Base_AEMv8A-AEMv8A              \
+        -C bp.secureflashloader.fname=bl1.bin     \
+        -C bp.flashloader0.fname=fip.bin          \
+        -a cluster0.cpu0=<bootwrapped-kernel.elf> \
+        --start cluster0.cpu0=0x0
+
+The `-a cluster0.cpu0=<bootwrapped-kernel.elf>` option loads the ELF file. It
+also sets the PC register to the ELF entry point address, which is not the
+desired behaviour, so the `--start cluster0.cpu0=0x0` option forces the PC back
+to 0x0 (the BL1 entry point address) on CPU #0. The `PRELOADED_BL33_BASE` define
+used when compiling the FIP must match the ELF entry point.
+
+#### Boot of a preloaded bootwrapped kernel image on Juno
+
+The procedure to obtain and compile the boot wrapper is very similar to the case
+of the FVP. Once compiled, the `SPIN_ON_BL1_EXIT=1` loading method explained
+above in the EL3 payload boot flow section may be used to load the ELF file over
+JTAG on Juno.
+
+
+9.  Preparing the images to run on FVP
 --------------------------------------
 
 Note: This section can be ignored when booting an EL3 payload, as no Flattened
@@ -907,20 +1093,21 @@ Copy the kernel image file `linux/arch/arm64/boot/Image` to the directory from
 which the FVP is launched. Alternatively a symbolic link may be used.
 
 
-9.  Running the software on FVP
--------------------------------
+10.  Running the software on FVP
+--------------------------------
 
 This version of the ARM Trusted Firmware has been tested on the following ARM
 FVPs (64-bit versions only).
 
-*   `Foundation_Platform` (Version 9.4, Build 9.4.59)
-*   `FVP_Base_AEMv8A-AEMv8A` (Version 7.0, Build 0.8.7004)
-*   `FVP_Base_Cortex-A57x4-A53x4` (Version 7.0, Build 0.8.7004)
-*   `FVP_Base_Cortex-A57x1-A53x1` (Version 7.0, Build 0.8.7004)
-*   `FVP_Base_Cortex-A57x2-A53x4` (Version 7.0, Build 0.8.7004)
+*   `Foundation_Platform` (Version 9.5, Build 9.5.40)
+*   `FVP_Base_AEMv8A-AEMv8A` (Version 7.2, Build 0.8.7202)
+*   `FVP_Base_Cortex-A57x4-A53x4` (Version 7.2, Build 0.8.7202)
+*   `FVP_Base_Cortex-A57x1-A53x1` (Version 7.2, Build 0.8.7202)
+*   `FVP_Base_Cortex-A57x2-A53x4` (Version 7.2, Build 0.8.7202)
 
 NOTE: The build numbers quoted above are those reported by launching the FVP
-with the `--version` parameter.
+with the `--version` parameter. `Foundation_Platform` tarball for `--version`
+9.5.40 is labeled as version 9.5.41.
 
 NOTE: The software will not work on Version 1.0 of the Foundation FVP.
 The commands below would report an `unhandled argument` error in this case.
@@ -1205,40 +1392,8 @@ The `bp.variant` parameter corresponds to the build variant field of the
 `SYS_ID` register.  Setting this to `0x0` allows the ARM Trusted Firmware to
 detect the legacy VE memory map while configuring the GIC.
 
-### Booting an EL3 payload on FVP
 
-Booting an EL3 payload on FVP requires a couple of changes to the way the
-model is normally invoked.
-
-First of all, the EL3 payload image is not part of the FIP and is not loaded by
-the Trusted Firmware. Therefore, it must be loaded in memory some other way.
-There are 2 ways of doing that:
-
-1.  It can be loaded over JTAG at the appropriate time. The infinite loop
-    introduced in BL1 when compiling the Trusted Firmware with
-    `SPIN_ON_BL1_EXIT=1` stops execution at the right moment for a debugger to
-    take control of the target and load the payload.
-
-2.  It can be pre-loaded in the FVP memory using the following model parameter:
-
-        --data="<path-to-binary>"@<base-address-of-binary>
-
-    The base address provided to the FVP must match the `EL3_PAYLOAD_BASE`
-    address used when building the Trusted Firmware.
-
-Secondly, the EL3 payloads boot flow requires the CPUs mailbox to be cleared
-at reset for the secondary CPUs holding pen to work properly. Unfortunately,
-its reset value is undefined on FVP. One way to clear it is to create an
-8-byte file containing all zero bytes and pre-load it into the FVP memory at the
-mailbox address (i.e. `0x04000000`) using the same `--data` FVP parameter as
-described above.
-
-The following command creates such a file called `mailbox.dat`:
-
-    dd if=/dev/zero of=mailbox.dat bs=1 count=8
-
-
-10.  Running the software on Juno
+11.  Running the software on Juno
 ---------------------------------
 
 This version of the ARM Trusted Firmware has been tested on Juno r0 and Juno r1.
@@ -1320,7 +1475,7 @@ The Juno board should suspend to RAM and then wakeup after 10 seconds due to
 wakeup interrupt from RTC.
 
 
-11.  Changes required for booting Linux on FVP in GICv3 mode
+12.  Changes required for booting Linux on FVP in GICv3 mode
 ------------------------------------------------------------
 
 In case the TF FVP port is built with the build option
@@ -1338,7 +1493,7 @@ used to test the GICv3 kernel on the respective FVP models.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-_Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved._
+_Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved._
 
 
 [Firmware Design]:             firmware-design.md

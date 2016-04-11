@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -42,6 +42,9 @@
 	 * C Runtime to print debug information. This
 	 * function will be accessed by console_init and
 	 * crash reporting.
+	 * We assume that the bootloader already set up
+	 * the HW (baud, ...) and only enable the trans-
+	 * mitter and receiver here.
 	 * In: x0 - console base address
 	 *     w1 - Uart clock in Hz
 	 *     w2 - Baud rate
@@ -60,13 +63,8 @@ func console_core_init
 	mov	w3, #(R_UART_CR_TX_EN | R_UART_CR_RX_EN | R_UART_CR_TXRST | R_UART_CR_RXRST)
 	str	w3, [x0, #R_UART_CR]
 
-	/* 8 bit, no parity */
-	mov	w3, #(R_UART_MR_PARITY_NONE)
-	str	w3, [x0, #R_UART_MR]
-
-	/* Setup baudrate */
-	b	cadence_serial_setbrg
 	mov	w0, #1
+	ret
 core_init_fail:
 	mov	w0, wzr
 	ret
