@@ -175,7 +175,8 @@ int pm_ipi_init(int (*fiq_handler)(uint32_t *))
 	/* Register IPI interrupt as INTR_TYPE_EL3 */
 	if (fiq_handler) {
 		usr_fiq_handler = fiq_handler;
-		int ret = request_intr_type_el3(IRQ_SEC_IPI_APU, ipi_fiq_handler);
+		int ret = zynqmp_request_intr_type_el3(IRQ_SEC_IPI_APU,
+						       ipi_fiq_handler);
 		if (ret)
 			return ret;
 

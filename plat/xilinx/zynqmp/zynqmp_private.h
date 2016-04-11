@@ -43,6 +43,6 @@ int zynqmp_is_pmu_up(void);
  * Register handler to specific GIC entrance
  * for INTR_TYPE_EL3 type of interrupt
  */
-int request_intr_type_el3(uint32_t, interrupt_type_handler_t);
+int zynqmp_request_intr_type_el3(uint32_t, interrupt_type_handler_t);
 
 #endif /* __ZYNQMP_PRIVATE_H__ */

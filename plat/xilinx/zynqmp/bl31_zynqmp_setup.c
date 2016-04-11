@@ -138,7 +138,7 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 static interrupt_type_handler_t type_el3_interrupt_table[MAX_INTR_EL3];
 
 /* Register INTR_TYPE_EL3 interrupt handler to specific GIC entrance */
-int request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
+int zynqmp_request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
 {
 	/* Validate 'handler' and 'id' parameters */
 	if (!handler || id >= MAX_INTR_EL3)
@@ -153,8 +153,8 @@ int request_intr_type_el3(uint32_t id, interrupt_type_handler_t handler)
 	return 0;
 }
 
-static uint64_t rdo_el3_interrupt_handler(uint32_t id, uint32_t flags,
-					  void *handle, void *cookie)
+static uint64_t zynqmp_el3_interrupt_handler(uint32_t id, uint32_t flags,
+					     void *handle, void *cookie)
 {
 	uint32_t intr_id;
 	interrupt_type_handler_t handler;
@@ -185,7 +185,8 @@ void bl31_plat_runtime_setup(void)
 
 	set_interrupt_rm_flag(flags, NON_SECURE);
 	rc = register_interrupt_type_handler(INTR_TYPE_EL3,
-					rdo_el3_interrupt_handler, flags);
+					     zynqmp_el3_interrupt_handler,
+					     flags);
 	if (rc)
 		panic();
 }
