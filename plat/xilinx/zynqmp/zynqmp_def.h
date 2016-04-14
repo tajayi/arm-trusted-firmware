@@ -114,16 +114,6 @@
 
 #define PMU_GLOBAL_CNTRL_FW_IS_PRESENT	(1 << 4)
 
-#define DRAM1_BASE		0x00000000ull
-#define DRAM1_SIZE		0x10000000ull
-#define DRAM1_END		(DRAM1_BASE + DRAM1_SIZE - 1)
-
-#define DRAM_BASE		DRAM1_BASE
-#define DRAM_SIZE		DRAM1_SIZE
-
-/* Load address of BL33 in the ZYNQMP port */
-#define PLAT_ARM_NS_IMAGE_OFFSET	(DRAM1_BASE + 0x8000000) /* DRAM + 128MB */
-
 /*******************************************************************************
  * CCI-400 related constants
  ******************************************************************************/
