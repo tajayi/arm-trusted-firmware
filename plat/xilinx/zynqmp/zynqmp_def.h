@@ -43,19 +43,6 @@
 /*******************************************************************************
  * ZYNQMP memory map related constants
  ******************************************************************************/
-
-#define ZYNQMP_TRUSTED_SRAM_BASE	0xFFFC0000
-#define ZYNQMP_TRUSTED_SRAM_SIZE	0x00040000
-#define ZYNQMP_TRUSTED_SRAM_LIMIT	(ZYNQMP_TRUSTED_SRAM_BASE + \
-					 ZYNQMP_TRUSTED_SRAM_SIZE)
-
-
-/* Location of trusted dram on the base zynqmp */
-#define ZYNQMP_TRUSTED_DRAM_BASE	0x30000000 /* Can't overlap TZROM area */
-#define ZYNQMP_TRUSTED_DRAM_SIZE	0x10000000
-#define ZYNQMP_TRUSTED_DRAM_LIMIT	(ZYNQMP_TRUSTED_DRAM_BASE + \
-					 ZYNQMP_TRUSTED_DRAM_SIZE)
-
 /* Aggregate of all devices in the first GB */
 #define DEVICE0_BASE		0xFF000000
 #define DEVICE0_SIZE		0x00E00000
