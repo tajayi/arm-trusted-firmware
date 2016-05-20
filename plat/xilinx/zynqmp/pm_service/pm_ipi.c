@@ -81,7 +81,7 @@
 
 #define IPI_APU_MASK		1U
 
-static bakery_lock_t pm_secure_lock;
+DEFINE_BAKERY_LOCK(pm_secure_lock);
 static int (*usr_fiq_handler)(uint32_t *buf);
 
 const struct pm_ipi apu_ipi = {
