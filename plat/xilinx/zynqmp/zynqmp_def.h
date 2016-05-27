@@ -139,7 +139,7 @@
  * UART related constants
  ******************************************************************************/
 #define ZYNQMP_UART0_BASE		0xFF000000
-#define ZYNQMP_UART1_BASE		0xFF001000
+#define ZYNQMP_UART1_BASE		0xFF010000
 
 #define PLAT_ARM_CRASH_UART_BASE	ZYNQMP_UART0_BASE
 /* impossible to call C routine how it is done now - hardcode any value */
