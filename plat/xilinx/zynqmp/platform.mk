@@ -73,7 +73,7 @@ PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
 				plat/xilinx/zynqmp/aarch64/zynqmp_common.c
 
 ZYNQMP_CONSOLE	?=	cadence
-ifeq (${ZYNQMP_CONSOLE}, cadence)
+ifeq (${ZYNQMP_CONSOLE}, $(filter ${ZYNQMP_CONSOLE},cadence cadence0 cadence1))
   PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S
 else ifeq (${ZYNQMP_CONSOLE}, dcc)
   PLAT_BL_COMMON_SOURCES += \
@@ -81,6 +81,7 @@ else ifeq (${ZYNQMP_CONSOLE}, dcc)
 else
   $(error "Please define ZYNQMP_CONSOLE")
 endif
+$(eval $(call add_define_val,ZYNQMP_CONSOLE,ZYNQMP_CONSOLE_ID_${ZYNQMP_CONSOLE}))
 
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				lib/cpus/aarch64/aem_generic.S			\
