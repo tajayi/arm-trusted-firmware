@@ -26,8 +26,9 @@ make ERROR_DEPRECATED=1 RESET_TO_BL31=1 CROSS_COMPILE=aarch64-none-elf- PLAT=zyn
 *   `ZYNQMP_BL32_MEM_SIZE`: Specifies the size of the memory region of the bl32 binary.
 
 *   `ZYNQMP_CONSOLE`: Select the console driver. Options:
-    -   `cadence` : Cadence UART
-    -   `dcc`     : ARM DCC JTAG UART
+    -   `cadence`, `cadence0`: Cadence UART 0
+    -   `cadence1`           : Cadence UART 1
+    -   `dcc`                : ARM DCC JTAG UART
 
 # FSBL->ATF Parameter Passing
 The FSBL populates a data structure with image information for the ATF. The ATF
