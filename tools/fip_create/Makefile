@@ -69,7 +69,7 @@ ${PROJECT}: ${OBJECTS} Makefile
 # path. This avoids conflicts with definitions in the compiler standard
 # include path.
 #
-uuid.h : ../../include/stdlib/sys/uuid.h
+uuid.h : ../../include/lib/stdlib/sys/uuid.h
 	$(call SHELL_COPY,$<,$@)
 
 firmware_image_package.h : ../../include/common/firmware_image_package.h

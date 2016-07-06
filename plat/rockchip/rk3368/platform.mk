@@ -48,7 +48,8 @@ RK_GIC_SOURCES         :=	drivers/arm/gic/common/gic_common.c		\
 				plat/common/plat_gicv2.c			\
 				${RK_PLAT}/common/rockchip_gicv2.c
 
-PLAT_BL_COMMON_SOURCES	:=	lib/aarch64/xlat_tables.c			\
+PLAT_BL_COMMON_SOURCES	:=	lib/xlat_tables/xlat_tables_common.c		\
+				lib/xlat_tables/aarch64/xlat_tables.c		\
 				plat/common/aarch64/plat_common.c		\
 				plat/common/aarch64/plat_psci_common.c
 
@@ -57,13 +58,14 @@ BL31_SOURCES		+=	${RK_GIC_SOURCES}				\
 				drivers/console/console.S			\
 				drivers/ti/uart/16550_console.S			\
 				drivers/delay_timer/delay_timer.c		\
+				drivers/delay_timer/generic_delay_timer.c	\
 				lib/cpus/aarch64/cortex_a53.S			\
 				plat/common/aarch64/platform_mp_stack.S		\
 				${RK_PLAT_COMMON}/aarch64/plat_helpers.S	\
 				${RK_PLAT_COMMON}/bl31_plat_setup.c		\
+				${RK_PLAT_COMMON}/params_setup.c                \
 				${RK_PLAT_COMMON}/pmusram/pmu_sram_cpus_on.S		\
 				${RK_PLAT_COMMON}/pmusram/pmu_sram.c		\
-				${RK_PLAT_COMMON}/plat_delay_timer.c		\
 				${RK_PLAT_COMMON}/plat_pm.c			\
 				${RK_PLAT_COMMON}/plat_topology.c		\
 				${RK_PLAT_COMMON}/aarch64/platform_common.c	\

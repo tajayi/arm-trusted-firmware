@@ -49,6 +49,9 @@ struct image_desc;
  * plat_get_rotpk_info() flags
  ******************************************************************************/
 #define ROTPK_IS_HASH			(1 << 0)
+/* Flag used to skip verification of the certificate ROTPK while the platform
+   ROTPK is not deployed */
+#define ROTPK_NOT_DEPLOYED		(1 << 1)
 
 /*******************************************************************************
  * Function declarations
@@ -56,7 +59,9 @@ struct image_desc;
 /*******************************************************************************
  * Mandatory common functions
  ******************************************************************************/
-uint64_t plat_get_syscnt_freq(void);
+unsigned long long plat_get_syscnt_freq(void) __deprecated;
+unsigned int plat_get_syscnt_freq2(void);
+
 int plat_get_image_source(unsigned int image_id,
 			uintptr_t *dev_handle,
 			uintptr_t *image_spec);

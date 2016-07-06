@@ -76,8 +76,8 @@ either mandatory or optional.
 A platform port must enable the Memory Management Unit (MMU) as well as the
 instruction and data caches for each BL stage. Setting up the translation
 tables is the responsibility of the platform port because memory maps differ
-across platforms. A memory translation library (see `lib/aarch64/xlat_tables.c`)
-is provided to help in this setup. Note that although this library supports
+across platforms. A memory translation library (see `lib/xlat_tables/`) is
+provided to help in this setup. Note that although this library supports
 non-identity mappings, this is intended only for re-mapping peripheral physical
 addresses and allows platforms with high I/O addresses to reduce their virtual
 address space. All other addresses corresponding to code and data must currently
@@ -189,8 +189,19 @@ platform port to define additional platform porting constants in
     Defines the local power state corresponding to the deepest retention state
     possible at every power domain level in the platform. This macro should be
     a value less than PLAT_MAX_OFF_STATE and greater than 0. It is used by the
-    PSCI implementation to distuiguish between retention and power down local
+    PSCI implementation to distinguish between retention and power down local
     power states within PSCI_CPU_SUSPEND call.
+
+*   **#define : PLAT_MAX_PWR_LVL_STATES**
+
+    Defines the maximum number of local power states per power domain level
+    that the platform supports. The default value of this macro is 2 since
+    most platforms just support a maximum of two local power states at each
+    power domain level (power-down and retention). If the platform needs to
+    account for more local power states, then it must redefine this macro.
+
+    Currently, this macro is used by the Generic PSCI implementation to size
+    the array used for PSCI_STAT_COUNT/RESIDENCY accounting.
 
 *   **#define : BL1_RO_BASE**
 
@@ -448,6 +459,14 @@ must also be defined:
     Defines the maximum number of open IO handles. Attempting to open more IO
     entities than this value using `io_open()` will fail with -ENOMEM.
 
+*   **#define : MAX_IO_BLOCK_DEVICES**
+
+    Defines the maximum number of registered IO block devices. Attempting to
+    register more devices this value using `io_dev_open()` will fail
+    with -ENOMEM. MAX_IO_BLOCK_DEVICES should be less than MAX_IO_DEVICES.
+    With this macro, multiple block devices could be supported at the same
+    time.
+
 If the platform needs to allocate data within the per-cpu data framework in
 BL31, it should define the following macro. Currently this is only required if
 the platform decides not to use the coherent memory section by undefining the
@@ -489,20 +508,15 @@ Each platform must ensure a file of this name is in the system include path with
 the following macro defined. In the ARM development platforms, this file is
 found in `plat/arm/board/<plat_name>/include/plat_macros.S`.
 
-*   **Macro : plat_print_gic_regs**
+*   **Macro : plat_crash_print_regs**
 
-    This macro allows the crash reporting routine to print GIC registers
-    in case of an unhandled exception in BL31. This aids in debugging and
-    this macro can be defined to be empty in case GIC register reporting is
-    not desired.
-
-*   **Macro : plat_print_interconnect_regs**
-
-    This macro allows the crash reporting routine to print interconnect
+    This macro allows the crash reporting routine to print relevant platform
     registers in case of an unhandled exception in BL31. This aids in debugging
-    and this macro can be defined to be empty in case interconnect register
-    reporting is not desired. In ARM standard platforms, the CCI snoop
-    control registers are reported.
+    and this macro can be defined to be empty in case register reporting is not
+    desired.
+
+    For instance, GIC or interconnect registers may be helpful for
+    troubleshooting.
 
 
 2.2 Handling Reset
@@ -628,10 +642,19 @@ In case the function returns a hash of the key:
         digest            OCTET STRING
     }
 
-The function returns 0 on success. Any other value means the ROTPK could not be
-retrieved from the platform. The function also reports extra information related
-to the ROTPK in the flags parameter.
+The function returns 0 on success. Any other value is treated as error by the
+Trusted Board Boot. The function also reports extra information related
+to the ROTPK in the flags parameter:
 
+    ROTPK_IS_HASH      : Indicates that the ROTPK returned by the platform is a
+                         hash.
+    ROTPK_NOT_DEPLOYED : This allows the platform to skip certificate ROTPK
+                         verification while the platform ROTPK is not deployed.
+                         When this flag is set, the function does not need to
+                         return a platform ROTPK, and the authentication
+                         framework uses the ROTPK in the certificate without
+                         verifying it against the platform value. This flag
+                         must not be used in a deployed production environment.
 
 ### Function: plat_get_nv_ctr()
 
@@ -1526,10 +1549,10 @@ state. This function must return a pointer to the `entry_point_info` structure
 (that was copied during `bl31_early_platform_setup()`) if the image exists. It
 should return NULL otherwise.
 
-### Function : plat_get_syscnt_freq() [mandatory]
+### Function : plat_get_syscnt_freq2() [mandatory]
 
     Argument : void
-    Return   : uint64_t
+    Return   : unsigned int
 
 This function is used by the architecture setup code to retrieve the counter
 frequency for the CPU's generic timer.  This value will be programmed into the
@@ -1712,6 +1735,22 @@ latter case, the power domain is expected to save enough state so that it can
 resume execution by restoring this state when its powered on (see
 `pwr_domain_suspend_finish()`).
 
+#### plat_psci_ops.pwr_domain_pwr_down_wfi()
+
+This is an optional function and, if implemented, is expected to perform
+platform specific actions including the `wfi` invocation which allows the
+CPU to powerdown. Since this function is invoked outside the PSCI locks,
+the actions performed in this hook must be local to the CPU or the platform
+must ensure that races between multiple CPUs cannot occur.
+
+The `target_state` has a similar meaning as described in the `pwr_domain_off()`
+operation and it encodes the platform coordinated target local power states for
+the CPU power domain and its parent power domain levels. This function must
+not return back to the caller.
+
+If this function is not implemented by the platform, PSCI generic
+implementation invokes `psci_power_down_wfi()` for power down.
+
 #### plat_psci_ops.pwr_domain_on_finish()
 
 This function is called by the PSCI implementation after the calling CPU is
@@ -1764,6 +1803,34 @@ domain level specific local states to suspend to system affinity level. The
 `pwr_domain_suspend()` will be invoked with the coordinated target state to
 enter system suspend.
 
+#### plat_psci_ops.get_pwr_lvl_state_idx()
+
+This is an optional function and, if implemented, is invoked by the PSCI
+implementation to convert the `local_state` (first argument) at a specified
+`pwr_lvl` (second argument) to an index between 0 and
+`PLAT_MAX_PWR_LVL_STATES` - 1. This function is only needed if the platform
+supports more than two local power states at each power domain level, that is
+`PLAT_MAX_PWR_LVL_STATES` is greater than 2, and needs to account for these
+local power states.
+
+#### plat_psci_ops.translate_power_state_by_mpidr()
+
+This is an optional function and, if implemented, verifies the `power_state`
+(second argument) parameter of the PSCI API corresponding to a target power
+domain. The target power domain is identified by using both `MPIDR` (first
+argument) and the power domain level encoded in `power_state`. The power domain
+level specific local states are to be extracted from `power_state` and be
+populated in the `output_state` (third argument) array.  The functionality
+is similar to the `validate_power_state` function described above and is
+envisaged to be used in case the validity of `power_state` depend on the
+targeted power domain. If the `power_state` is invalid for the targeted power
+domain, the platform must return PSCI_E_INVALID_PARAMS as error. If this
+function is not implemented, then the generic implementation relies on
+`validate_power_state` function to translate the `power_state`.
+
+This function can also be used in case the platform wants to support local
+power state encoding for `power_state` parameter of PSCI_STAT_COUNT/RESIDENCY
+APIs as described in Section 5.18 of [PSCI].
 
 3.6  Interrupt Management framework (in BL31)
 ----------------------------------------------
@@ -2016,12 +2083,12 @@ library only contains those C library definitions required by the local
 implementation. If more functionality is required, the needed library functions
 will need to be added to the local implementation.
 
-Versions of [FreeBSD] headers can be found in `include/stdlib`. Some of these
-headers have been cut down in order to simplify the implementation. In order to
-minimize changes to the header files, the [FreeBSD] layout has been maintained.
-The generic C library definitions can be found in `include/stdlib` with more
-system and machine specific declarations in `include/stdlib/sys` and
-`include/stdlib/machine`.
+Versions of [FreeBSD] headers can be found in `include/lib/stdlib`. Some of
+these headers have been cut down in order to simplify the implementation. In
+order to minimize changes to the header files, the [FreeBSD] layout has been
+maintained. The generic C library definitions can be found in
+`include/lib/stdlib` with more system and machine specific declarations in
+`include/lib/stdlib/sys` and `include/lib/stdlib/machine`.
 
 The local C library implementations can be found in `lib/stdlib`. In order to
 extend the C library these files may need to be modified. It is recommended to
