@@ -100,6 +100,11 @@ int psci_do_cpu_off(unsigned int end_pwrlvl)
 	 */
 	psci_do_state_coordination(end_pwrlvl, &state_info);
 
+#if ENABLE_PSCI_STAT
+	/* Update the last cpu for each level till end_pwrlvl */
+	psci_stats_update_pwr_down(end_pwrlvl, &state_info);
+#endif
+
 	/*
 	 * Arch. management. Perform the necessary steps to flush all
 	 * cpu caches.
@@ -111,6 +116,16 @@ int psci_do_cpu_off(unsigned int end_pwrlvl)
 	 * cpu off e.g. exit cpu coherency, program the power controller etc.
 	 */
 	psci_plat_pm_ops->pwr_domain_off(&state_info);
+
+#if ENABLE_PSCI_STAT
+	/*
+	 * Capture time-stamp while entering low power state.
+	 * No cache maintenance needed because caches are off
+	 * and writes are direct to main memory.
+	 */
+	PMF_CAPTURE_TIMESTAMP(psci_svc, PSCI_STAT_ID_ENTER_LOW_PWR,
+		PMF_NO_CACHE_MAINT);
+#endif
 
 exit:
 	/*
@@ -138,11 +153,16 @@ exit:
 		dsbish();
 		inv_cpu_data(psci_svc_cpu_data.aff_info_state);
 
-		/*
-		 * Enter a wfi loop which will allow the power controller to
-		 * physically power down this cpu.
-		 */
-		psci_power_down_wfi();
+		if (psci_plat_pm_ops->pwr_domain_pwr_down_wfi) {
+			/* This function must not return */
+			psci_plat_pm_ops->pwr_domain_pwr_down_wfi(&state_info);
+		} else {
+			/*
+			 * Enter a wfi loop which will allow the power
+			 * controller to physically power down this cpu.
+			 */
+			psci_power_down_wfi();
+		}
 	}
 
 	return rc;

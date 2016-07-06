@@ -28,27 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <arch_helpers.h>
-#include <delay_timer.h>
-#include <platform_def.h>
+#ifndef __PLAT_SIP_CALLS_H__
+#define __PLAT_SIP_CALLS_H__
 
-static uint32_t plat_get_timer_value(void)
-{
-	/*
-	 * Generic delay timer implementation expects the timer to be a down
-	 * counter. We apply bitwise NOT operator to the tick values returned
-	 * by read_cntpct_el0() to simulate the down counter.
-	 */
-	return (uint32_t)(~read_cntpct_el0());
-}
+/*******************************************************************************
+ * Plat SiP function constants
+ ******************************************************************************/
+#define MTK_PLAT_SIP_NUM_CALLS	6
 
-static const timer_ops_t plat_timer_ops = {
-	.get_timer_value	= plat_get_timer_value,
-	.clk_mult		= 1,
-	.clk_div		= SYS_COUNTER_FREQ_IN_MHZ,
-};
+#define MTK_SIP_PWR_ON_MTCMOS			0x82000402
+#define MTK_SIP_PWR_OFF_MTCMOS			0x82000403
+#define MTK_SIP_PWR_MTCMOS_SUPPORT		0x82000404
+#define MTK_SIP_SET_HDCP_KEY_NUM		0x82000405
+#define MTK_SIP_CLR_HDCP_KEY			0x82000406
+#define MTK_SIP_SET_HDCP_KEY_EX			0x82000407
 
-void plat_delay_timer_init(void)
-{
-	timer_init(&plat_timer_ops);
-}
+#endif /* __PLAT_SIP_CALLS_H__ */

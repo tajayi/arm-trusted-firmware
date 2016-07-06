@@ -80,6 +80,10 @@
 #define PSCI_FEATURES			0x8400000A
 #define PSCI_SYSTEM_SUSPEND_AARCH32	0x8400000E
 #define PSCI_SYSTEM_SUSPEND_AARCH64	0xc400000E
+#define PSCI_STAT_RESIDENCY_AARCH32	0x84000010
+#define PSCI_STAT_RESIDENCY_AARCH64	0xc4000010
+#define PSCI_STAT_COUNT_AARCH32		0x84000011
+#define PSCI_STAT_COUNT_AARCH64		0xc4000011
 
 /* Macro to help build the psci capabilities bitfield */
 #define define_psci_cap(x)		(1 << (x & 0x1f))
@@ -87,7 +91,11 @@
 /*
  * Number of PSCI calls (above) implemented
  */
+#if ENABLE_PSCI_STAT
+#define PSCI_NUM_CALLS			22
+#else
 #define PSCI_NUM_CALLS			18
+#endif
 
 /*******************************************************************************
  * PSCI Migrate and friends
@@ -265,6 +273,8 @@ typedef struct plat_psci_ops {
 	void (*pwr_domain_on_finish)(const psci_power_state_t *target_state);
 	void (*pwr_domain_suspend_finish)(
 				const psci_power_state_t *target_state);
+	void (*pwr_domain_pwr_down_wfi)(
+				const psci_power_state_t *target_state) __dead2;
 	void (*system_off)(void) __dead2;
 	void (*system_reset)(void) __dead2;
 	int (*validate_power_state)(unsigned int power_state,
@@ -272,6 +282,11 @@ typedef struct plat_psci_ops {
 	int (*validate_ns_entrypoint)(uintptr_t ns_entrypoint);
 	void (*get_sys_suspend_power_state)(
 				    psci_power_state_t *req_state);
+	int (*get_pwr_lvl_state_idx)(plat_local_state_t pwr_domain_state,
+				    int pwrlvl);
+	int (*translate_power_state_by_mpidr)(u_register_t mpidr,
+				    unsigned int power_state,
+				    psci_power_state_t *output_state);
 } plat_psci_ops_t;
 
 /*******************************************************************************

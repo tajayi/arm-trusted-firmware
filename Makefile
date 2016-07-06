@@ -62,6 +62,9 @@ NS_TIMER_SWITCH			:= 0
 RESET_TO_BL31			:= 0
 # Include FP registers in cpu context
 CTX_INCLUDE_FPREGS		:= 0
+# Build flag to include AArch32 registers in cpu context save and restore
+# during world switch. This flag must be set to 0 for AArch64-only platforms.
+CTX_INCLUDE_AARCH32_REGS	:= 1
 # Determine the version of ARM GIC architecture to use for interrupt management
 # in EL3. The platform port can change this value if needed.
 ARM_GIC_ARCH			:= 2
@@ -101,22 +104,38 @@ COLD_BOOT_SINGLE_CPU		:= 0
 SPIN_ON_BL1_EXIT		:= 0
 # Build PL011 UART driver in minimal generic UART mode
 PL011_GENERIC_UART		:= 0
-
+# Flag to enable Performance Measurement Framework
+ENABLE_PMF			:= 0
+# Flag to enable PSCI STATs functionality
+ENABLE_PSCI_STAT	:= 0
 
 ################################################################################
 # Checkpatch script options
 ################################################################################
 
-CHECK_IGNORE		:=	--ignore COMPLEX_MACRO \
-				--ignore GERRIT_CHANGE_ID \
-				--ignore GIT_COMMIT_ID
-CHECKPATCH_ARGS		:=	--no-tree --no-signoff ${CHECK_IGNORE}
-CHECKCODE_ARGS		:=	--no-patch --no-tree --no-signoff ${CHECK_IGNORE}
-# Do not check the coding style on C library files or documentation files
-INCLUDE_DIRS_TO_CHECK	:=	$(sort $(filter-out include/stdlib, $(wildcard include/*)))
-LIB_DIRS_TO_CHECK	:=	$(sort $(filter-out lib/stdlib, $(wildcard lib/*)))
-ROOT_DIRS_TO_CHECK	:=	$(sort $(filter-out lib include docs %.md, $(wildcard *)))
-CHECK_PATHS		:=	${ROOT_DIRS_TO_CHECK} ${INCLUDE_DIRS_TO_CHECK} ${LIB_DIRS_TO_CHECK}
+CHECKCODE_ARGS		:=	--no-patch
+# Do not check the coding style on imported library files or documentation files
+INC_LIB_DIRS_TO_CHECK	:=	$(sort $(filter-out			\
+					include/lib/libfdt		\
+					include/lib/stdlib,		\
+					$(wildcard include/lib/*)))
+INC_DIRS_TO_CHECK	:=	$(sort $(filter-out			\
+					include/lib,			\
+					$(wildcard include/*)))
+LIB_DIRS_TO_CHECK	:=	$(sort $(filter-out			\
+					lib/libfdt			\
+					lib/stdlib,			\
+					$(wildcard lib/*)))
+ROOT_DIRS_TO_CHECK	:=	$(sort $(filter-out			\
+					lib				\
+					include				\
+					docs				\
+					%.md,				\
+					$(wildcard *)))
+CHECK_PATHS		:=	${ROOT_DIRS_TO_CHECK}			\
+				${INC_DIRS_TO_CHECK}			\
+				${INC_LIB_DIRS_TO_CHECK}		\
+				${LIB_DIRS_TO_CHECK}
 
 
 ################################################################################
@@ -136,7 +155,7 @@ export Q
 $(eval $(call add_define,DEBUG))
 ifneq (${DEBUG}, 0)
         BUILD_TYPE	:=	debug
-        CFLAGS		+= 	-g
+        TF_CFLAGS	+= 	-g
         ASFLAGS		+= 	-g -Wa,--gdwarf-2
         # Use LOG_LEVEL_INFO by default for debug builds
         LOG_LEVEL	:=	40
@@ -179,12 +198,12 @@ ASFLAGS			+= 	-nostdinc -ffreestanding -Wa,--fatal-warnings	\
 				-Werror -Wmissing-include-dirs			\
 				-mgeneral-regs-only -D__ASSEMBLY__		\
 				${DEFINES} ${INCLUDES}
-CFLAGS			+= 	-nostdinc -ffreestanding -Wall			\
+TF_CFLAGS		+= 	-nostdinc -ffreestanding -Wall			\
 				-Werror -Wmissing-include-dirs			\
 				-mgeneral-regs-only -mstrict-align		\
 				-std=c99 -c -Os					\
 				${DEFINES} ${INCLUDES}
-CFLAGS			+=	-ffunction-sections -fdata-sections
+TF_CFLAGS		+=	-ffunction-sections -fdata-sections
 
 LDFLAGS			+=	--fatal-warnings -O1
 LDFLAGS			+=	--gc-sections
@@ -193,26 +212,15 @@ LDFLAGS			+=	--gc-sections
 ################################################################################
 # Common sources and include directories
 ################################################################################
+include lib/stdlib/stdlib.mk
 
 BL_COMMON_SOURCES	+=	common/bl_common.c			\
 				common/tf_printf.c			\
 				common/aarch64/debug.S			\
 				lib/aarch64/cache_helpers.S		\
 				lib/aarch64/misc_helpers.S		\
-				lib/stdlib/abort.c			\
-				lib/stdlib/assert.c			\
-				lib/stdlib/exit.c			\
-				lib/stdlib/mem.c			\
-				lib/stdlib/printf.c			\
-				lib/stdlib/putchar.c			\
-				lib/stdlib/puts.c			\
-				lib/stdlib/sscanf.c			\
-				lib/stdlib/strchr.c			\
-				lib/stdlib/strcmp.c			\
-				lib/stdlib/strlen.c			\
-				lib/stdlib/strncmp.c			\
-				lib/stdlib/subr_prf.c			\
-				plat/common/aarch64/platform_helpers.S
+				plat/common/aarch64/platform_helpers.S	\
+				${STDLIB_SRCS}
 
 INCLUDES		+=	-Iinclude/bl1			\
 				-Iinclude/bl31			\
@@ -227,8 +235,6 @@ INCLUDES		+=	-Iinclude/bl1			\
 				-Iinclude/lib/aarch64		\
 				-Iinclude/lib/cpus/aarch64	\
 				-Iinclude/plat/common		\
-				-Iinclude/stdlib		\
-				-Iinclude/stdlib/sys		\
 				${PLAT_INCLUDES}		\
 				${SPD_INCLUDES}
 
@@ -331,7 +337,7 @@ endif
 
 # Check if -pedantic option should be used
 ifeq (${DISABLE_PEDANTIC},0)
-        CFLAGS		+= 	-pedantic
+        TF_CFLAGS	+= 	-pedantic
 endif
 
 # Using the ARM Trusted Firmware BL2 implies that a BL33 image also needs to be
@@ -370,6 +376,10 @@ ifneq (${GENERATE_COT},0)
         endif
 endif
 
+# Make sure PMF is enabled if PSCI STAT is enabled.
+ifeq (${ENABLE_PSCI_STAT},1)
+ENABLE_PMF			:= 1
+endif
 
 ################################################################################
 # Auxiliary tools (fip_create, cert_create, etc)
@@ -392,6 +402,7 @@ $(eval $(call assert_boolean,DEBUG))
 $(eval $(call assert_boolean,NS_TIMER_SWITCH))
 $(eval $(call assert_boolean,RESET_TO_BL31))
 $(eval $(call assert_boolean,CTX_INCLUDE_FPREGS))
+$(eval $(call assert_boolean,CTX_INCLUDE_AARCH32_REGS))
 $(eval $(call assert_boolean,ASM_ASSERTION))
 $(eval $(call assert_boolean,USE_COHERENT_MEM))
 $(eval $(call assert_boolean,DISABLE_PEDANTIC))
@@ -406,6 +417,8 @@ $(eval $(call assert_boolean,ERROR_DEPRECATED))
 $(eval $(call assert_boolean,ENABLE_PLAT_COMPAT))
 $(eval $(call assert_boolean,SPIN_ON_BL1_EXIT))
 $(eval $(call assert_boolean,PL011_GENERIC_UART))
+$(eval $(call assert_boolean,ENABLE_PMF))
+$(eval $(call assert_boolean,ENABLE_PSCI_STAT))
 
 
 ################################################################################
@@ -419,6 +432,7 @@ $(eval $(call add_define,SPD_${SPD}))
 $(eval $(call add_define,NS_TIMER_SWITCH))
 $(eval $(call add_define,RESET_TO_BL31))
 $(eval $(call add_define,CTX_INCLUDE_FPREGS))
+$(eval $(call add_define,CTX_INCLUDE_AARCH32_REGS))
 $(eval $(call add_define,ARM_GIC_ARCH))
 $(eval $(call add_define,ARM_CCI_PRODUCT_ID))
 $(eval $(call add_define,ASM_ASSERTION))
@@ -432,6 +446,8 @@ $(eval $(call add_define,ERROR_DEPRECATED))
 $(eval $(call add_define,ENABLE_PLAT_COMPAT))
 $(eval $(call add_define,SPIN_ON_BL1_EXIT))
 $(eval $(call add_define,PL011_GENERIC_UART))
+$(eval $(call add_define,ENABLE_PMF))
+$(eval $(call add_define,ENABLE_PSCI_STAT))
 # Define the EL3_PAYLOAD_BASE flag only if it is provided.
 ifdef EL3_PAYLOAD_BASE
         $(eval $(call add_define,EL3_PAYLOAD_BASE))
@@ -442,7 +458,6 @@ else
                 $(eval $(call add_define,PRELOADED_BL33_BASE))
         endif
 endif
-
 
 ################################################################################
 # Include BL specific makefiles
@@ -487,7 +502,7 @@ msg_start:
 
 # Check if deprecated declarations should be treated as error or not.
 ifeq (${ERROR_DEPRECATED},0)
-    CFLAGS		+= 	-Wno-error=deprecated-declarations
+    TF_CFLAGS		+= 	-Wno-error=deprecated-declarations
 endif
 
 # Expand build macros for the different images
@@ -550,15 +565,24 @@ realclean distclean:
 
 checkcodebase:		locate-checkpatch
 	@echo "  CHECKING STYLE"
-	@if test -d .git ; then	\
-		git ls-files | grep -v stdlib | while read GIT_FILE ; do ${CHECKPATCH} ${CHECKCODE_ARGS} -f $$GIT_FILE ; done ;	\
-	 else			\
-		 find . -type f -not -iwholename "*.git*" -not -iwholename "*build*" -not -iwholename "*stdlib*" -exec ${CHECKPATCH} ${CHECKCODE_ARGS} -f {} \; ;	\
-	 fi
+	@if test -d .git ; then						\
+		git ls-files | grep -E -v libfdt\|stdlib\|docs\|\.md |	\
+		while read GIT_FILE ;					\
+		do ${CHECKPATCH} ${CHECKCODE_ARGS} -f $$GIT_FILE ;	\
+		done ;							\
+	else								\
+		 find . -type f -not -iwholename "*.git*"		\
+		 -not -iwholename "*build*"				\
+		 -not -iwholename "*libfdt*"				\
+		 -not -iwholename "*stdlib*"				\
+		 -not -iwholename "*docs*"				\
+		 -not -iwholename "*.md"				\
+		 -exec ${CHECKPATCH} ${CHECKCODE_ARGS} -f {} \; ;	\
+	fi
 
 checkpatch:		locate-checkpatch
 	@echo "  CHECKING STYLE"
-	${Q}git log -p ${BASE_COMMIT}..HEAD -- ${CHECK_PATHS} | ${CHECKPATCH} ${CHECKPATCH_ARGS} - || true
+	${Q}git log -p ${BASE_COMMIT}..HEAD -- ${CHECK_PATHS} | ${CHECKPATCH} - || true
 
 certtool: ${CRTTOOL}
 

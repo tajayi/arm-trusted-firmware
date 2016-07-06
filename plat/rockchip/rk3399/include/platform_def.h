@@ -101,7 +101,7 @@
 /*
  * Put BL3-1 at the top of the Trusted RAM
  */
-#define BL31_BASE		(TZRAM_BASE + 0x8000)
+#define BL31_BASE		(TZRAM_BASE + 0x10000)
 #define BL31_LIMIT	(TZRAM_BASE + TZRAM_SIZE)
 
 /*******************************************************************************
@@ -109,7 +109,7 @@
  ******************************************************************************/
 #define ADDR_SPACE_SIZE		(1ull << 32)
 #define MAX_XLAT_TABLES		20
-#define MAX_MMAP_REGIONS	16
+#define MAX_MMAP_REGIONS	20
 
 /*******************************************************************************
  * Declarations and constants to access the mailboxes safely. Each mailbox is

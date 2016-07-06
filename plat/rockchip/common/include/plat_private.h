@@ -77,7 +77,7 @@ struct rockchip_pm_ops_cb {
 #endif
 
 #ifndef BITS_WITH_WMASK
-#define BITS_WITH_WMASK(msk, bits, shift)\
+#define BITS_WITH_WMASK(bits, msk, shift)\
 	(BITS_SHIFT(bits, shift) | BITS_SHIFT(msk, (shift + REG_MSK_SHIFT)))
 #endif
 
@@ -97,6 +97,8 @@ void plat_cci_disable(void);
 
 void plat_delay_timer_init(void);
 
+void params_early_setup(void *plat_params_from_bl2);
+
 void plat_rockchip_gic_driver_init(void);
 void plat_rockchip_gic_init(void);
 void plat_rockchip_gic_cpuif_enable(void);
@@ -107,6 +109,12 @@ void plat_rockchip_pmusram_prepare(void);
 void plat_rockchip_pmu_init(void);
 void plat_rockchip_soc_init(void);
 void plat_setup_rockchip_pm_ops(struct rockchip_pm_ops_cb *ops);
+
+void platform_cpu_warmboot(void);
+
+void *plat_get_rockchip_gpio_reset(void);
+void *plat_get_rockchip_gpio_poweroff(void);
+void plat_rockchip_gpio_init(void);
 
 extern const unsigned char rockchip_power_domain_tree_desc[];
 

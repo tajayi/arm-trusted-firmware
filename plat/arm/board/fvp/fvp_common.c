@@ -30,16 +30,13 @@
 
 #include <arm_config.h>
 #include <arm_def.h>
+#include <ccn.h>
 #include <debug.h>
 #include <gicv2.h>
 #include <mmio.h>
 #include <plat_arm.h>
 #include <v2m_def.h>
 #include "../fvp_def.h"
-
-#if (FVP_USE_GIC_DRIVER == FVP_GICV2)
-extern gicv2_driver_data_t arm_gic_data;
-#endif
 
 /* Defines for GIC Driver build time selection */
 #define FVP_GICV2		1
@@ -65,7 +62,7 @@ arm_config_t arm_config;
 
 #define MAP_DEVICE2	MAP_REGION_FLAT(DEVICE2_BASE,			\
 					DEVICE2_SIZE,			\
-					MT_DEVICE | MT_RO | MT_SECURE)
+					MT_DEVICE | MT_RW | MT_SECURE)
 
 
 /*
@@ -159,26 +156,9 @@ void fvp_config_setup(void)
 	 */
 	switch (bld) {
 	case BLD_GIC_VE_MMAP:
-#if IMAGE_BL31 || IMAGE_BL32
-#if FVP_USE_GIC_DRIVER == FVP_GICV2
-		/*
-		 * If the FVP implements the VE compatible memory map, then the
-		 * GICv2 driver must be included in the build. Update the platform
-		 * data with the correct GICv2 base addresses before it is used
-		 * to initialise the driver.
-		 *
-		 * This update of platform data is temporary and will be removed
-		 * once VE memory map for FVP is no longer supported by Trusted
-		 * Firmware.
-		 */
-		arm_gic_data.gicd_base = VE_GICD_BASE;
-		arm_gic_data.gicc_base = VE_GICC_BASE;
-
-#else
-		ERROR("Only GICv2 driver supported for VE memory map\n");
+		ERROR("Legacy Versatile Express memory map for GIC peripheral"
+				" is not supported\n");
 		panic();
-#endif /* __FVP_USE_GIC_DRIVER == FVP_GICV2__ */
-#endif /* __IMAGE_BL31 || IMAGE_BL32__ */
 		break;
 	case BLD_GIC_A53A57_MMAP:
 		break;
@@ -234,8 +214,16 @@ void fvp_config_setup(void)
 
 void fvp_interconnect_init(void)
 {
-	if (arm_config.flags & ARM_CONFIG_HAS_INTERCONNECT)
+	if (arm_config.flags & ARM_CONFIG_HAS_INTERCONNECT) {
+#if FVP_INTERCONNECT_DRIVER == FVP_CCN
+		if (ccn_get_part0_id(PLAT_ARM_CCN_BASE) != CCN_502_PART0_ID) {
+			ERROR("Unrecognized CCN variant detected. Only CCN-502"
+					" is supported");
+			panic();
+		}
+#endif
 		plat_arm_interconnect_init();
+	}
 }
 
 void fvp_interconnect_enable(void)

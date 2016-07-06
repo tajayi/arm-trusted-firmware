@@ -291,9 +291,9 @@ void zynqmp_config_setup(void)
 	mmio_write_32(IOU_SCNTRS_CONTROL, IOU_SCNTRS_CONTROL_EN);
 }
 
-uint64_t plat_get_syscnt_freq(void)
+unsigned int plat_get_syscnt_freq2(void)
 {
-	uint64_t counter_base_frequency;
+	unsigned int counter_base_frequency;
 
 	/* FIXME: Read the frequency from Frequency modes table */
 	counter_base_frequency = zynqmp_get_system_timer_freq();

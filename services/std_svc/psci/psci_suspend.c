@@ -168,6 +168,11 @@ void psci_cpu_suspend_start(entry_point_info_t *ep,
 	 */
 	psci_do_state_coordination(end_pwrlvl, state_info);
 
+#if ENABLE_PSCI_STAT
+	/* Update the last cpu for each level till end_pwrlvl */
+	psci_stats_update_pwr_down(end_pwrlvl, state_info);
+#endif
+
 	if (is_power_down_state)
 		psci_suspend_to_pwrdown_start(end_pwrlvl, ep, state_info);
 
@@ -179,6 +184,16 @@ void psci_cpu_suspend_start(entry_point_info_t *ep,
 	 */
 	psci_plat_pm_ops->pwr_domain_suspend(state_info);
 
+#if ENABLE_PSCI_STAT
+	/*
+	 * Capture time-stamp while entering low power state.
+	 * No cache maintenance needed because caches are off
+	 * and writes are direct to main memory.
+	 */
+	PMF_CAPTURE_TIMESTAMP(psci_svc, PSCI_STAT_ID_ENTER_LOW_PWR,
+		PMF_NO_CACHE_MAINT);
+#endif
+
 exit:
 	/*
 	 * Release the locks corresponding to each power level in the
@@ -189,8 +204,13 @@ exit:
 	if (skip_wfi)
 		return;
 
-	if (is_power_down_state)
-		psci_power_down_wfi();
+	if (is_power_down_state) {
+		/* The function calls below must not return */
+		if (psci_plat_pm_ops->pwr_domain_pwr_down_wfi)
+			psci_plat_pm_ops->pwr_domain_pwr_down_wfi(state_info);
+		else
+			psci_power_down_wfi();
+	}
 
 	/*
 	 * We will reach here if only retention/standby states have been
@@ -214,7 +234,7 @@ exit:
 void psci_cpu_suspend_finish(unsigned int cpu_idx,
 			     psci_power_state_t *state_info)
 {
-	unsigned long long counter_freq;
+	unsigned int counter_freq;
 	unsigned int max_off_lvl;
 
 	/* Ensure we have been woken up from a suspended state */
@@ -238,7 +258,7 @@ void psci_cpu_suspend_finish(unsigned int cpu_idx,
 	psci_do_pwrup_cache_maintenance();
 
 	/* Re-init the cntfrq_el0 register */
-	counter_freq = plat_get_syscnt_freq();
+	counter_freq = plat_get_syscnt_freq2();
 	write_cntfrq_el0(counter_freq);
 
 	/*

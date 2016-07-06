@@ -61,6 +61,27 @@
 #define PMUSRAM_SIZE		SIZE_K(64)
 #define PMUSRAM_RSIZE		SIZE_K(8)
 
+#define PMUGRF_BASE		0xff320000
+#define PMUGRF_SIZE		SIZE_K(64)
+
+#define GPIO0_BASE		0xff720000
+#define GPIO0_SIZE		SIZE_K(64)
+
+#define GPIO1_BASE		0xff730000
+#define GPIO1_SIZE		SIZE_K(64)
+
+#define GPIO2_BASE		0xff780000
+#define GPIO2_SIZE		SIZE_K(32)
+
+#define GPIO3_BASE		0xff788000
+#define GPIO3_SIZE		SIZE_K(32)
+
+#define GPIO4_BASE		0xff790000
+#define GPIO4_SIZE		SIZE_K(32)
+
+#define GRF_BASE		0xff770000
+#define GRF_SIZE		SIZE_K(64)
+
 /*
  * include i2c pmu/audio, pwm0-3 rkpwm0-3 uart_dbg,mailbox scr
  * 0xff650000 -0xff6c0000
@@ -79,14 +100,13 @@
 #define RK3399_UART2_BASE	(0xff1a0000)
 #define RK3399_UART2_SIZE	SIZE_K(64)
 
-#define RK3399_BAUDRATE		(1500000)
+#define RK3399_BAUDRATE		(115200)
 #define RK3399_UART_CLOCK	(24000000)
 
 /******************************************************************************
  * System counter frequency related constants
  ******************************************************************************/
 #define SYS_COUNTER_FREQ_IN_TICKS	24000000
-#define SYS_COUNTER_FREQ_IN_MHZ		24
 
 /* Base rockchip_platform compatible GIC memory map */
 #define BASE_GICD_BASE		(GIC500_BASE)

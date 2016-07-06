@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,25 +27,65 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <arch_helpers.h>
-#include <delay_timer.h>
-#include <mt8173_def.h>
+#include <assert.h>
+#include <debug.h>
+#include <platform.h>
+#include <pmf.h>
+#include <smcc_helpers.h>
 
-static uint32_t plat_get_timer_value(void)
+/*
+ * This function is responsible for handling all PMF SMC calls.
+ */
+uintptr_t pmf_smc_handler(unsigned int smc_fid,
+			u_register_t x1,
+			u_register_t x2,
+			u_register_t x3,
+			u_register_t x4,
+			void *cookie,
+			void *handle,
+			u_register_t flags)
 {
-	/* Generic delay timer implementation expects the timer to be a down
-	 * counter. We apply bitwise NOT operator to the tick values returned
-	 * by read_cntpct_el0() to simulate the down counter. */
-	return (uint32_t)(~read_cntpct_el0());
-}
+	int rc;
+	unsigned long long ts_value;
 
-static const timer_ops_t plat_timer_ops = {
-	.get_timer_value	= plat_get_timer_value,
-	.clk_mult		= 1,
-	.clk_div		= SYS_COUNTER_FREQ_IN_MHZ,
-};
+	if (((smc_fid >> FUNCID_CC_SHIFT) & FUNCID_CC_MASK) == SMC_32) {
 
-void plat_delay_timer_init(void)
-{
-	timer_init(&plat_timer_ops);
+		x1 = (uint32_t)x1;
+		x2 = (uint32_t)x2;
+		x3 = (uint32_t)x3;
+
+		switch (smc_fid) {
+		case PMF_SMC_GET_TIMESTAMP_32:
+			/*
+			 * Return error code and the captured
+			 * time-stamp to the caller.
+			 * x0 --> error code.
+			 * x1 - x2 --> time-stamp value.
+			 */
+			rc = pmf_get_timestamp_smc(x1, x2, x3, &ts_value);
+			SMC_RET3(handle, rc, (uint32_t)ts_value,
+					(uint32_t)(ts_value >> 32));
+
+		default:
+			break;
+		}
+	} else {
+		switch (smc_fid) {
+		case PMF_SMC_GET_TIMESTAMP_64:
+			/*
+			 * Return error code and the captured
+			 * time-stamp to the caller.
+			 * x0 --> error code.
+			 * x1 --> time-stamp value.
+			 */
+			rc = pmf_get_timestamp_smc(x1, x2, x3, &ts_value);
+			SMC_RET2(handle, rc, ts_value);
+
+		default:
+			break;
+		}
+	}
+
+	WARN("Unimplemented PMF Call: 0x%x \n", smc_fid);
+	SMC_RET1(handle, SMC_UNK);
 }
