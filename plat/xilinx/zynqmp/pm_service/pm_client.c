@@ -45,18 +45,12 @@
 #include "pm_ipi.h"
 #include "../zynqmp_def.h"
 
-/* Minimum interrupt ID that is supported as wake event */
 #define IRQ_MAX		84
 #define NUM_GICD_ISENABLER	((IRQ_MAX >> 5) + 1)
-
-/* Minimum interrupt ID that is supported as wake event */
-#define IRQ_MAX		84
-#define NUM_GICD_ISENABLER	((IRQ_MAX >> 5) + 1)
-
 #define UNDEFINED_CPUID		(~0)
+
 DEFINE_BAKERY_LOCK(pm_client_secure_lock);
 
-/* Declaration of linker defined symbol */
 extern const struct pm_ipi apu_ipi;
 
 /* Order in pm_procs_all array must match cpu ids */
