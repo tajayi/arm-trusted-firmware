@@ -39,6 +39,7 @@ void zynqmp_config_setup(void);
 unsigned int zynqmp_get_uart_clk(void);
 int zynqmp_is_pmu_up(void);
 unsigned int zynqmp_get_bootmode(void);
+unsigned int zynqmp_get_silicon_id(void);
 
 /*
  * Register handler to specific GIC entrance

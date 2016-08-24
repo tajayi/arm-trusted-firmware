@@ -140,7 +140,7 @@ static const struct {
 	},
 };
 
-static unsigned int zynqmp_get_silicon_id(void)
+unsigned int zynqmp_get_silicon_id(void)
 {
 	uint32_t id;
 
