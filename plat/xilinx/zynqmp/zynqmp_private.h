@@ -40,12 +40,6 @@ unsigned int zynqmp_get_uart_clk(void);
 int zynqmp_is_pmu_up(void);
 unsigned int zynqmp_get_bootmode(void);
 
-/*
- * Register handler to specific GIC entrance
- * for INTR_TYPE_EL3 type of interrupt
- */
-int zynqmp_request_intr_type_el3(unsigned int, interrupt_type_handler_t);
-
 /* For FSBL handover */
 void fsbl_atf_handover(entry_point_info_t *bl32_image_ep_info,
 		       entry_point_info_t *bl33_image_ep_info);

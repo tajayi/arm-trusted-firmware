@@ -82,7 +82,6 @@
 #define IPI_APU_MASK		1U
 
 DEFINE_BAKERY_LOCK(pm_secure_lock);
-static int (*usr_fiq_handler)(uint32_t *buf);
 
 const struct pm_ipi apu_ipi = {
 	.mask = IPI_APU_MASK,
@@ -91,97 +90,21 @@ const struct pm_ipi apu_ipi = {
 };
 
 /**
- * pm_ipi_read_buffer() - Read from IPI buffer registers
- * @proc - Pointer to the processor who expected data
- * @pld - array of 5 elements
- *
- * Read value from ipi buffer registers (from PMU) and store
- * in PM context payload structure
- */
-static void pm_ipi_read_buffer(const struct pm_proc *const proc, uint32_t *pld)
-{
-	uint32_t i;
-	uint32_t offset = 0;
-	uint32_t buffer_base = proc->ipi->buffer_base +
-		IPI_BUFFER_TARGET_PMU_OFFSET +
-		IPI_BUFFER_RESP_OFFSET;
-
-	/* Read from IPI buffer and store into payload array */
-	for (i = 0; i < PAYLOAD_ARG_CNT; i++) {
-		pld[i] = mmio_read_32(buffer_base + offset);
-		offset += PAYLOAD_ARG_SIZE;
-	}
-}
-
-/**
- * ipi_fiq_handler() - IPI Handler for PM-API callbacks
- * @id - 	number of the highest priority pending interrupt of the type
- *		that this handler was registered for
- * @flags - 	security state, bit[0]
- * @handler - 	pointer to 'cpu_context' structure of the current CPU for the
- * 	      	security state specified in the 'flags' parameter
- * @cookie  - 	unused
- *
- * Function registered as INTR_TYPE_EL3 interrupt handler
- *
- * PMU sends IPI interrupts for PM-API callbacks. If a handler is registered,
- * the handler is called with a pointer to the payload as argument.
- *
- * In presence of non-secure software layers (EL1/2) sets the interrupt
- * at registered entrance in GIC and informs that PMU responsed or demands
- * action
- */
-static uint64_t ipi_fiq_handler(uint32_t id, uint32_t flags, void *handle,
-			 void *cookie)
-{
-	uint32_t ipi_apu_isr_reg = mmio_read_32(IPI_APU_ISR);
-
-	if (usr_fiq_handler) {
-		uint32_t payload[PAYLOAD_ARG_CNT];
-		unsigned int cpuid = plat_my_core_pos();
-		const struct pm_proc *proc = pm_get_proc(cpuid);
-
-		/* Read PM-API Arguments */
-		pm_ipi_read_buffer(proc, payload);
-		usr_fiq_handler(payload);
-
-	}
-
-	/* Clear IPI_APU_ISR bit */
-	mmio_write_32(IPI_APU_ISR, ipi_apu_isr_reg & IPI_PMU_PM_INT_MASK);
-
-	return 0;
-}
-
-/**
  * pm_ipi_init() - Initialize IPI peripheral for communication with PMU
  *
  * @return	On success, the initialization function must return 0.
  *		Any other return value will cause the framework to ignore
  *		the service
  *
- * Enable interrupts at registered entrance in IPI peripheral
  * Called from pm_setup initialization function
  */
-int pm_ipi_init(int (*fiq_handler)(uint32_t *))
+int pm_ipi_init(void)
 {
 	bakery_lock_init(&pm_secure_lock);
 
 	/* IPI Interrupts Clear & Disable */
 	mmio_write_32(IPI_APU_ISR, 0xffffffff);
 	mmio_write_32(IPI_APU_IDR, 0xffffffff);
-
-	/* Register IPI interrupt as INTR_TYPE_EL3 */
-	if (fiq_handler) {
-		usr_fiq_handler = fiq_handler;
-		int ret = zynqmp_request_intr_type_el3(IRQ_SEC_IPI_APU,
-						       ipi_fiq_handler);
-		if (ret)
-			return ret;
-
-		/* IPI Interrupts Enable */
-		mmio_write_32(IPI_APU_IER, IPI_APU_IXR_PMU_0_MASK);
-	}
 
 	return 0;
 }
