@@ -31,8 +31,8 @@
 PLAT_INCLUDES		+=	-Iinclude/plat/arm/board/common/			\
 				-Iinclude/plat/arm/board/common/drivers
 
-PLAT_BL_COMMON_SOURCES	+=	drivers/arm/pl011/pl011_console.S			\
-				plat/arm/board/common/aarch64/board_arm_helpers.S
+PLAT_BL_COMMON_SOURCES	+=	drivers/arm/pl011/${ARCH}/pl011_console.S		\
+				plat/arm/board/common/${ARCH}/board_arm_helpers.S
 
 BL1_SOURCES		+=	plat/arm/board/common/drivers/norflash/norflash.c
 
@@ -61,8 +61,8 @@ ifneq (${TRUSTED_BOARD_BOOT},0)
 endif
 
 # This flag controls whether memory usage needs to be optimised
-ARM_BOARD_OPTIMISE_MMAP	?=	0
+ARM_BOARD_OPTIMISE_MEM	?=	0
 
 # Process flags
-$(eval $(call assert_boolean,ARM_BOARD_OPTIMISE_MMAP))
-$(eval $(call add_define,ARM_BOARD_OPTIMISE_MMAP))
+$(eval $(call assert_boolean,ARM_BOARD_OPTIMISE_MEM))
+$(eval $(call add_define,ARM_BOARD_OPTIMISE_MEM))

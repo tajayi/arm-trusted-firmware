@@ -39,36 +39,9 @@
 
 /* Table of regions to map using the MMU.  */
 const mmap_region_t plat_rk_mmap[] = {
-	MAP_REGION_FLAT(GIC500_BASE, GIC500_SIZE,
+	MAP_REGION_FLAT(RK3399_DEV_RNG0_BASE, RK3399_DEV_RNG0_SIZE,
 			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(CCI500_BASE, CCI500_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(STIME_BASE, STIME_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(CRUS_BASE, CRUS_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(SGRF_BASE, SGRF_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(PMU_BASE, PMU_SIZE,
-			MT_DEVICE | MT_RW | MT_NS),
-	MAP_REGION_FLAT(PMUSRAM_BASE, PMUSRAM_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(RK3399_UART2_BASE, RK3399_UART2_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(PMUGRF_BASE, PMUGRF_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GPIO0_BASE, GPIO0_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GPIO1_BASE, GPIO1_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GPIO2_BASE, GPIO2_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GPIO3_BASE, GPIO3_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GPIO4_BASE, GPIO4_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
-	MAP_REGION_FLAT(GRF_BASE, GRF_SIZE,
-			MT_DEVICE | MT_RW | MT_SECURE),
+
 	{ 0 }
 };
 
@@ -263,7 +236,22 @@ static void _pll_suspend(uint32_t pll_id)
 	set_pll_bypass(pll_id);
 }
 
-void plls_suspend(void)
+void disable_dvfs_plls(void)
+{
+	_pll_suspend(CPLL_ID);
+	_pll_suspend(NPLL_ID);
+	_pll_suspend(VPLL_ID);
+	_pll_suspend(GPLL_ID);
+	_pll_suspend(ABPLL_ID);
+	_pll_suspend(ALPLL_ID);
+}
+
+void disable_nodvfs_plls(void)
+{
+	_pll_suspend(PPLL_ID);
+}
+
+void plls_suspend_prepare(void)
 {
 	uint32_t i, pll_id;
 
@@ -272,21 +260,49 @@ void plls_suspend(void)
 
 	for (i = 0; i < CRU_CLKSEL_COUNT; i++)
 		slp_data.cru_clksel_con[i] =
-			mmio_read_32(CRU_BASE +
-				     CRU_CLKSEL_OFFSET + i * REG_SIZE);
+			mmio_read_32(CRU_BASE + CRU_CLKSEL_CON(i));
 
 	for (i = 0; i < PMUCRU_CLKSEL_CONUT; i++)
 		slp_data.pmucru_clksel_con[i] =
 			mmio_read_32(PMUCRU_BASE +
 				     PMUCRU_CLKSEL_OFFSET + i * REG_SIZE);
+}
 
-	_pll_suspend(CPLL_ID);
-	_pll_suspend(NPLL_ID);
-	_pll_suspend(VPLL_ID);
-	_pll_suspend(PPLL_ID);
-	_pll_suspend(GPLL_ID);
-	_pll_suspend(ABPLL_ID);
-	_pll_suspend(ALPLL_ID);
+void clk_gate_con_save(void)
+{
+	uint32_t i = 0;
+
+	for (i = 0; i < PMUCRU_GATE_COUNT; i++)
+		slp_data.pmucru_gate_con[i] =
+			mmio_read_32(PMUCRU_BASE + PMUCRU_GATE_CON(i));
+
+	for (i = 0; i < CRU_GATE_COUNT; i++)
+		slp_data.cru_gate_con[i] =
+			mmio_read_32(CRU_BASE + CRU_GATE_CON(i));
+}
+
+void clk_gate_con_disable(void)
+{
+	uint32_t i;
+
+	for (i = 0; i < PMUCRU_GATE_COUNT; i++)
+		mmio_write_32(PMUCRU_BASE + PMUCRU_GATE_CON(i), REG_SOC_WMSK);
+
+	for (i = 0; i < CRU_GATE_COUNT; i++)
+		mmio_write_32(CRU_BASE + CRU_GATE_CON(i), REG_SOC_WMSK);
+}
+
+void clk_gate_con_restore(void)
+{
+	uint32_t i;
+
+	for (i = 0; i < PMUCRU_GATE_COUNT; i++)
+		mmio_write_32(PMUCRU_BASE + PMUCRU_GATE_CON(i),
+			      REG_SOC_WMSK | slp_data.pmucru_gate_con[i]);
+
+	for (i = 0; i < CRU_GATE_COUNT; i++)
+		mmio_write_32(CRU_BASE + CRU_GATE_CON(i),
+			      REG_SOC_WMSK | slp_data.cru_gate_con[i]);
 }
 
 static void set_plls_nobypass(uint32_t pll_id)
@@ -299,12 +315,18 @@ static void set_plls_nobypass(uint32_t pll_id)
 			      PLL_NO_BYPASS_MODE);
 }
 
-static void plls_resume_prepare(void)
+static void _pll_resume(uint32_t pll_id)
+{
+	set_plls_nobypass(pll_id);
+	set_pll_normal_mode(pll_id);
+}
+
+void plls_resume_finish(void)
 {
 	int i;
 
 	for (i = 0; i < CRU_CLKSEL_COUNT; i++)
-		mmio_write_32((CRU_BASE + CRU_CLKSEL_OFFSET + i * REG_SIZE),
+		mmio_write_32((CRU_BASE + CRU_CLKSEL_CON(i)),
 			      REG_SOC_WMSK | slp_data.cru_clksel_con[i]);
 	for (i = 0; i < PMUCRU_CLKSEL_CONUT; i++)
 		mmio_write_32((PMUCRU_BASE +
@@ -312,15 +334,19 @@ static void plls_resume_prepare(void)
 			      REG_SOC_WMSK | slp_data.pmucru_clksel_con[i]);
 }
 
-void plls_resume(void)
+void enable_dvfs_plls(void)
 {
-	int pll_id;
+	_pll_resume(ALPLL_ID);
+	_pll_resume(ABPLL_ID);
+	_pll_resume(GPLL_ID);
+	_pll_resume(VPLL_ID);
+	_pll_resume(NPLL_ID);
+	_pll_resume(CPLL_ID);
+}
 
-	plls_resume_prepare();
-	for (pll_id = ALPLL_ID; pll_id < END_PLL_ID; pll_id++) {
-		set_plls_nobypass(pll_id);
-		set_pll_normal_mode(pll_id);
-	}
+void enable_nodvfs_plls(void)
+{
+	_pll_resume(PPLL_ID);
 }
 
 void soc_global_soft_reset_init(void)
@@ -351,7 +377,7 @@ void  __dead2 soc_global_soft_reset(void)
 	 * so we do not hope the core to excute valid codes.
 	 */
 	while (1)
-	;
+		;
 }
 
 void plat_rockchip_soc_init(void)

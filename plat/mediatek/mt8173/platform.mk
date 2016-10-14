@@ -32,13 +32,13 @@ MTK_PLAT		:=	plat/mediatek
 MTK_PLAT_SOC		:=	${MTK_PLAT}/${PLAT}
 
 PLAT_INCLUDES		:=	-I${MTK_PLAT}/common/				\
+				-I${MTK_PLAT}/common/drivers/uart/		\
 				-I${MTK_PLAT_SOC}/drivers/crypt/		\
 				-I${MTK_PLAT_SOC}/drivers/mtcmos/		\
 				-I${MTK_PLAT_SOC}/drivers/pmic/			\
 				-I${MTK_PLAT_SOC}/drivers/rtc/			\
 				-I${MTK_PLAT_SOC}/drivers/spm/			\
 				-I${MTK_PLAT_SOC}/drivers/timer/		\
-				-I${MTK_PLAT_SOC}/drivers/uart/			\
 				-I${MTK_PLAT_SOC}/include/
 
 PLAT_BL_COMMON_SOURCES	:=	lib/xlat_tables/xlat_tables_common.c		\
@@ -50,7 +50,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				drivers/arm/gic/arm_gic.c			\
 				drivers/arm/gic/gic_v2.c			\
 				drivers/arm/gic/gic_v3.c			\
-				drivers/console/console.S			\
+				drivers/console/aarch64/console.S		\
 				drivers/delay_timer/delay_timer.c		\
 				drivers/delay_timer/generic_delay_timer.c	\
 				lib/cpus/aarch64/aem_generic.S			\
@@ -58,6 +58,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				lib/cpus/aarch64/cortex_a57.S			\
 				lib/cpus/aarch64/cortex_a72.S			\
 				plat/common/aarch64/platform_mp_stack.S		\
+				${MTK_PLAT}/common/drivers/uart/8250_console.S	\
 				${MTK_PLAT}/common/mtk_plat_common.c		\
 				${MTK_PLAT}/common/mtk_sip_svc.c		\
 				${MTK_PLAT_SOC}/aarch64/plat_helpers.S		\
@@ -72,7 +73,6 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				${MTK_PLAT_SOC}/drivers/spm/spm_mcdi.c		\
 				${MTK_PLAT_SOC}/drivers/spm/spm_suspend.c	\
 				${MTK_PLAT_SOC}/drivers/timer/mt_cpuxgpt.c	\
-				${MTK_PLAT_SOC}/drivers/uart/8250_console.S	\
 				${MTK_PLAT_SOC}/plat_mt_gic.c			\
 				${MTK_PLAT_SOC}/plat_pm.c			\
 				${MTK_PLAT_SOC}/plat_sip_calls.c		\

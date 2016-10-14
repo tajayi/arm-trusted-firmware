@@ -69,6 +69,9 @@ FVP_GIC_SOURCES		:=	drivers/arm/gic/common/gic_common.c	\
 				plat/common/plat_gicv2.c		\
 				plat/arm/common/arm_gicv2.c
 else ifeq (${FVP_USE_GIC_DRIVER}, FVP_GICV3_LEGACY)
+  ifeq (${ARCH}, aarch32)
+    $(error "GICV3 Legacy driver not supported for AArch32 build")
+  endif
 FVP_GIC_SOURCES		:=	drivers/arm/gic/arm_gic.c		\
 				drivers/arm/gic/gic_v2.c		\
 				drivers/arm/gic/gic_v3.c		\
@@ -98,17 +101,22 @@ PLAT_INCLUDES		:=	-Iplat/arm/board/fvp/include
 
 PLAT_BL_COMMON_SOURCES	:=	plat/arm/board/fvp/fvp_common.c
 
-FVP_CPU_LIBS		:=	lib/cpus/aarch64/aem_generic.S			\
-				lib/cpus/aarch64/cortex_a35.S			\
+FVP_CPU_LIBS		:=	lib/cpus/${ARCH}/aem_generic.S
+
+ifeq (${ARCH}, aarch64)
+FVP_CPU_LIBS		+=	lib/cpus/aarch64/cortex_a35.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
 				lib/cpus/aarch64/cortex_a57.S			\
 				lib/cpus/aarch64/cortex_a72.S			\
 				lib/cpus/aarch64/cortex_a73.S
+else
+FVP_CPU_LIBS		+=	lib/cpus/aarch32/cortex_a32.S
+endif
 
 BL1_SOURCES		+=	drivers/io/io_semihosting.c			\
 				lib/semihosting/semihosting.c			\
-				lib/semihosting/aarch64/semihosting_call.S	\
-				plat/arm/board/fvp/aarch64/fvp_helpers.S	\
+				lib/semihosting/${ARCH}/semihosting_call.S	\
+				plat/arm/board/fvp/${ARCH}/fvp_helpers.S	\
 				plat/arm/board/fvp/fvp_bl1_setup.c		\
 				plat/arm/board/fvp/fvp_err.c			\
 				plat/arm/board/fvp/fvp_io_storage.c		\
@@ -120,7 +128,7 @@ BL1_SOURCES		+=	drivers/io/io_semihosting.c			\
 BL2_SOURCES		+=	drivers/io/io_semihosting.c			\
 				drivers/delay_timer/delay_timer.c		\
 				lib/semihosting/semihosting.c			\
-				lib/semihosting/aarch64/semihosting_call.S	\
+				lib/semihosting/${ARCH}/semihosting_call.S	\
 				plat/arm/board/fvp/fvp_bl2_setup.c		\
 				plat/arm/board/fvp/fvp_err.c			\
 				plat/arm/board/fvp/fvp_io_storage.c		\

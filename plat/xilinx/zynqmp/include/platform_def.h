@@ -99,7 +99,7 @@
  * Platform specific page table and MMU setup constants
  ******************************************************************************/
 #define ADDR_SPACE_SIZE			(1ull << 32)
-#define MAX_MMAP_REGIONS		6
+#define MAX_MMAP_REGIONS		7
 #define MAX_XLAT_TABLES			5
 
 #define CACHE_WRITEBACK_SHIFT   6

@@ -32,7 +32,7 @@
 # Trusted Firmware Version
 #
 VERSION_MAJOR			:= 1
-VERSION_MINOR			:= 2
+VERSION_MINOR			:= 3
 
 # Default goal is build all images
 .DEFAULT_GOAL			:= all
@@ -45,6 +45,8 @@ include ${MAKE_HELPERS_DIRECTORY}build_env.mk
 # Default values for build configurations
 ################################################################################
 
+# The Target build architecture. Supported values are: aarch64, aarch32.
+ARCH				:= aarch64
 # Build verbosity
 V				:= 0
 # Debug build
@@ -54,6 +56,8 @@ DEFAULT_PLAT			:= fvp
 PLAT				:= ${DEFAULT_PLAT}
 # SPD choice
 SPD				:= none
+# The AArch32 Secure Payload to be built as BL32 image
+AARCH32_SP			:= none
 # Base commit to perform code check on
 BASE_COMMIT			:= origin/master
 # NS timer register save and restore
@@ -108,6 +112,11 @@ PL011_GENERIC_UART		:= 0
 ENABLE_PMF			:= 0
 # Flag to enable PSCI STATs functionality
 ENABLE_PSCI_STAT	:= 0
+# Whether code and read-only data should be put on separate memory pages.
+# The platform Makefile is free to override this value.
+SEPARATE_CODE_AND_RODATA	:= 0
+# Flag to enable new version of image loading
+LOAD_IMAGE_V2		:= 0
 
 ################################################################################
 # Checkpatch script options
@@ -179,6 +188,10 @@ ifneq (${GENERATE_COT},0)
         FWU_FIP_DEPS += fwu_certificates
 endif
 
+# For AArch32, enable new version of image loading.
+ifeq (${ARCH},aarch32)
+        LOAD_IMAGE_V2	:=	1
+endif
 
 ################################################################################
 # Toolchain
@@ -194,14 +207,20 @@ OD			:=	${CROSS_COMPILE}objdump
 NM			:=	${CROSS_COMPILE}nm
 PP			:=	${CROSS_COMPILE}gcc -E
 
+ASFLAGS_aarch64		=	-mgeneral-regs-only
+TF_CFLAGS_aarch64	=	-mgeneral-regs-only -mstrict-align
+
+ASFLAGS_aarch32		=	-march=armv8-a
+TF_CFLAGS_aarch32	=	-march=armv8-a
+
 ASFLAGS			+= 	-nostdinc -ffreestanding -Wa,--fatal-warnings	\
 				-Werror -Wmissing-include-dirs			\
-				-mgeneral-regs-only -D__ASSEMBLY__		\
+				-D__ASSEMBLY__ $(ASFLAGS_$(ARCH))		\
 				${DEFINES} ${INCLUDES}
 TF_CFLAGS		+= 	-nostdinc -ffreestanding -Wall			\
 				-Werror -Wmissing-include-dirs			\
-				-mgeneral-regs-only -mstrict-align		\
 				-std=c99 -c -Os					\
+				$(TF_CFLAGS_$(ARCH))				\
 				${DEFINES} ${INCLUDES}
 TF_CFLAGS		+=	-ffunction-sections -fdata-sections
 
@@ -216,26 +235,31 @@ include lib/stdlib/stdlib.mk
 
 BL_COMMON_SOURCES	+=	common/bl_common.c			\
 				common/tf_printf.c			\
-				common/aarch64/debug.S			\
-				lib/aarch64/cache_helpers.S		\
-				lib/aarch64/misc_helpers.S		\
-				plat/common/aarch64/platform_helpers.S	\
+				common/${ARCH}/debug.S			\
+				lib/${ARCH}/cache_helpers.S		\
+				lib/${ARCH}/misc_helpers.S		\
+				plat/common/${ARCH}/platform_helpers.S	\
 				${STDLIB_SRCS}
 
-INCLUDES		+=	-Iinclude/bl1			\
-				-Iinclude/bl31			\
-				-Iinclude/bl31/services		\
-				-Iinclude/common		\
-				-Iinclude/drivers		\
-				-Iinclude/drivers/arm		\
-				-Iinclude/drivers/auth		\
-				-Iinclude/drivers/io		\
-				-Iinclude/drivers/ti/uart	\
-				-Iinclude/lib			\
-				-Iinclude/lib/aarch64		\
-				-Iinclude/lib/cpus/aarch64	\
-				-Iinclude/plat/common		\
-				${PLAT_INCLUDES}		\
+INCLUDES		+=	-Iinclude/bl1				\
+				-Iinclude/bl31				\
+				-Iinclude/common			\
+				-Iinclude/common/${ARCH}		\
+				-Iinclude/drivers			\
+				-Iinclude/drivers/arm			\
+				-Iinclude/drivers/auth			\
+				-Iinclude/drivers/io			\
+				-Iinclude/drivers/ti/uart		\
+				-Iinclude/lib				\
+				-Iinclude/lib/${ARCH}			\
+				-Iinclude/lib/cpus/${ARCH}		\
+				-Iinclude/lib/el3_runtime		\
+				-Iinclude/lib/el3_runtime/${ARCH}	\
+				-Iinclude/lib/pmf			\
+				-Iinclude/lib/psci			\
+				-Iinclude/plat/common			\
+				-Iinclude/services			\
+				${PLAT_INCLUDES}			\
 				${SPD_INCLUDES}
 
 
@@ -259,6 +283,9 @@ INCLUDE_TBBR_MK		:=	1
 ################################################################################
 
 ifneq (${SPD},none)
+ifeq (${ARCH},aarch32)
+	$(error "Error: SPD is incompatible with AArch32.")
+endif
 ifdef EL3_PAYLOAD_BASE
         $(warning "SPD and EL3_PAYLOAD_BASE are incompatible build options.")
         $(warning "The SPD and its BL32 companion will be present but ignored.")
@@ -291,6 +318,8 @@ endif
 
 include ${PLAT_MAKEFILE_FULL}
 
+# Platform compatibility is not supported in AArch32
+ifneq (${ARCH},aarch32)
 # If the platform has not defined ENABLE_PLAT_COMPAT, then enable it by default
 ifndef ENABLE_PLAT_COMPAT
 ENABLE_PLAT_COMPAT := 1
@@ -299,6 +328,7 @@ endif
 # Include the platform compatibility helpers for PSCI
 ifneq (${ENABLE_PLAT_COMPAT}, 0)
 include plat/compat/plat_compat.mk
+endif
 endif
 
 # Include the CPU specific operations makefile, which provides default
@@ -328,6 +358,21 @@ ifeq (${NEED_BL33},yes)
                 PRELOADED_BL33_BASE is used and won't be added to the FIP \
                 file.")
         endif
+endif
+
+# TRUSTED_BOARD_BOOT is currently not supported when LOAD_IMAGE_V2 is enabled.
+ifeq (${LOAD_IMAGE_V2},1)
+        ifeq (${TRUSTED_BOARD_BOOT},1)
+                $(error "TRUSTED_BOARD_BOOT is currently not supported	\
+                for LOAD_IMAGE_V2=1")
+        endif
+endif
+
+# For AArch32, LOAD_IMAGE_V2 must be enabled.
+ifeq (${ARCH},aarch32)
+    ifeq (${LOAD_IMAGE_V2}, 0)
+        $(error "For AArch32, LOAD_IMAGE_V2 must be enabled.")
+    endif
 endif
 
 
@@ -382,7 +427,7 @@ ENABLE_PMF			:= 1
 endif
 
 ################################################################################
-# Auxiliary tools (fip_create, cert_create, etc)
+# Auxiliary tools (fiptool, cert_create, etc)
 ################################################################################
 
 # Variables for use with Certificate Generation Tool
@@ -390,8 +435,8 @@ CRTTOOLPATH		?=	tools/cert_create
 CRTTOOL			?=	${CRTTOOLPATH}/cert_create${BIN_EXT}
 
 # Variables for use with Firmware Image Package
-FIPTOOLPATH		?=	tools/fip_create
-FIPTOOL			?=	${FIPTOOLPATH}/fip_create${BIN_EXT}
+FIPTOOLPATH		?=	tools/fiptool
+FIPTOOL			?=	${FIPTOOLPATH}/fiptool${BIN_EXT}
 
 
 ################################################################################
@@ -419,6 +464,8 @@ $(eval $(call assert_boolean,SPIN_ON_BL1_EXIT))
 $(eval $(call assert_boolean,PL011_GENERIC_UART))
 $(eval $(call assert_boolean,ENABLE_PMF))
 $(eval $(call assert_boolean,ENABLE_PSCI_STAT))
+$(eval $(call assert_boolean,SEPARATE_CODE_AND_RODATA))
+$(eval $(call assert_boolean,LOAD_IMAGE_V2))
 
 
 ################################################################################
@@ -448,6 +495,8 @@ $(eval $(call add_define,SPIN_ON_BL1_EXIT))
 $(eval $(call add_define,PL011_GENERIC_UART))
 $(eval $(call add_define,ENABLE_PMF))
 $(eval $(call add_define,ENABLE_PSCI_STAT))
+$(eval $(call add_define,SEPARATE_CODE_AND_RODATA))
+$(eval $(call add_define,LOAD_IMAGE_V2))
 # Define the EL3_PAYLOAD_BASE flag only if it is provided.
 ifdef EL3_PAYLOAD_BASE
         $(eval $(call add_define,EL3_PAYLOAD_BASE))
@@ -458,11 +507,16 @@ else
                 $(eval $(call add_define,PRELOADED_BL33_BASE))
         endif
 endif
+# Define the AARCH32/AARCH64 flag based on the ARCH flag
+ifeq (${ARCH},aarch32)
+        $(eval $(call add_define,AARCH32))
+else
+        $(eval $(call add_define,AARCH64))
+endif
 
 ################################################################################
 # Include BL specific makefiles
 ################################################################################
-
 ifdef BL1_SOURCES
 NEED_BL1 := yes
 include bl1/bl1.mk
@@ -473,6 +527,8 @@ NEED_BL2 := yes
 include bl2/bl2.mk
 endif
 
+# For AArch32, BL31 is not applicable, and BL2U is not supported at present.
+ifneq (${ARCH},aarch32)
 ifdef BL2U_SOURCES
 NEED_BL2U := yes
 include bl2u/bl2u.mk
@@ -486,7 +542,27 @@ NEED_BL31 := yes
 include bl31/bl31.mk
 endif
 endif
+endif
 
+ifeq (${ARCH},aarch32)
+NEED_BL32 := yes
+
+################################################################################
+# Build `AARCH32_SP` as BL32 image for AArch32
+################################################################################
+ifneq (${AARCH32_SP},none)
+# We expect to locate an sp.mk under the specified AARCH32_SP directory
+AARCH32_SP_MAKE	:=	$(wildcard bl32/${AARCH32_SP}/${AARCH32_SP}.mk)
+
+ifeq (${AARCH32_SP_MAKE},)
+  $(error Error: No bl32/${AARCH32_SP}/${AARCH32_SP}.mk located)
+endif
+
+$(info Including ${AARCH32_SP_MAKE})
+include ${AARCH32_SP_MAKE}
+endif
+
+endif
 
 ################################################################################
 # Build targets
@@ -603,7 +679,8 @@ certificates: ${CRT_DEPS} ${CRTTOOL}
 endif
 
 ${BUILD_PLAT}/${FIP_NAME}: ${FIP_DEPS} ${FIPTOOL}
-	${Q}${FIPTOOL} --dump ${FIP_ARGS} $@
+	${Q}${FIPTOOL} create ${FIP_ARGS} $@
+	${Q}${FIPTOOL} info $@
 	@${ECHO_BLANK_LINE}
 	@echo "Built $@ successfully"
 	@${ECHO_BLANK_LINE}
@@ -618,7 +695,8 @@ fwu_certificates: ${FWU_CRT_DEPS} ${CRTTOOL}
 endif
 
 ${BUILD_PLAT}/${FWU_FIP_NAME}: ${FWU_FIP_DEPS} ${FIPTOOL}
-	${Q}${FIPTOOL} --dump ${FWU_FIP_ARGS} $@
+	${Q}${FIPTOOL} create ${FWU_FIP_ARGS} $@
+	${Q}${FIPTOOL} info $@
 	@echo
 	@echo "Built $@ successfully"
 	@echo
@@ -629,7 +707,7 @@ fwu_fip: ${BUILD_PLAT}/${FWU_FIP_NAME}
 
 .PHONY: ${FIPTOOL}
 ${FIPTOOL}:
-	${Q}${MAKE} --no-print-directory -C ${FIPTOOLPATH}
+	${Q}${MAKE} CPPFLAGS="-DVERSION='\"${VERSION_STRING}\"'" --no-print-directory -C ${FIPTOOLPATH}
 
 cscope:
 	@echo "  CSCOPE"
@@ -658,7 +736,8 @@ help:
 	@echo "  bl2            Build the BL2 binary"
 	@echo "  bl2u           Build the BL2U binary"
 	@echo "  bl31           Build the BL31 binary"
-	@echo "  bl32           Build the BL32 binary"
+	@echo "  bl32           Build the BL32 binary. If ARCH=aarch32, then "
+	@echo "                 this builds secure payload specified by AARCH32_SP"
 	@echo "  certificates   Build the certificates (requires 'GENERATE_COT=1')"
 	@echo "  fip            Build the Firmware Image Package (FIP)"
 	@echo "  fwu_fip        Build the FWU Firmware Image Package (FIP)"
