@@ -66,9 +66,12 @@ arm_config_t arm_config;
 
 
 /*
- * Table of regions for various BL stages to map using the MMU.
- * This doesn't include TZRAM as the 'mem_layout' argument passed to
- * arm_configure_mmu_elx() will give the available subset of that,
+ * Table of memory regions for various BL stages to map using the MMU.
+ * This doesn't include Trusted SRAM as arm_setup_page_tables() already
+ * takes care of mapping it.
+ *
+ * The flash needs to be mapped as writable in order to erase the FIP's Table of
+ * Contents in case of unrecoverable error (see plat_error_handler()).
  */
 #if IMAGE_BL1
 const mmap_region_t plat_arm_mmap[] = {
@@ -118,6 +121,9 @@ const mmap_region_t plat_arm_mmap[] = {
 #endif
 #if IMAGE_BL32
 const mmap_region_t plat_arm_mmap[] = {
+#ifdef AARCH32
+	ARM_MAP_SHARED_RAM,
+#endif
 	V2M_MAP_IOFPGA,
 	MAP_DEVICE0,
 	MAP_DEVICE1,
@@ -183,6 +189,7 @@ void fvp_config_setup(void)
 		case REV_FOUNDATION_FVP_V2_0:
 		case REV_FOUNDATION_FVP_V2_1:
 		case REV_FOUNDATION_FVP_v9_1:
+		case REV_FOUNDATION_FVP_v9_6:
 			break;
 		default:
 			WARN("Unrecognized Foundation FVP revision %x\n", rev);

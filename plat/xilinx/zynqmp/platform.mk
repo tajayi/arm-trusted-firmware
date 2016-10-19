@@ -30,6 +30,8 @@ ENABLE_PLAT_COMPAT := 0
 PROGRAMMABLE_RESET_ADDRESS := 1
 PSCI_EXTENDED_STATE_ID := 1
 A53_DISABLE_NON_TEMPORAL_HINT := 0
+SEPARATE_CODE_AND_RODATA := 1
+RESET_TO_BL31 := 1
 
 ifdef ZYNQMP_ATF_MEM_BASE
     $(eval $(call add_define,ZYNQMP_ATF_MEM_BASE))
@@ -60,13 +62,15 @@ PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 
 PLAT_BL_COMMON_SOURCES	:=	lib/xlat_tables/xlat_tables_common.c		\
 				lib/xlat_tables/aarch64/xlat_tables.c		\
+				drivers/delay_timer/delay_timer.c		\
+				drivers/delay_timer/generic_delay_timer.c	\
 				drivers/arm/gic/common/gic_common.c		\
 				drivers/arm/gic/v2/gicv2_main.c			\
 				drivers/arm/gic/v2/gicv2_helpers.c		\
-				drivers/console/console.S			\
-				plat/arm/common/aarch64/arm_common.c		\
+				drivers/console/aarch64/console.S		\
 				plat/arm/common/aarch64/arm_helpers.S		\
 				plat/arm/common/arm_cci.c			\
+				plat/arm/common/arm_common.c			\
 				plat/arm/common/arm_gicv2.c			\
 				plat/common/plat_gicv2.c			\
 				plat/common/aarch64/plat_common.c		\
@@ -75,7 +79,7 @@ PLAT_BL_COMMON_SOURCES	:=	lib/xlat_tables/xlat_tables_common.c		\
 
 ZYNQMP_CONSOLE	?=	cadence
 ifeq (${ZYNQMP_CONSOLE}, $(filter ${ZYNQMP_CONSOLE},cadence cadence0 cadence1))
-  PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/cdns_console.S
+  PLAT_BL_COMMON_SOURCES += drivers/cadence/uart/aarch64/cdns_console.S
 else ifeq (${ZYNQMP_CONSOLE}, dcc)
   PLAT_BL_COMMON_SOURCES += \
 			    drivers/arm/dcc/dcc_console.c
@@ -87,7 +91,7 @@ $(eval $(call add_define_val,ZYNQMP_CONSOLE,ZYNQMP_CONSOLE_ID_${ZYNQMP_CONSOLE})
 BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
 				lib/cpus/aarch64/aem_generic.S			\
 				lib/cpus/aarch64/cortex_a53.S			\
-				plat/common/aarch64/plat_psci_common.c		\
+				plat/common/plat_psci_common.c			\
 				plat/common/aarch64/platform_mp_stack.S		\
 				plat/xilinx/zynqmp/bl31_zynqmp_setup.c		\
 				plat/xilinx/zynqmp/plat_psci.c			\

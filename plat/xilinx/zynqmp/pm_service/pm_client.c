@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, ARM Limited and Contributors. All rights reserved.
+ * Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,13 +33,13 @@
  * for getting information about and changing state of the APU.
  */
 
+#include <assert.h>
 #include <bakery_lock.h>
 #include <gicv2.h>
+#include <gic_common.h>
 #include <bl_common.h>
 #include <mmio.h>
-#include <gic_common.h>
 #include <string.h>
-#include <assert.h>
 #include "pm_api_sys.h"
 #include "pm_client.h"
 #include "pm_ipi.h"

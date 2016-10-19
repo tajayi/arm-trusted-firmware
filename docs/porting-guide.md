@@ -8,7 +8,7 @@ Contents
 2.  [Common Modifications](#2--common-modifications)
     *   [Common mandatory modifications](#21-common-mandatory-modifications)
     *   [Handling reset](#22-handling-reset)
-    *   [Common mandatory modifications](#23-common-mandatory-modifications)
+    *   [Common mandatory function modifications](#23-common-mandatory-function-modifications)
     *   [Common optional modifications](#24-common-optional-modifications)
 3.  [Boot Loader stage specific modifications](#3--modifications-specific-to-a-boot-loader-stage)
     *   [Boot Loader stage 1 (BL1)](#31-boot-loader-stage-1-bl1)
@@ -545,7 +545,7 @@ reset vector code to perform the above tasks.
 ### Function : plat_get_my_entrypoint() [mandatory when PROGRAMMABLE_RESET_ADDRESS == 0]
 
     Argument : void
-    Return   : unsigned long
+    Return   : uintptr_t
 
 This function is called with the called with the MMU and caches disabled
 (`SCTLR_EL3.M` = 0 and `SCTLR_EL3.C` = 0). The function is responsible for
@@ -685,7 +685,7 @@ The function returns 0 on success. Any other value means the counter value could
 not be updated.
 
 
-2.3 Common mandatory modifications
+2.3 Common mandatory function modifications
 ---------------------------------
 
 The following functions are mandatory functions which need to be implemented
@@ -721,7 +721,6 @@ Firmware represents the power domain topology and how this relates to the
 linear CPU index, please refer [Power Domain Topology Design].
 
 
-
 2.4 Common optional modifications
 ---------------------------------
 
@@ -748,7 +747,7 @@ provided in [plat/common/aarch64/platform_up_stack.S] and
 ### Function : plat_get_my_stack()
 
     Argument : void
-    Return   : unsigned long
+    Return   : uintptr_t
 
 This function returns the base address of the normal memory stack that
 has been allocated for the current CPU. For BL images that only require a
@@ -777,11 +776,15 @@ called in the following circumstances:
 The default implementation doesn't do anything, to avoid making assumptions
 about the way the platform displays its status information.
 
-This function receives the exception type as its argument. Possible values for
-exceptions types are listed in the [include/common/bl_common.h] header file.
-Note that these constants are not related to any architectural exception code;
-they are just an ARM Trusted Firmware convention.
+For AArch64, this function receives the exception type as its argument.
+Possible values for exceptions types are listed in the
+[include/common/bl_common.h] header file. Note that these constants are not
+related to any architectural exception code; they are just an ARM Trusted
+Firmware convention.
 
+For AArch32, this function receives the exception mode as its argument.
+Possible values for exception modes are listed in the
+[include/lib/aarch32/arch.h] header file.
 
 ### Function : plat_reset_handler()
 
@@ -841,9 +844,36 @@ and must be implemented in assembly because it may be called before the C
 environment is initialized.
 
 Note: The address from where it was called is stored in x30 (Link Register).
-
 The default implementation simply spins.
 
+
+### Function : plat_get_bl_image_load_info()
+
+    Argument : void
+    Return   : bl_load_info_t *
+
+This function returns pointer to the list of images that the platform has
+populated to load. This function is currently invoked in BL2 to load the
+BL3xx images, when LOAD_IMAGE_V2 is enabled.
+
+### Function : plat_get_next_bl_params()
+
+    Argument : void
+    Return   : bl_params_t *
+
+This function returns a pointer to the shared memory that the platform has
+kept aside to pass trusted firmware related information that next BL image
+needs. This function is currently invoked in BL2 to pass this information to
+the next BL image, when LOAD_IMAGE_V2 is enabled.
+
+### Function : plat_flush_next_bl_params()
+
+    Argument : void
+    Return   : void
+
+This function flushes to main memory all the image params that are passed to
+next image. This function is currently invoked in BL2 to flush this information
+to the next BL image, when LOAD_IMAGE_V2 is enabled.
 
 3.  Modifications specific to a Boot Loader stage
 -------------------------------------------------
@@ -966,7 +996,7 @@ This function helps fulfill requirements 4 and 5 above.
 
 ### Function : bl1_init_bl2_mem_layout() [optional]
 
-    Argument : meminfo *, meminfo *, unsigned int, unsigned long
+    Argument : meminfo *, meminfo *
     Return   : void
 
 BL1 needs to tell the next stage the amount of secure RAM available
@@ -1174,6 +1204,20 @@ The purpose of this function is to return a pointer to a `meminfo` structure
 populated with the extents of secure RAM available for BL2 to use. See
 `bl2_early_platform_setup()` above.
 
+
+Following function is required only when LOAD_IMAGE_V2 is enabled.
+
+### Function : bl2_plat_handle_post_image_load() [mandatory]
+
+    Argument : unsigned int
+    Return   : int
+
+This function can be used by the platforms to update/use image information
+for given `image_id`. This function is currently invoked in BL2 to handle
+BL image specific information based on the `image_id` passed, when
+LOAD_IMAGE_V2 is enabled.
+
+Following functions are required only when LOAD_IMAGE_V2 is disabled.
 
 ### Function : bl2_plat_get_scp_bl2_meminfo() [mandatory]
 
@@ -1832,6 +1876,20 @@ This function can also be used in case the platform wants to support local
 power state encoding for `power_state` parameter of PSCI_STAT_COUNT/RESIDENCY
 APIs as described in Section 5.18 of [PSCI].
 
+#### plat_psci_ops.get_node_hw_state()
+
+This is an optional function. If implemented this function is intended to return
+the power state of a node (identified by the first parameter, the `MPIDR`) in
+the power domain topology (identified by the second parameter, `power_level`),
+as retrieved from a power controller or equivalent component on the platform.
+Upon successful completion, the implementation must map and return the final
+status among `HW_ON`, `HW_OFF` or `HW_STANDBY`. Upon encountering failures, it
+must return either `PSCI_E_INVALID_PARAMS` or `PSCI_E_NOT_SUPPORTED` as
+appropriate.
+
+Implementations are not expected to handle `power_levels` greater than
+`PLAT_MAX_PWR_LVL`.
+
 3.6  Interrupt Management framework (in BL31)
 ----------------------------------------------
 BL31 implements an Interrupt Management Framework (IMF) to manage interrupts
@@ -2180,6 +2238,7 @@ _Copyright (c) 2013-2016, ARM Limited and Contributors. All rights reserved._
 [plat/common/aarch64/platform_up_stack.S]: ../plat/common/aarch64/platform_up_stack.S
 [plat/arm/board/fvp/fvp_pm.c]:             ../plat/arm/board/fvp/fvp_pm.c
 [include/common/bl_common.h]:              ../include/common/bl_common.h
+[include/lib/aarch32/arch.h]:              ../include/lib/aarch32/arch.h
 [include/plat/arm/common/arm_def.h]:       ../include/plat/arm/common/arm_def.h
 [include/plat/common/common_def.h]:        ../include/plat/common/common_def.h
 [include/plat/common/platform.h]:          ../include/plat/common/platform.h

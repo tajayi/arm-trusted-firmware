@@ -29,6 +29,7 @@
  */
 
 #include <debug.h>
+#include <generic_delay_timer.h>
 #include <mmio.h>
 #include <platform.h>
 #include <xlat_tables.h>
@@ -267,6 +268,7 @@ void zynqmp_config_setup(void)
 {
 	zynqmp_discover_pmufw();
 	zynqmp_print_platform_name();
+	generic_delay_timer_init();
 }
 
 unsigned int plat_get_syscnt_freq2(void)

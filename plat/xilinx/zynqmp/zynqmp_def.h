@@ -198,7 +198,5 @@
 /* Access control register defines */
 #define ACTLR_EL3_L2ACTLR_BIT	(1 << 6)
 #define ACTLR_EL3_CPUACTLR_BIT	(1 << 0)
-#define ACTLR_EL3_ENABLE_ACCESS	(ACTLR_EL3_L2ACTLR_BIT | \
-				ACTLR_EL3_CPUACTLR_BIT)
 
 #endif /* __ZYNQMP_DEF_H__ */

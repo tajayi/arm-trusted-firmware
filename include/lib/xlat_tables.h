@@ -45,16 +45,13 @@
 #define FOUR_KB_INDEX(x)	((x) >> FOUR_KB_SHIFT)
 
 #define INVALID_DESC		0x0
-#define BLOCK_DESC		0x1
-#define TABLE_DESC		0x3
+#define BLOCK_DESC		0x1 /* Table levels 0-2 */
+#define TABLE_DESC		0x3 /* Table levels 0-2 */
+#define PAGE_DESC		0x3 /* Table level 3 */
 
 #define FIRST_LEVEL_DESC_N	ONE_GB_SHIFT
 #define SECOND_LEVEL_DESC_N	TWO_MB_SHIFT
 #define THIRD_LEVEL_DESC_N	FOUR_KB_SHIFT
-
-#define LEVEL1			1
-#define LEVEL2			2
-#define LEVEL3			3
 
 #define XN			(1ull << 2)
 #define PXN			(1ull << 1)
@@ -78,6 +75,14 @@
 #define XLAT_TABLE_SIZE_SHIFT	PAGE_SIZE_SHIFT
 #define XLAT_TABLE_SIZE		(1 << XLAT_TABLE_SIZE_SHIFT)
 
+#ifdef AARCH32
+#define XLAT_TABLE_LEVEL_MIN	1
+#else
+#define XLAT_TABLE_LEVEL_MIN	0
+#endif /* AARCH32 */
+
+#define XLAT_TABLE_LEVEL_MAX	3
+
 /* Values for number of entries in each MMU translation table */
 #define XLAT_TABLE_ENTRIES_SHIFT (XLAT_TABLE_SIZE_SHIFT - XLAT_ENTRY_SIZE_SHIFT)
 #define XLAT_TABLE_ENTRIES	(1 << XLAT_TABLE_ENTRIES_SHIFT)
@@ -87,6 +92,7 @@
 #define L3_XLAT_ADDRESS_SHIFT	PAGE_SIZE_SHIFT
 #define L2_XLAT_ADDRESS_SHIFT	(L3_XLAT_ADDRESS_SHIFT + XLAT_TABLE_ENTRIES_SHIFT)
 #define L1_XLAT_ADDRESS_SHIFT	(L2_XLAT_ADDRESS_SHIFT + XLAT_TABLE_ENTRIES_SHIFT)
+#define L0_XLAT_ADDRESS_SHIFT	(L1_XLAT_ADDRESS_SHIFT + XLAT_TABLE_ENTRIES_SHIFT)
 
 /*
  * AP[1] bit is ignored by hardware and is
@@ -134,6 +140,8 @@
 #define MT_PERM_SHIFT	3
 /* Security state (SECURE/NS) */
 #define MT_SEC_SHIFT	4
+/* Access permissions for instruction execution (EXECUTE/EXECUTE_NEVER) */
+#define MT_EXECUTE_SHIFT	5
 
 /*
  * Memory mapping attributes
@@ -155,7 +163,20 @@ typedef enum  {
 
 	MT_SECURE	= 0 << MT_SEC_SHIFT,
 	MT_NS		= 1 << MT_SEC_SHIFT,
+
+	/*
+	 * Access permissions for instruction execution are only relevant for
+	 * normal read-only memory, i.e. MT_MEMORY | MT_RO. They are ignored
+	 * (and potentially overridden) otherwise:
+	 *  - Device memory is always marked as execute-never.
+	 *  - Read-write normal memory is always marked as execute-never.
+	 */
+	MT_EXECUTE		= 0 << MT_EXECUTE_SHIFT,
+	MT_EXECUTE_NEVER	= 1 << MT_EXECUTE_SHIFT,
 } mmap_attr_t;
+
+#define MT_CODE		(MT_MEMORY | MT_RO | MT_EXECUTE)
+#define MT_RO_DATA	(MT_MEMORY | MT_RO | MT_EXECUTE_NEVER)
 
 /*
  * Structure for specifying a single region of memory.
@@ -173,9 +194,14 @@ void mmap_add_region(unsigned long long base_pa, uintptr_t base_va,
 				size_t size, unsigned int attr);
 void mmap_add(const mmap_region_t *mm);
 
+#ifdef AARCH32
+/* AArch32 specific translation table API */
+void enable_mmu_secure(uint32_t flags);
+#else
 /* AArch64 specific translation table APIs */
 void enable_mmu_el1(unsigned int flags);
 void enable_mmu_el3(unsigned int flags);
+#endif /* AARCH32 */
 
 #endif /*__ASSEMBLY__*/
 #endif /* __XLAT_TABLES_H__ */
