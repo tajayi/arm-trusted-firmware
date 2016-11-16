@@ -42,9 +42,7 @@
 #include "pm_ipi.h"
 #include "../zynqmp_private.h"
 
-/* PM Function identifiers  */
-#define PM_F_INIT			0xa01
-#define PM_F_GETARGS			0xa02
+#define PM_GET_CALLBACK_DATA	0xa01
 
 /* 0 - UP, !0 - DOWN */
 static int pm_down = !0;
@@ -52,58 +50,13 @@ static int pm_down = !0;
 /**
  * pm_context - Structure which contains data for power management
  * @api_version		version of PM API, must match with one on PMU side
- * @callback_irq	registered interrupt number used for pm callback action
  * @payload		payload array used to store received
  *			data from ipi buffer registers
  */
 static struct {
 	uint32_t api_version;
-	uint32_t callback_irq;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 } pm_ctx;
-
-void gicd_set_isenabler(uintptr_t base, unsigned int id);
-void gicd_set_ispendr(uintptr_t base, unsigned int id);
-void gicd_set_isactiver(uintptr_t base, unsigned int id);
-/**
- * trigger_callback_irq() - Set interrupt for non-secure EL1/EL2
- * @irq_num - entrance in GIC
- *
- * Inform non-secure software layer (EL1/2) that PMU responsed on acknowledge
- * or demands suspend action.
- */
-static void trigger_callback_irq(uint32_t irq_num)
-{
-	/* Set interrupt for non-secure EL1/EL2 */
-	gicd_set_ispendr(BASE_GICD_BASE, irq_num);
-	gicd_set_isactiver(BASE_GICD_BASE, irq_num);
-}
-
-/**
- * ipi_fiq_handler() - IPI Handler for PM-API callbacks
- * @buf:	Pointer to a structure holding the IPI data
- *
- * Function registered as INTR_TYPE_EL3 interrupt handler
- *
- * PMU sends IPI interrupts for PM-API callbacks.
- * This handler reads data from payload buffers and
- * based on read data decodes type of callback and call proper function.
- *
- * In presence of non-secure software layers (EL1/2) sets the interrupt
- * at registered entrance in GIC and informs that PMU responsed or demands
- * action
- */
-static int ipi_fiq_handler(uint32_t *buf)
-{
-	/*
-	 * Inform non-secure software layer (EL1/2) by setting the interrupt
-	 * at registered entrance in GIC, that PMU responsed or demands action
-	 */
-	memcpy(pm_ctx.payload, buf, sizeof(pm_ctx.payload));
-	trigger_callback_irq(pm_ctx.callback_irq);
-
-	return 0;
-}
 
 /**
  * pm_setup() - PM service setup
@@ -117,7 +70,6 @@ static int ipi_fiq_handler(uint32_t *buf)
  *
  * Called from sip_svc_setup initialization function with the
  * rt_svc_init signature.
- *
  */
 int pm_setup(void)
 {
@@ -126,7 +78,7 @@ int pm_setup(void)
 	if (!zynqmp_is_pmu_up())
 		return -ENODEV;
 
-	status = pm_ipi_init(ipi_fiq_handler);
+	status = pm_ipi_init();
 
 	if (status == 0)
 		INFO("BL31: PM Service Init Complete: API v%d.%d\n",
@@ -172,36 +124,6 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 	pm_arg[3] = (uint32_t)(x2 >> 32);
 
 	switch (smc_fid & FUNCID_NUM_MASK) {
-	case PM_F_INIT:
-		VERBOSE("Initialize pm callback, irq: %lu\n", x1);
-
-		/* Save pm callback irq number */
-		pm_ctx.callback_irq = x1;
-		gicd_set_isenabler(BASE_GICD_BASE, x1);
-		SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS);
-
-	case PM_F_GETARGS:
-	{
-		uint64_t svc_ret[3];
-
-		svc_ret[0] = pm_ctx.payload[0];
-		svc_ret[0] |= (uint64_t)pm_ctx.payload[1] << 32;
-		svc_ret[1] = pm_ctx.payload[2];
-		svc_ret[1] |= (uint64_t)pm_ctx.payload[3] << 32;
-		svc_ret[2] = pm_ctx.payload[4];
-
-		/*
-		 * According to SMC calling convention the return values are
-		 * stored in registers x0-x3
-		 * x0[31:0]  = pm_api_id
-		 * x0[63:32] = arg0
-		 * x1[31:0]  = arg1
-		 * x1[63:32] = arg2
-		 * x2[31:0]  = arg3
-		 */
-		SMC_RET3(handle, svc_ret[0], svc_ret[1], svc_ret[2]);
-	}
-
 	/* PM API Functions */
 	case PM_SELF_SUSPEND:
 		ret = pm_self_suspend(pm_arg[0], pm_arg[1], pm_arg[2],
@@ -253,11 +175,19 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 
 	case PM_GET_API_VERSION:
 		/* Check is PM API version already verified */
-		if (pm_ctx.api_version == PM_VERSION)
+		if (pm_ctx.api_version == PM_VERSION) {
 			SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS |
 				 ((uint64_t)PM_VERSION << 32));
+		}
 
 		ret = pm_get_api_version(&pm_ctx.api_version);
+		/*
+		 * Enable IPI IRQ
+		 * assume the rich OS is OK to handle callback IRQs now.
+		 * Even if we were wrong, it would not enable the IRQ in
+		 * the GIC.
+		 */
+		pm_ipi_irq_enable();
 		SMC_RET1(handle, (uint64_t)ret |
 			 ((uint64_t)pm_ctx.api_version << 32));
 
@@ -327,6 +257,16 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		ret = pm_get_chipid(result);
 		SMC_RET2(handle, (uint64_t)ret | ((uint64_t)result[0] << 32),
 			 result[1]);
+	}
+
+	case PM_GET_CALLBACK_DATA:
+	{
+		uint32_t result[4];
+
+		pm_get_callbackdata(result, sizeof(result));
+		SMC_RET2(handle,
+			 (uint64_t)result[0] | ((uint64_t)result[1] << 32),
+			 (uint64_t)result[2] | ((uint64_t)result[3] << 32));
 	}
 
 	default:

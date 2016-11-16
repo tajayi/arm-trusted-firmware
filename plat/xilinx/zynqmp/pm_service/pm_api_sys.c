@@ -396,7 +396,7 @@ enum pm_ret_status pm_register_notifier(enum pm_node_id nid,
 	PM_PACK_PAYLOAD5(payload, PM_REGISTER_NOTIFIER,
 			 nid, event, wake, enable);
 
-	return pm_ipi_send(primary_proc, payload);
+	return pm_ipi_send_sync(primary_proc, payload, NULL, 0);
 }
 
 /**
@@ -556,4 +556,17 @@ enum pm_ret_status pm_get_chipid(uint32_t *value)
 	/* Send request to the PMU */
 	PM_PACK_PAYLOAD1(payload, PM_GET_CHIPID);
 	return pm_ipi_send_sync(primary_proc, payload, value, 2);
+}
+
+/**
+ * pm_get_callbackdata() - Read from IPI response buffer
+ * @data - array of PAYLOAD_ARG_CNT elements
+ *
+ * Read value from ipi buffer response buffer.
+ */
+void pm_get_callbackdata(uint32_t *data, size_t count)
+{
+
+	pm_ipi_buff_read_callb(data, count);
+	pm_ipi_irq_clear();
 }
