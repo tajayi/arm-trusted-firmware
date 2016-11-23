@@ -6,7 +6,6 @@ cscope.*
 .project
 .cproject
 *~
-tags
 
 # Ignore build directory
 build/
