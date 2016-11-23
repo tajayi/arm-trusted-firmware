@@ -46,8 +46,9 @@
 #include <pmu.h>
 #include <pmu_com.h>
 #include <pwm.h>
-#include <soc.h>
 #include <bl31.h>
+#include <rk3399m0.h>
+#include <suspend.h>
 
 DEFINE_BAKERY_LOCK(rockchip_pd_lock);
 
@@ -101,7 +102,6 @@ static void pmu_bus_idle_req(uint32_t bus, uint32_t state)
 		     mmio_read_32(PMU_BASE + PMU_BUS_IDLE_ACK),
 		     bus_ack);
 	}
-
 }
 
 struct pmu_slpdata_s pmu_slpdata;
@@ -436,7 +436,7 @@ static void pmu_scu_b_pwrup(void)
 void plat_rockchip_pmusram_prepare(void)
 {
 	uint32_t *sram_dst, *sram_src;
-	size_t sram_size = 2;
+	size_t sram_size;
 
 	/*
 	 * pmu sram code and data prepare
@@ -817,9 +817,18 @@ static void init_pmu_counts(void)
 	mmio_write_32(PMU_BASE + PMU_GPU_PWRUP_CNT, CYCL_24M_CNT_US(1));
 }
 
+static uint32_t clk_ddrc_save;
+
 static void sys_slp_config(void)
 {
 	uint32_t slp_mode_cfg = 0;
+
+	/* keep enabling clk_ddrc_bpll_src_en gate for DDRC */
+	clk_ddrc_save = mmio_read_32(CRU_BASE + CRU_CLKGATE_CON(3));
+	mmio_write_32(CRU_BASE + CRU_CLKGATE_CON(3), WMSK_BIT(1));
+
+	prepare_abpll_for_ddrctrl();
+	sram_func_set_ddrctl_pll(ABPLL_ID);
 
 	mmio_write_32(GRF_BASE + GRF_SOC_CON4, CCI_FORCE_WAKEUP);
 	mmio_write_32(PMU_BASE + PMU_CCI500_CON,
@@ -840,8 +849,6 @@ static void sys_slp_config(void)
 		       BIT(PMU_SCU_PD_EN) |
 		       BIT(PMU_CCI_PD_EN) |
 		       BIT(PMU_CLK_CORE_SRC_GATE_EN) |
-		       BIT(PMU_PERILP_PD_EN) |
-		       BIT(PMU_CLK_PERILP_SRC_GATE_EN) |
 		       BIT(PMU_ALIVE_USE_LF) |
 		       BIT(PMU_SREF0_ENTER_EN) |
 		       BIT(PMU_SREF1_ENTER_EN) |
@@ -850,6 +857,7 @@ static void sys_slp_config(void)
 		       BIT(PMU_DDRIO0_RET_EN) |
 		       BIT(PMU_DDRIO1_RET_EN) |
 		       BIT(PMU_DDRIO_RET_HW_DE_REQ) |
+		       BIT(PMU_CENTER_PD_EN) |
 		       BIT(PMU_PLL_PD_EN) |
 		       BIT(PMU_CLK_CENTER_SRC_GATE_EN) |
 		       BIT(PMU_OSC_DIS) |
@@ -857,7 +865,6 @@ static void sys_slp_config(void)
 
 	mmio_setbits_32(PMU_BASE + PMU_WKUP_CFG4, BIT(PMU_GPIO_WKUP_EN));
 	mmio_write_32(PMU_BASE + PMU_PWRMODE_CON, slp_mode_cfg);
-
 
 	mmio_write_32(PMU_BASE + PMU_PLL_CON, PLL_PD_HW);
 	mmio_write_32(PMUGRF_BASE + PMUGRF_SOC_CON0, EXTERNAL_32K);
@@ -1058,10 +1065,45 @@ static void resume_gpio(void)
 	}
 }
 
+static void m0_clock_init(void)
+{
+	/* enable clocks for M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_CLKGATE_CON2,
+		      BITS_WITH_WMASK(0x0, 0x2f, 0));
+
+	/* switch the parent to xin24M and div == 1 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_CLKSEL_CON0,
+		      BIT_WITH_WMSK(15) | BITS_WITH_WMASK(0x0, 0x1f, 8));
+
+	/* start M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_SOFTRST_CON0,
+		      BITS_WITH_WMASK(0x0, 0x24, 0));
+
+	/* gating disable for M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_GATEDIS_CON0, BIT_WITH_WMSK(1));
+}
+
+static void m0_reset(void)
+{
+	/* stop M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_SOFTRST_CON0,
+		      BITS_WITH_WMASK(0x24, 0x24, 0));
+
+	/* recover gating bit for M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_GATEDIS_CON0, WMSK_BIT(1));
+
+	/* disable clocks for M0 */
+	mmio_write_32(PMUCRU_BASE + PMUCRU_CLKGATE_CON2,
+		      BITS_WITH_WMASK(0x2f, 0x2f, 0));
+}
+
 static int sys_pwr_domain_suspend(void)
 {
 	uint32_t wait_cnt = 0;
 	uint32_t status = 0;
+
+	dmc_save();
+	pmu_scu_b_pwrdn();
 
 	pmu_power_domains_suspend();
 	set_hw_idle(BIT(PMU_CLR_CENTER1) |
@@ -1071,19 +1113,17 @@ static int sys_pwr_domain_suspend(void)
 		    BIT(PMU_CLR_CCIM0) |
 		    BIT(PMU_CLR_CCIM1) |
 		    BIT(PMU_CLR_CENTER) |
-		    BIT(PMU_CLR_PERILP) |
-		    BIT(PMU_CLR_PMU) |
-		    BIT(PMU_CLR_PERILPM0) |
 		    BIT(PMU_CLR_GIC));
 
 	sys_slp_config();
+
+	m0_clock_init();
+
 	pmu_sgrf_rst_hld();
 
 	mmio_write_32(SGRF_BASE + SGRF_SOC_CON0_1(1),
 		      (PMUSRAM_BASE >> CPU_BOOT_ADDR_ALIGN) |
 		      CPU_BOOT_ADDR_WMASK);
-
-	pmu_scu_b_pwrdn();
 
 	mmio_write_32(PMU_BASE + PMU_ADB400_CON,
 		      BIT_WITH_WMSK(PMU_PWRDWN_REQ_CORE_B_2GIC_SW) |
@@ -1103,14 +1143,17 @@ static int sys_pwr_domain_suspend(void)
 		}
 	}
 	mmio_setbits_32(PMU_BASE + PMU_PWRDN_CON, BIT(PMU_SCU_B_PWRDWN_EN));
+
+	secure_watchdog_disable();
+
 	/*
 	 * Disabling PLLs/PWM/DVFS is approaching WFI which is
 	 * the last steps in suspend.
 	 */
-	plls_suspend_prepare();
 	disable_dvfs_plls();
 	disable_pwms();
 	disable_nodvfs_plls();
+
 	suspend_apio();
 	suspend_gpio();
 
@@ -1129,7 +1172,12 @@ static int sys_pwr_domain_resume(void)
 	/* PWM regulators take time to come up; give 300us to be safe. */
 	udelay(300);
 	enable_dvfs_plls();
-	plls_resume_finish();
+
+	secure_watchdog_restore();
+
+	/* restore clk_ddrc_bpll_src_en gate */
+	mmio_write_32(CRU_BASE + CRU_CLKGATE_CON(3),
+		      BITS_WITH_WMASK(clk_ddrc_save, 0xff, 0));
 
 	/*
 	 * The wakeup status is not cleared by itself, we need to clear it
@@ -1177,8 +1225,12 @@ static int sys_pwr_domain_resume(void)
 
 	pmu_sgrf_rst_hld_release();
 	pmu_scu_b_pwrup();
-
 	pmu_power_domains_resume();
+
+	restore_dpll();
+	sram_func_set_ddrctl_pll(DPLL_ID);
+	restore_abpll();
+
 	clr_hw_idle(BIT(PMU_CLR_CENTER1) |
 				BIT(PMU_CLR_ALIVE) |
 				BIT(PMU_CLR_MSCH0) |
@@ -1186,11 +1238,11 @@ static int sys_pwr_domain_resume(void)
 				BIT(PMU_CLR_CCIM0) |
 				BIT(PMU_CLR_CCIM1) |
 				BIT(PMU_CLR_CENTER) |
-				BIT(PMU_CLR_PERILP) |
-				BIT(PMU_CLR_PMU) |
 				BIT(PMU_CLR_GIC));
 
 	plat_rockchip_gic_cpuif_enable();
+
+	m0_reset();
 
 	return 0;
 }
@@ -1236,42 +1288,6 @@ void __dead2 soc_system_off(void)
 	while (1)
 		;
 }
-static void __dead2 sys_pwr_down_wfi(const psci_power_state_t *target_state)
-{
-	uint32_t wakeup_status;
-
-	/*
-	 * Check wakeup status and abort suspend early if we see a wakeup
-	 * event.
-	 *
-	 * NOTE: technically I we're supposed to just execute a wfi here and
-	 * we'll either execute a normal suspend/resume or the wfi will be
-	 * treated as a no-op if a wake event was present and caused an abort
-	 * of the suspend/resume.  For some reason that's not happening and if
-	 * we execute the wfi while a wake event is pending then the whole
-	 * system wedges.
-	 *
-	 * Until the above is solved this extra check prevents system wedges in
-	 * most cases but there is still a small race condition between checking
-	 * PMU_WAKEUP_STATUS and executing wfi.  If a wake event happens in
-	 * there then we will die.
-	 */
-	wakeup_status = mmio_read_32(PMU_BASE + PMU_WAKEUP_STATUS);
-	if (wakeup_status) {
-		WARN("early wake, will not enter power mode.\n");
-
-		mmio_write_32(PMU_BASE + PMU_PWRMODE_CON, 0);
-
-		disable_mmu_icache_el3();
-		bl31_warm_entrypoint();
-
-		while (1)
-			;
-	} else {
-		/* Enter WFI */
-		psci_power_down_wfi();
-	}
-}
 
 static struct rockchip_pm_ops_cb pm_ops = {
 	.cores_pwr_dm_on = cores_pwr_domain_on,
@@ -1287,7 +1303,6 @@ static struct rockchip_pm_ops_cb pm_ops = {
 	.sys_pwr_dm_resume = sys_pwr_domain_resume,
 	.sys_gbl_soft_reset = soc_soft_reset,
 	.system_off = soc_system_off,
-	.sys_pwr_down_wfi = sys_pwr_down_wfi,
 };
 
 void plat_rockchip_pmu_init(void)
@@ -1306,9 +1321,10 @@ void plat_rockchip_pmu_init(void)
 	for (cpu = 0; cpu < PLATFORM_CLUSTER_COUNT; cpu++)
 		clst_warmboot_data[cpu] = 0;
 
-	psram_sleep_cfg->ddr_func = 0x00;
-	psram_sleep_cfg->ddr_data = 0x00;
-	psram_sleep_cfg->ddr_flag = 0x00;
+	psram_sleep_cfg->ddr_func = (uint64_t)dmc_restore;
+	psram_sleep_cfg->ddr_data = (uint64_t)&sdram_config;
+	psram_sleep_cfg->ddr_flag = 0x01;
+
 	psram_sleep_cfg->boot_mpidr = read_mpidr_el1() & 0xffff;
 
 	/* config cpu's warm boot address */

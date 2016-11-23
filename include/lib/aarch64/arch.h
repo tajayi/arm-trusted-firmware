@@ -155,7 +155,10 @@
 #define SCTLR_A_BIT		(1 << 1)
 #define SCTLR_C_BIT		(1 << 2)
 #define SCTLR_SA_BIT		(1 << 3)
+#define SCTLR_CP15BEN_BIT	(1 << 5)
 #define SCTLR_I_BIT		(1 << 12)
+#define SCTLR_NTWI_BIT		(1 << 16)
+#define SCTLR_NTWE_BIT		(1 << 18)
 #define SCTLR_WXN_BIT		(1 << 19)
 #define SCTLR_EE_BIT		(1 << 25)
 
@@ -407,5 +410,10 @@
 #define CNTACR_RVOFF_SHIFT	0x3
 #define CNTACR_RWVT_SHIFT	0x4
 #define CNTACR_RWPT_SHIFT	0x5
+
+/* PMCR_EL0 definitions */
+#define PMCR_EL0_N_SHIFT	11
+#define PMCR_EL0_N_MASK		0x1f
+#define PMCR_EL0_N_BITS		(PMCR_EL0_N_MASK << PMCR_EL0_N_SHIFT)
 
 #endif /* __ARCH_H__ */
