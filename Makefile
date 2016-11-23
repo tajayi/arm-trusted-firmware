@@ -647,7 +647,7 @@ ${FIPTOOL}:
 
 cscope:
 	@echo "  CSCOPE"
-	${Q}find ${CURDIR} -type f -name "*.[chsS]" > cscope.files
+	${Q}find ${CURDIR} -name "*.[chsS]" > cscope.files
 	${Q}cscope -b -q -k
 
 help:
