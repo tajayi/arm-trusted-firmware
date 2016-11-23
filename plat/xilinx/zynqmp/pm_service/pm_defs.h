@@ -93,12 +93,6 @@ enum pm_api_id {
 	PM_API_MAX
 };
 
-enum pm_api_cb_id {
-	PM_INIT_SUSPEND_CB = 30,
-	PM_ACKNOWLEDGE_CB,
-	PM_NOTIFY_CB,
-};
-
 enum pm_node_id {
 	NODE_UNKNOWN = 0,
 	NODE_APU,

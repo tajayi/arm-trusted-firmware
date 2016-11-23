@@ -114,8 +114,6 @@ enum pm_ret_status pm_fpga_load(uint32_t address_high,
 				uint32_t size,
 				uint32_t flags);
 enum pm_ret_status pm_fpga_get_status(unsigned int *value);
-enum pm_ret_status pm_get_chipid(uint32_t *value);
-void pm_get_callbackdata(uint32_t *data, size_t count);
 
 enum pm_ret_status pm_get_chipid(uint32_t *value);
 void pm_get_callbackdata(uint32_t *data, size_t count);

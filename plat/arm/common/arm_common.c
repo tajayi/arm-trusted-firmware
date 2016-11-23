@@ -184,7 +184,6 @@ uint32_t arm_get_spsr_for_bl33_entry(void)
 #ifdef ARM_SYS_TIMCTL_BASE
 void arm_configure_sys_timer(void)
 {
-#ifdef ARM_SYS_TIMCTL_BASE
 	unsigned int reg_val;
 
 #if ARM_CONFIG_CNTACR
@@ -196,7 +195,6 @@ void arm_configure_sys_timer(void)
 
 	reg_val = (1 << CNTNSAR_NS_SHIFT(PLAT_ARM_NSTIMER_FRAME_ID));
 	mmio_write_32(ARM_SYS_TIMCTL_BASE + CNTNSAR, reg_val);
-#endif
 }
 #endif /* ARM_SYS_TIMCTL_BASE */
 

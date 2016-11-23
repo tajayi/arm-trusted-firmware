@@ -86,9 +86,6 @@ static int32_t validate_routing_model(uint32_t type, uint32_t flags)
 	flags >>= INTR_RM_FLAGS_SHIFT;
 	flags &= INTR_RM_FLAGS_MASK;
 
-	if (type == INTR_TYPE_EL3)
-		return validate_el3_interrupt_rm(flags);
-
 	if (type == INTR_TYPE_S_EL1)
 		return validate_sel1_interrupt_rm(flags);
 
@@ -160,10 +157,8 @@ int32_t set_routing_model(uint32_t type, uint32_t flags)
 
 	/* Update the routing model in internal data structures */
 	intr_type_descs[type].flags = flags;
-	if (get_interrupt_rm_flag(flags, SECURE))
-		set_scr_el3_from_rm(type, flags, SECURE);
-	if (get_interrupt_rm_flag(flags, NON_SECURE))
-		set_scr_el3_from_rm(type, flags, NON_SECURE);
+	set_scr_el3_from_rm(type, flags, SECURE);
+	set_scr_el3_from_rm(type, flags, NON_SECURE);
 
 	return 0;
 }
@@ -249,13 +244,6 @@ interrupt_type_handler_t get_interrupt_type_handler(uint32_t type)
 {
 	if (validate_interrupt_type(type))
 		return NULL;
-
-	if (type == INTR_TYPE_S_EL1
-            && !intr_type_descs[type].handler) {
-		/* If this is a secure interrupt without
-		 * any S-EL1 handler, fallback to EL3 interrupts.  */
-		type = INTR_TYPE_EL3;
-	}
 
 	return intr_type_descs[type].handler;
 }
