@@ -64,8 +64,8 @@
 #define PLL_NO_BYPASS_MODE		WMSK_BIT(PLL_BYPASS_SHIFT)
 
 #define PLL_CON_COUNT			0x06
-#define CRU_CLKSEL_COUNT		0x108
-#define CRU_CLKSEL_CON(n)		(0x80 + (n) * 4)
+#define CRU_CLKSEL_COUNT		108
+#define CRU_CLKSEL_CON(n)		(0x100 + (n) * 4)
 
 #define PMUCRU_CLKSEL_CONUT		0x06
 #define PMUCRU_CLKSEL_OFFSET		0x080
@@ -73,6 +73,7 @@
 #define REG_SOC_WMSK			0xffff0000
 #define CLK_GATE_MASK			0x01
 
+#define SGRF_SOC_COUNT		0x17
 #define PMUCRU_GATE_COUNT	0x03
 #define CRU_GATE_COUNT		0x23
 #define PMUCRU_GATE_CON(n)	(0x100 + (n) * 4)
@@ -111,6 +112,7 @@ struct deepsleep_data_s {
 	uint32_t cru_clksel_con[CRU_CLKSEL_COUNT];
 	uint32_t cru_gate_con[CRU_GATE_COUNT];
 	uint32_t pmucru_gate_con[PMUCRU_GATE_COUNT];
+	uint32_t sgrf_con[SGRF_SOC_COUNT];
 };
 
 /**************************************************
@@ -171,6 +173,20 @@ struct deepsleep_data_s {
 
 #define TIMER_FMODE		(0x0 << 1)
 #define TIMER_RMODE		(0x1 << 1)
+
+/**************************************************
+ * secure WDT
+ **************************************************/
+#define WDT_CM0_EN		0x0
+#define WDT_CM0_DIS		0x1
+#define WDT_CA53_EN		0x0
+#define WDT_CA53_DIS		0x1
+
+#define PCLK_WDT_CA53_GATE_SHIFT	8
+#define PCLK_WDT_CM0_GATE_SHIFT		10
+
+#define WDT_CA53_1BIT_MASK	0x1
+#define WDT_CM0_1BIT_MASK	0x1
 
 /**************************************************
  * cru reg, offset
@@ -245,6 +261,8 @@ struct deepsleep_data_s {
 #define SGRF_PMU_SLV_CON1_CFG		(SGRF_SLV_S_WMSK | \
 					SGRF_PMUSRAM_S)
 /* ddr region */
+#define SGRF_DDR_RGN_DPLL_CLK	BIT_WITH_WMSK(15) /* DDR PLL output clock */
+#define SGRF_DDR_RGN_RTC_CLK	BIT_WITH_WMSK(14) /* 32K clock for DDR PLL */
 #define SGRF_DDR_RGN_BYPS	BIT_WITH_WMSK(9) /* All of ddr rgn  is ns */
 
 /* The MST access the ddr rgn n with secure attribution */
@@ -293,6 +311,18 @@ struct deepsleep_data_s {
 #define GRF_DDRC1_CON0		0xe388
 #define GRF_DDRC1_CON1		0xe38c
 
+#define PMUCRU_CLKSEL_CON0	0x0080
+#define PMUCRU_CLKGATE_CON2	0x0108
+#define PMUCRU_SOFTRST_CON0	0x0110
+#define PMUCRU_GATEDIS_CON0 0x0130
+
+#define SGRF_SOC_CON6     0x0e018
+#define SGRF_PERILP_CON0	0x08100
+#define SGRF_PERILP_CON(n)	(SGRF_PERILP_CON0 + (n) * 4)
+#define SGRF_PMU_CON0	0x0c100
+#define SGRF_PMU_CON(n)   (SGRF_PMU_CON0 + (n) * 4)
+#define PMUCRU_SOFTRST_CON(n)   (PMUCRU_SOFTRST_CON0 + (n) * 4)
+
 /*
  * When system reset in running state, we want the cpus to be reboot
  * from maskrom (system reboot),
@@ -316,13 +346,17 @@ static inline void pmu_sgrf_rst_hld(void)
 
 /* funciton*/
 void __dead2 soc_global_soft_reset(void);
-void plls_suspend_prepare(void);
+void secure_watchdog_disable();
+void secure_watchdog_restore();
 void disable_dvfs_plls(void);
 void disable_nodvfs_plls(void);
-void plls_resume_finish(void);
 void enable_dvfs_plls(void);
 void enable_nodvfs_plls(void);
+void prepare_abpll_for_ddrctrl(void);
+void restore_abpll(void);
+void restore_dpll(void);
 void clk_gate_con_save(void);
 void clk_gate_con_disable(void);
 void clk_gate_con_restore(void);
+void sgrf_init(void);
 #endif /* __SOC_H__ */

@@ -501,6 +501,17 @@ optionally be defined:
     PLAT_PL061_MAX_GPIOS    :=      160
     $(eval $(call add_define,PLAT_PL061_MAX_GPIOS))
 
+If the platform port uses the partition driver, the following constant may
+optionally be defined:
+
+*   **PLAT_PARTITION_MAX_ENTRIES**
+    Maximum number of partition entries required by the platform. This allows
+    control how much memory is allocated for partition entries. The default
+    value is 128.
+    [For example, define the build flag in platform.mk]:
+    PLAT_PARTITION_MAX_ENTRIES	:=	12
+    $(eval $(call add_define,PLAT_PARTITION_MAX_ENTRIES))
+
 
 ### File : plat_macros.S [mandatory]
 
@@ -547,7 +558,7 @@ reset vector code to perform the above tasks.
     Argument : void
     Return   : uintptr_t
 
-This function is called with the called with the MMU and caches disabled
+This function is called with the MMU and caches disabled
 (`SCTLR_EL3.M` = 0 and `SCTLR_EL3.C` = 0). The function is responsible for
 distinguishing between a warm and cold reset for the current CPU using
 platform-specific means. If it's a warm reset, then it returns the warm
@@ -1076,12 +1087,14 @@ The default implementation spins forever.
 
     Argument : uintptr_t mem_base, unsigned int mem_size,
                unsigned int flags
-    Return   : void
+    Return   : int
 
 BL1 calls this function while handling FWU copy and authenticate SMCs. The
 platform must ensure that the provided `mem_base` and `mem_size` are mapped into
 BL1, and that this memory corresponds to either a secure or non-secure memory
 region as indicated by the security state of the `flags` argument.
+
+This function must return 0 on success, a non-null error code otherwise.
 
 The default implementation of this function asserts therefore platforms must
 override it when using the FWU feature.
@@ -1820,6 +1833,18 @@ in the normal world and also provide secure runtime firmware services.
 The `target_state` (first argument) has a similar meaning as described in
 the `pwr_domain_on_finish()` operation. The generic code expects the platform
 to succeed.
+
+#### plat_psci_ops.system_off()
+
+This function is called by PSCI implementation in response to a `SYSTEM_OFF`
+call. It performs the platform-specific system poweroff sequence after
+notifying the Secure Payload Dispatcher.
+
+#### plat_psci_ops.system_reset()
+
+This function is called by PSCI implementation in response to a `SYSTEM_RESET`
+call. It performs the platform-specific system reset sequence after
+notifying the Secure Payload Dispatcher.
 
 #### plat_psci_ops.validate_power_state()
 

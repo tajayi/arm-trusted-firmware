@@ -76,9 +76,31 @@ BL31_SOURCES            +=      ${RK_GIC_SOURCES}                               
 				${RK_PLAT_SOC}/plat_sip_calls.c			\
 				${RK_PLAT_SOC}/drivers/gpio/rk3399_gpio.c	\
                                 ${RK_PLAT_SOC}/drivers/pmu/pmu.c                \
+                                ${RK_PLAT_SOC}/drivers/pmu/pmu_fw.c             \
 				${RK_PLAT_SOC}/drivers/pwm/pwm.c	\
                                 ${RK_PLAT_SOC}/drivers/soc/soc.c		\
+				${RK_PLAT_SOC}/drivers/dram/dfs.c		\
+                                ${RK_PLAT_SOC}/drivers/dram/suspend.c           \
 				${RK_PLAT_SOC}/drivers/dram/dram.c		\
 				${RK_PLAT_SOC}/drivers/dram/dram_spec_timing.c
 
 ENABLE_PLAT_COMPAT      :=      0
+
+$(eval $(call add_define,PLAT_EXTRA_LD_SCRIPT))
+
+# M0 source build
+PLAT_M0                 :=      ${PLAT}m0
+BUILD_M0		:=	${BUILD_PLAT}/m0
+
+RK3399M0FW=${BUILD_M0}/${PLAT_M0}.bin
+$(eval $(call add_define,RK3399M0FW))
+
+# CCACHE_EXTRAFILES is needed because ccache doesn't handle .incbin
+export CCACHE_EXTRAFILES
+${BUILD_PLAT}/bl31/pmu_fw.o: CCACHE_EXTRAFILES=$(RK3399M0FW)
+${RK_PLAT_SOC}/drivers/pmu/pmu_fw.c: $(RK3399M0FW)
+
+$(eval $(call MAKE_PREREQ_DIR,${BUILD_M0},))
+.PHONY: $(RK3399M0FW)
+$(RK3399M0FW): | ${BUILD_M0}
+	$(MAKE) -C ${RK_PLAT_SOC}/drivers/m0 BUILD=$(abspath ${BUILD_PLAT}/m0)

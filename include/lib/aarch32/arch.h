@@ -108,7 +108,7 @@
 
 /* SCTLR definitions */
 #define SCTLR_RES1	((1 << 23) | (1 << 22) | (1 << 11) | (1 << 4) | \
-			(1 << 3) | SCTLR_CP15BEN_BIT | SCTLR_NTWI_BIT | SCTLR_NTWE_BIT)
+			(1 << 3))
 #define SCTLR_M_BIT		(1 << 0)
 #define SCTLR_A_BIT		(1 << 1)
 #define SCTLR_C_BIT		(1 << 2)
@@ -128,7 +128,7 @@
 /* HSCTLR definitions */
 #define HSCTLR_RES1 	((1 << 29) | (1 << 28) | (1 << 23) | (1 << 22)	\
 			| (1 << 18) | (1 << 16) | (1 << 11) | (1 << 4)	\
-			| (1 << 3) | HSCTLR_CP15BEN_BIT)
+			| (1 << 3))
 #define HSCTLR_M_BIT		(1 << 0)
 #define HSCTLR_A_BIT		(1 << 1)
 #define HSCTLR_C_BIT		(1 << 2)
@@ -318,6 +318,11 @@
 
 #define MAX_CACHE_LINE_SIZE	0x800 /* 2KB */
 
+/* PMCR definitions */
+#define PMCR_N_SHIFT		11
+#define PMCR_N_MASK		0x1f
+#define PMCR_N_BITS		(PMCR_N_MASK << PMCR_N_SHIFT)
+
 /*******************************************************************************
  * Definitions of register offsets and fields in the CNTCTLBase Frame of the
  * system level implementation of the Generic Timer.
@@ -374,6 +379,11 @@
 #define CLIDR		p15, 1, c0, c0, 1
 #define CSSELR		p15, 2, c0, c0, 0
 #define CCSIDR		p15, 1, c0, c0, 0
+
+/* Debug register defines. The format is: coproc, opt1, CRn, CRm, opt2 */
+#define HDCR		p15, 4, c1, c1, 1
+#define SDCR		p15, 0, c1, c3, 1
+#define PMCR		p15, 0, c9, c12, 0
 
 /* GICv3 CPU Interface system register defines. The format is: coproc, opt1, CRn, CRm, opt2 */
 #define ICC_IAR1	p15, 0, c12, c12, 0

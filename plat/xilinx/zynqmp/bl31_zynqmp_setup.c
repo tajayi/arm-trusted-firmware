@@ -132,7 +132,6 @@ static void zynqmp_testing_setup(void)
 
 	actlr_el3 |= ACTLR_EL3_L2ACTLR_BIT | ACTLR_EL3_CPUACTLR_BIT;
 	actlr_el2 |= ACTLR_EL3_L2ACTLR_BIT | ACTLR_EL3_CPUACTLR_BIT;
-
 	write_actlr_el3(actlr_el3);
 	write_actlr_el2(actlr_el2);
 }

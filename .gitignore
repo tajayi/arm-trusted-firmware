@@ -2,10 +2,9 @@
 cscope.*
 *.swp
 *.patch
+*~
 .project
 .cproject
-*~
-tags
 
 # Ignore build directory
 build/

@@ -45,7 +45,7 @@
 #define PM_GET_CALLBACK_DATA	0xa01
 
 /* 0 - UP, !0 - DOWN */
-static int pm_down = !0;
+static int32_t pm_down = !0;
 
 /**
  * pm_context - Structure which contains data for power management
