@@ -79,6 +79,7 @@ uint32_t plat_ic_get_pending_interrupt_type(void);
 uint32_t plat_ic_acknowledge_interrupt(void);
 uint32_t plat_ic_get_interrupt_type(uint32_t id);
 void plat_ic_end_of_interrupt(uint32_t id);
+void plat_ic_trigger_sgi(unsigned int id, unsigned int target);
 uint32_t plat_interrupt_type_to_line(uint32_t type,
 				     uint32_t security_state);
 
