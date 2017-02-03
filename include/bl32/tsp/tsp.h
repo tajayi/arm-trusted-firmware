@@ -69,8 +69,8 @@
  * Generate function IDs for TSP services to be used in SMC calls, by
  * appropriately setting bit 31 to differentiate standard and fast SMC calls
  */
-#define TSP_STD_FID(fid)	((fid) | 0x72000000 | (0 << 31))
-#define TSP_FAST_FID(fid)	((fid) | 0x72000000 | (1 << 31))
+#define TSP_STD_FID(fid)	((fid) | 0x72000000 | (0U << 31))
+#define TSP_FAST_FID(fid)	((fid) | 0x72000000 | (1U << 31))
 
 /* SMC function ID to request a previously preempted std smc */
 #define TSP_FID_RESUME		TSP_STD_FID(0x3000)
