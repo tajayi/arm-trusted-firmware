@@ -42,11 +42,21 @@
 #include "pm_ipi.h"
 #include "../zynqmp_private.h"
 
+#if ZYNQMP_WARM_RESTART
+#include <arch_helpers.h>
+#include <platform.h>
+#include <spinlock.h>
+#include <mmio.h>
+#endif
+
 #define PM_GET_CALLBACK_DATA	0xa01
 
 /* 0 - UP, !0 - DOWN */
 static int32_t pm_down = !0;
-
+#if ZYNQMP_WARM_RESTART
+static spinlock_t inc_lock;
+static int active_cores = 0;
+#endif
 /**
  * pm_context - Structure which contains data for power management
  * @api_version		version of PM API, must match with one on PMU side
@@ -57,6 +67,80 @@ static struct {
 	uint32_t api_version;
 	uint32_t payload[PAYLOAD_ARG_CNT];
 } pm_ctx;
+
+#if ZYNQMP_WARM_RESTART
+/**
+ * ipi_fiq_handler() - IPI Handler for PM-API callbacks
+ * @buf:	Pointer to a structure holding the IPI data
+ *
+ * Function registered as INTR_TYPE_EL3 interrupt handler
+ *
+ * PMU sends IPI interrupts for PM-API callbacks.
+ * This handler reads data from payload buffers and
+ * based on read data decodes type of callback and call proper function.
+ *
+ * In presence of non-secure software layers (EL1/2) sets the interrupt
+ * at registered entrance in GIC and informs that PMU responsed or demands
+ * action
+ */
+static uint32_t ipi_fiq_handler(void)
+{
+	uint32_t handled = 0;
+	uint32_t core_count = 0;
+	uint32_t core_status[3];
+	uint32_t target_cpu_list = 0;
+	int i;
+
+	for(i=0; i< 4; i++)
+	{
+		pm_get_node_status(NODE_APU_0 + i, core_status);
+		if (core_status[0] == 1)
+		{
+			core_count ++;
+			target_cpu_list |= (1 << i);
+		}
+	}
+
+	spin_lock(&inc_lock);
+	active_cores = core_count;
+	spin_unlock(&inc_lock);
+
+	INFO("Active Cores: %d\n", active_cores);
+
+	/* trigger SGI to active cores */
+	plat_ic_trigger_sgi(ARM_IRQ_SEC_SGI_7, target_cpu_list);
+
+	handled |= IPI_APU_IXR_PMU_1_MASK;
+
+	return handled;
+}
+
+static uint64_t __unused __dead2 zynqmp_sgi7_irq(uint32_t id, uint32_t flags,
+						 void *handle, void *cookie)
+{
+	int i;
+	/* enter wfi and stay there */
+	INFO("Entering wfi\n");
+
+	spin_lock(&inc_lock);
+	active_cores--;
+	spin_unlock(&inc_lock);
+
+	for (i = 0; i < 4; i++) {
+		mmio_write_32(0xF9010000 + 0xF10 + 4 * i, 0xffffffff); // ICENABLE
+	}
+
+	dsb();
+
+	if (active_cores == 0) {
+		pm_system_shutdown(1 /*reset*/, NODE_APU);
+	}
+
+	/* enter wfi and stay there */
+	while (1)
+		wfi();
+}
+#endif
 
 /**
  * pm_setup() - PM service setup
@@ -78,7 +162,20 @@ int pm_setup(void)
 	if (!zynqmp_is_pmu_up())
 		return -ENODEV;
 
+#if !ZYNQMP_WARM_RESTART
 	status = pm_ipi_init();
+#else
+	status = pm_ipi_init(ipi_fiq_handler);
+	if (status)
+		goto err;
+
+	/* register IRQ handler for SGI7 */
+	status = request_intr_type_el3(ARM_IRQ_SEC_SGI_7, zynqmp_sgi7_irq);
+	if (status)
+		WARN("BL31: registering SGI7 interrupt failed\n");
+
+err:
+#endif
 
 	if (status == 0)
 		INFO("BL31: PM Service Init Complete: API v%d.%d\n",

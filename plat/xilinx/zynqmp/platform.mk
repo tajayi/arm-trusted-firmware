@@ -55,6 +55,10 @@ ifdef ZYNQMP_BL32_MEM_BASE
     $(eval $(call add_define,ZYNQMP_BL32_MEM_SIZE))
 endif
 
+ifdef ZYNQMP_WARM_RESTART
+  $(eval $(call add_define,ZYNQMP_WARM_RESTART))
+endif
+
 PLAT_INCLUDES		:=	-Iinclude/plat/arm/common/			\
 				-Iinclude/plat/arm/common/aarch64/		\
 				-Iplat/xilinx/zynqmp/include/			\
