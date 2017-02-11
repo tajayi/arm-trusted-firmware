@@ -52,7 +52,7 @@ void psci_system_off(void)
 	/* This function does not return. We should never get here */
 }
 
-void psci_system_reset(void)
+void psci_system_reset(unsigned int scope)
 {
 	psci_print_power_domain_map();
 
@@ -64,7 +64,7 @@ void psci_system_reset(void)
 	}
 
 	/* Call the platform specific hook */
-	psci_plat_pm_ops->system_reset();
+	psci_plat_pm_ops->system_reset(scope);
 
 	/* This function does not return. We should never get here */
 }
