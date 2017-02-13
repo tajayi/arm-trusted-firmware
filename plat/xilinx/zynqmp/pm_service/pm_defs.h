@@ -158,6 +158,11 @@ enum pm_node_id {
 	NODE_RTC,
 	NODE_LPD,
 	NODE_VCU,
+	NODE_IPI_RPU_1,
+	NODE_IPI_PL_0,
+	NODE_IPI_PL_1,
+	NODE_IPI_PL_2,
+	NODE_IPI_PL_3,
 	NODE_MAX
 };
 
