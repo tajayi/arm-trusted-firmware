@@ -157,6 +157,7 @@ enum pm_node_id {
 	NODE_PCAP,
 	NODE_RTC,
 	NODE_LPD,
+	NODE_VCU,
 	NODE_MAX
 };
 
