@@ -134,7 +134,8 @@ static uint64_t __unused __dead2 zynqmp_sgi7_irq(uint32_t id, uint32_t flags,
 	dsb();
 
 	if (active_cores == 0) {
-		pm_system_shutdown(1 /*reset*/, NODE_APU);
+		pm_system_shutdown(PMF_SHUTDOWN_TYPE_RESET,
+					PMF_SHUTDOWN_SUBTYPE_SUBSYSTEM);
 	}
 
 	/* enter wfi and stay there */
