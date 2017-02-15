@@ -117,6 +117,11 @@ enum pm_ret_status pm_fpga_load(uint32_t address_high,
 enum pm_ret_status pm_fpga_get_status(unsigned int *value);
 
 enum pm_ret_status pm_get_chipid(uint32_t *value);
+enum pm_ret_status pm_secure_rsaaes(uint32_t address_high,
+				    uint32_t address_low,
+				    uint32_t size,
+				    uint32_t flags);
+
 void pm_get_callbackdata(uint32_t *data, size_t count);
 
 #endif /* _PM_API_SYS_H_ */
