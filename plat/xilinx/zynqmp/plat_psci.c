@@ -279,7 +279,7 @@ static void __dead2 zynqmp_system_off(void)
 		wfi();
 }
 
-static void __dead2 zynqmp_nopmu_system_reset(unsigned int scope)
+static void __dead2 zynqmp_nopmu_system_reset(void)
 {
 	/*
 	 * This currently triggers a system reset. I.e. the whole
@@ -301,13 +301,14 @@ static void __dead2 zynqmp_nopmu_system_reset(unsigned int scope)
 		wfi();
 }
 
-static void __dead2 zynqmp_system_reset(unsigned int scope)
+static void __dead2 zynqmp_system_reset(void)
 {
 	/* disable coherency */
 	plat_arm_interconnect_exit_coherency();
 
 	/* Send the system reset request to the PMU */
-	pm_system_shutdown(PMF_SHUTDOWN_TYPE_RESET, scope);
+	pm_system_shutdown(PMF_SHUTDOWN_TYPE_RESET,
+			   PMF_SHUTDOWN_SUBTYPE_SUBSYSTEM);
 
 	while (1)
 		wfi();

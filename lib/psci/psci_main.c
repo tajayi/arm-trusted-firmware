@@ -428,7 +428,7 @@ u_register_t psci_smc_handler(uint32_t smc_fid,
 			/* We should never return from psci_system_off() */
 
 		case PSCI_SYSTEM_RESET:
-			psci_system_reset(x1);
+			psci_system_reset();
 			/* We should never return from psci_system_reset() */
 
 		case PSCI_FEATURES:

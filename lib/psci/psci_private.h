@@ -240,7 +240,7 @@ void psci_do_pwrup_cache_maintenance(void);
 
 /* Private exported functions from psci_system_off.c */
 void __dead2 psci_system_off(void);
-void __dead2 psci_system_reset(unsigned int scope);
+void __dead2 psci_system_reset(void);
 
 /* Private exported functions from psci_stat.c */
 void psci_stats_update_pwr_down(unsigned int end_pwrlvl,

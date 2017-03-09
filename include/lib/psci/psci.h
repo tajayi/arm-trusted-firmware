@@ -296,7 +296,7 @@ typedef struct plat_psci_ops {
 	void (*pwr_domain_pwr_down_wfi)(
 				const psci_power_state_t *target_state) __dead2;
 	void (*system_off)(void) __dead2;
-	void (*system_reset)(unsigned int scope) __dead2;
+	void (*system_reset)(void) __dead2;
 	int (*validate_power_state)(unsigned int power_state,
 				    psci_power_state_t *req_state);
 	int (*validate_ns_entrypoint)(uintptr_t ns_entrypoint);
