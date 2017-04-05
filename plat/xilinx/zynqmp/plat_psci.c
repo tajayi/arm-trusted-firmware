@@ -273,7 +273,7 @@ static void __dead2 zynqmp_system_off(void)
 
 	/* Send the power down request to the PMU */
 	pm_system_shutdown(PMF_SHUTDOWN_TYPE_SHUTDOWN,
-			   PMF_SHUTDOWN_SUBTYPE_SYSTEM);
+			   pm_get_shutdown_scope());
 
 	while (1)
 		wfi();
@@ -308,7 +308,7 @@ static void __dead2 zynqmp_system_reset(void)
 
 	/* Send the system reset request to the PMU */
 	pm_system_shutdown(PMF_SHUTDOWN_TYPE_RESET,
-			   PMF_SHUTDOWN_SUBTYPE_SYSTEM);
+			   pm_get_shutdown_scope());
 
 	while (1)
 		wfi();

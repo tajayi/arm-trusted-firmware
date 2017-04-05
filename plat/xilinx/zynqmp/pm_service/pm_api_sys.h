@@ -124,5 +124,6 @@ enum pm_ret_status pm_secure_rsaaes(uint32_t address_high,
 				    uint32_t flags);
 
 void pm_get_callbackdata(uint32_t *data, size_t count);
+unsigned int pm_get_shutdown_scope();
 
 #endif /* _PM_API_SYS_H_ */
