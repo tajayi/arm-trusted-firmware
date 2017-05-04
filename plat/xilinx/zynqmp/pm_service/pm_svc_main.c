@@ -125,13 +125,14 @@ static uint64_t __unused __dead2 zynqmp_sgi7_irq(uint32_t id, uint32_t flags,
 
 	spin_lock(&inc_lock);
 	active_cores--;
-	spin_unlock(&inc_lock);
 
 	for (i = 0; i < 4; i++) {
 		mmio_write_32(0xF9010000 + 0xF10 + 4 * i, 0xffffffff); // ICENABLE
 	}
 
 	dsb();
+
+	spin_unlock(&inc_lock);
 
 	if (active_cores == 0) {
 		pm_system_shutdown(PMF_SHUTDOWN_TYPE_RESET,
