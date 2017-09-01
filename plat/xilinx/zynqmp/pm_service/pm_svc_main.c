@@ -219,9 +219,9 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		SMC_RET1(handle, SMC_UNK);
 
 	pm_arg[0] = (uint32_t)x1;
-	pm_arg[1] = (uint32_t)(x1 >> 32);
-	pm_arg[2] = (uint32_t)x2;
-	pm_arg[3] = (uint32_t)(x2 >> 32);
+	pm_arg[1] = (uint32_t)x2;
+	pm_arg[2] = (uint32_t)x3;
+	pm_arg[3] = (uint32_t)x4;
 
 	switch (smc_fid & FUNCID_NUM_MASK) {
 	/* PM API Functions */
@@ -283,8 +283,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 	case PM_GET_API_VERSION:
 		/* Check is PM API version already verified */
 		if (pm_ctx.api_version == PM_VERSION) {
-			SMC_RET1(handle, (uint64_t)PM_RET_SUCCESS |
-				 ((uint64_t)PM_VERSION << 32));
+			SMC_RET2(handle, (uint64_t)PM_RET_SUCCESS,
+				(uint64_t)PM_VERSION);
 		}
 
 		ret = pm_get_api_version(&pm_ctx.api_version);
@@ -295,8 +295,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		 * the GIC.
 		 */
 		pm_ipi_irq_enable();
-		SMC_RET1(handle, (uint64_t)ret |
-			 ((uint64_t)pm_ctx.api_version << 32));
+		SMC_RET2(handle, (uint64_t)ret,
+			(uint64_t)pm_ctx.api_version);
 
 	case PM_SET_CONFIGURATION:
 		ret = pm_set_configuration(pm_arg[0]);
@@ -311,8 +311,10 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t buff[3];
 
 		ret = pm_get_node_status(pm_arg[0], buff);
-		SMC_RET2(handle, (uint64_t)ret | ((uint64_t)buff[0] << 32),
-			(uint64_t)buff[1] | ((uint64_t)buff[2] << 32));
+		SMC_RET4(handle, (uint64_t)ret,
+			(uint64_t)buff[0],
+			(uint64_t)buff[1],
+			(uint64_t)buff[2]);
 	}
 
 	case PM_GET_OP_CHARACTERISTIC:
@@ -320,7 +322,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t result;
 
 		ret = pm_get_op_characteristic(pm_arg[0], pm_arg[1], &result);
-		SMC_RET1(handle, (uint64_t)ret | ((uint64_t)result << 32));
+		SMC_RET2(handle, (uint64_t)ret,
+			(uint64_t)result);
 	}
 
 	case PM_REGISTER_NOTIFIER:
@@ -337,8 +340,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t reset_status;
 
 		ret = pm_reset_get_status(pm_arg[0], &reset_status);
-		SMC_RET1(handle, (uint64_t)ret |
-			 ((uint64_t)reset_status << 32));
+		SMC_RET2(handle, (uint64_t)ret,
+			(uint64_t)reset_status);
 	}
 
 	/* PM memory access functions */
@@ -351,7 +354,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t value;
 
 		ret = pm_mmio_read(pm_arg[0], &value);
-		SMC_RET1(handle, (uint64_t)ret | ((uint64_t)value) << 32);
+		SMC_RET2(handle, (uint64_t)ret,
+			(uint64_t)value);
 	}
 
 	case PM_FPGA_LOAD:
@@ -363,7 +367,8 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t value;
 
 		ret = pm_fpga_get_status(&value);
-		SMC_RET1(handle, (uint64_t)ret | ((uint64_t)value) << 32);
+		SMC_RET2(handle, (uint64_t)ret,
+			(uint64_t)value);
 	}
 
 	case PM_GET_CHIPID:
@@ -371,8 +376,9 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t result[2];
 
 		ret = pm_get_chipid(result);
-		SMC_RET2(handle, (uint64_t)ret | ((uint64_t)result[0] << 32),
-			 result[1]);
+		SMC_RET3(handle, (uint64_t)ret,
+			(uint64_t)result[0],
+			result[1]);
 	}
 
 	case PM_SECURE_RSA_AES:
@@ -385,9 +391,9 @@ uint64_t pm_smc_handler(uint32_t smc_fid, uint64_t x1, uint64_t x2, uint64_t x3,
 		uint32_t result[4];
 
 		pm_get_callbackdata(result, sizeof(result));
-		SMC_RET2(handle,
-			 (uint64_t)result[0] | ((uint64_t)result[1] << 32),
-			 (uint64_t)result[2] | ((uint64_t)result[3] << 32));
+		SMC_RET4(handle,
+			(uint64_t)result[0], (uint64_t)result[1],
+			(uint64_t)result[2], (uint64_t)result[3]);
 	}
 
 	case PM_SET_SUSPEND_MODE:
