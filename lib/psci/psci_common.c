@@ -666,7 +666,14 @@ static int psci_get_ns_ep_info(entry_point_info_t *ep,
 	 * Figure out whether the cpu enters the non-secure address space
 	 * in aarch32 or aarch64
 	 */
-	if (ns_scr_el3 & SCR_RW_BIT) {
+	int caller_32 = (GET_RW(read_spsr_el3()) == MODE_RW_32);
+	if (caller_32) {
+		mode = MODE32_svc;
+		daif = DAIF_ABT_BIT | DAIF_IRQ_BIT | DAIF_FIQ_BIT;
+
+		ep->spsr = SPSR_MODE32(mode, entrypoint & 0x1, ee, daif);
+	}
+	else if (ns_scr_el3 & SCR_RW_BIT) {
 
 		/*
 		 * Check whether a Thumb entry point has been provided for an
