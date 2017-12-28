@@ -92,6 +92,12 @@ void cci_init(uintptr_t cci_base,
 
 	assert(validate_cci_map(map));
 	g_cci_slave_if_map = map;
+
+	/*
+	 * Enable non-secure access to CCI registers
+	 */
+	mmio_write_32(g_cci_base + SECURE_ACCESS_REG, 0x1);
+
 }
 
 void cci_enable_snoop_dvm_reqs(unsigned int master_id)
